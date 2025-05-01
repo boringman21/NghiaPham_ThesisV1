@@ -1,0 +1,176 @@
+\section{Các phương pháp bổ khuyết dữ liệu}
+Các phương pháp được đề xuất và sử dụng có thể chia thành các nhóm:
+\begin{itemize}
+    \item Phương pháp cổ điển:
+        \begin{itemize}
+            \item Sử dụng đơn thuộc tính:
+                \begin{itemize}
+                    \item Mean imputation
+                    \item Median imputation
+                    \item Last observation carried forward
+                    \item Next observation carried backward
+                    \item Spline interpolation
+                    \item Linear interpolation
+                    \item Moving average
+                \end{itemize}
+            \item Sử dụng kết hợp các thuộc tính của tập quan trắc:
+                \begin{itemize}
+                    \item MICE - khởi tạo giá trị ban đầu bằng Mean
+                    \item MICE - khởi tạo giá trị ban đầu bằng Median
+                    \item MICE - khởi tạo giá trị ban đầu bằng Last observation carried forward 
+                    \item MICE - khởi tạo giá trị ban đầu bằng Next observation carried backward
+                    \item MICE - khởi tạo giá trị ban đầu bằng Spline interpolation
+                    \item MICE - khởi tạo giá trị ban đầu bằng Linear interpolation
+                    \item MICE - khởi tạo giá trị ban đầu bằng Moving average
+                \end{itemize}
+            \item Sử dụng kết hợp các thuộc tính của tập tổng hợp (viễn thám và quan trắc):
+                \begin{itemize}
+                    \item MICE - khởi tạo giá trị ban đầu bằng Mean
+                    \item MICE - khởi tạo giá trị ban đầu bằng Median
+                    \item MICE - khởi tạo giá trị ban đầu bằng Last observation carried forward 
+                    \item MICE - khởi tạo giá trị ban đầu bằng Next observation carried backward
+                    \item MICE - khởi tạo giá trị ban đầu bằng Spline interpolation
+                    \item MICE - khởi tạo giá trị ban đầu bằng Linear interpolation
+                    \item MICE - khởi tạo giá trị ban đầu bằng Moving average
+                \end{itemize}
+        \end{itemize}
+    \item Phương pháp sử dụng học sâu:
+        \begin{itemize}
+            \item Sử dụng đơn thuộc tính:            
+                \begin{itemize}
+                    \item RNN network: Kiến trúc mạng RNN được mô tả ở hình \ref{fig:section5_3-rnn} và bảng \ref{tab:section5_3-rnn} với $m=1$, $n=1$
+
+                    \begin{figure}[h!]
+                        \centering
+                        \includegraphics[width=0.6\linewidth]{image/section5_3/rnn.drawio.png}
+                        \caption{Kiến trúc mạng RNN}
+                        \label{fig:section5_3-rnn}
+                    \end{figure}
+
+                    \newpage
+                    
+                    \begin{table}[h]
+                        \caption{Kiến trúc mạng RNN}
+                        \centering
+                        \begin{tabular}{|l|l|c|}
+                        \hline
+                    Thành phần  &  Thông số \\
+                          \hline
+                     Loss fuction & MAE \\
+                     Optimizer & Adam\\
+                    Learning rate & 0.001 \\
+                     Epoch & 50 \\
+                     Activation function & RELU \\
+                    \hline
+                        \end{tabular}
+                        \label{tab:section5_3-rnn}
+                    \end{table}
+                    
+                    \item LSTM network: Kiến trúc mạng LSTM được mô tả ở hình \ref{fig:section5_3_lstm} và bảng \ref{tab:section5_3-lstm} với $m=1$, $n=1$
+                    \begin{figure}[h]
+                        \centering
+                        \includegraphics[width=0.6\linewidth]{image/section5_3/lstm.drawio.png}
+                        \caption{Kiến trúc mạng LSTM}
+                        \label{fig:section5_3_lstm}
+                    \end{figure}
+                    
+                    \begin{table}[h!]
+                        \caption{Kiến trúc mạng LSTM}
+                        \centering
+                        \begin{tabular}{|l|c|}
+                        \hline
+                     Thành phần  &  Thông số \\
+                          \hline
+                     Loss fuction & MAE \\
+                     Optimizer & Adam\\
+                     Learning rate & 0.001 \\
+                     Epoch & 50 \\
+                    Activation function & sigmoid \\
+                    \hline
+                        \end{tabular}
+                        \label{tab:section5_3-lstm}
+                    \end{table}
+                    
+
+                    \newpage
+                    \item LSTM-LSTM network: Kiến trúc mạng LSTM-LSTM được mô tả ở hình \ref{fig:section5_3_lstm_lstm} và bảng \ref{tab:section5_3_lstm_lstm} với $m=1$, $n=1$
+                    
+                    \begin{figure}[h!]
+                        \centering
+                        \includegraphics[width=0.6\linewidth]{image/section5_3/lstm-lstm.drawio.png}
+                        \caption{Kiến trúc mạng LSTM-LSTM}
+                        \label{fig:section5_3_lstm_lstm}
+                    \end{figure}
+
+                    \begin{table}[h]
+                        \caption{Kiến trúc mạng LSTM-LSTM}
+                        \centering
+                        \begin{tabular}{|l|c|}
+                        \hline
+                    Thành phần  &  Thông số \\
+                          \hline
+                     Loss fuction & MAE \\
+                    Learning rate & 0.001 \\
+                     Optimizer & Adam \\
+                     Epoch & 50 \\
+                    Activation function & sigmoid \\
+                    \hline
+                        \end{tabular}
+                        \label{tab:section5_3_lstm_lstm}
+                    \end{table}
+                    
+                    \newpage
+                    \item CNN-LSTM network: Kiến trúc mạng CNN-LSTM được mô tả ở hình \ref{fig:section5_3_cnn_lstm} và bảng \ref{tab:section5_3_cnn_lstm} với $m=1$, $n=1$
+                    \begin{figure}[h!]
+                        \centering
+                        \includegraphics[width=0.45\linewidth]{image/section5_3/cnn-lstm.png}
+                        \caption{Kiến trúc mạng CNN-LSTM}
+                        \label{fig:section5_3_cnn_lstm}
+                    \end{figure}
+                    
+                    \begin{table}[h!]
+                        \caption{Kiến trúc mạng CNN-LSTM}
+                        \centering
+                        \begin{tabular}{|l|c|}
+                        \hline
+                     Thành phần  &  Thông số \\
+                          \hline
+                     Loss fuction & MAE \\
+                     Learning rate & 0.001 \\
+                    Optimizer & Adam \\
+                     Epoch & 50 \\
+                    Activation function & sigmoid \\
+                    \hline
+                        \end{tabular}
+                        \label{tab:section5_3_cnn_lstm}
+                    \end{table}
+                   
+                    \newpage
+                    
+                \end{itemize}
+            \item Sử dụng kết hợp nhiều thuộc tính:
+                \begin{itemize}
+                    \item GAIN network: Hình \ref{fig:gain_generator} và  \ref{fig:gain_discriminator} mô tả kiến trúc Generator và Discriminator của GAIN.
+                    \begin{figure}[h!]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{image/section5_3/gain-generator.drawio.png}
+                        \caption{Kiến trúc Generator của GAIN}
+                        \label{fig:gain_generator}
+                    \end{figure}
+
+                    \newpage
+                    
+                    \begin{figure}
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{image/section5_3/discriminator-gain.drawio.png}
+                        \caption{Kiến trúc Discriminator của GAIN}
+                        \label{fig:gain_discriminator}
+                    \end{figure}
+
+
+                    
+                    \item RNN, LSTM, LSTM-LSTM, CNN-LSTM network với kiến trúc được mô tả ở lần lượt ở (hình \ref{fig:section5_3-rnn} và bảng \ref{tab:section5_3-rnn}), (hình \ref{fig:section5_3_lstm} và bảng \ref{tab:section5_3-lstm}), (hình \ref{fig:section5_3_lstm_lstm} và bảng \ref{tab:section5_3_lstm_lstm}), và (hình \ref{fig:section5_3_cnn_lstm} và bảng \ref{tab:section5_3_cnn_lstm}) với $n=1$ và $m$ là số lượng thuộc tính đầu vào. Đầu vào của các mô hình này được xác định dựa trên mối tương quan giữa các thuộc tính với nhau. Các thuộc tính có mối tương quan cao sẽ được chọn để dự đoán lẫn nhau.
+                    
+                \end{itemize}
+        \end{itemize}
+\end{itemize}

@@ -1,0 +1,31 @@
+\section{Huấn luyện các mô hình bổ khuyết dùng RNN, LSTM, LSTM-LSTM, CNN-LSTM}
+Đối với các phương pháp bổ khuyết sử dụng RNN, LSTM, LSTM-LSTM, CNN-LSTM, dữ liệu trước khi đi vào các mô hình này sẽ trải qua 2 bước:
+\begin{enumerate}
+    \item Chuẩn hoá dữ liệu bằng min-max scaler theo công thức:
+\begin{equation}
+x_{scaled}= \frac{x-x_{min}}{x_{max}-x_{min}} \label{section5_3_min_max_scale}
+\end{equation}
+    \item Tạo tập dữ liệu đầu vào và đầu ra bằng kĩ thuật sliding window với input size = 24, output size = 1, step size = 1. Nghĩa là, giá trị của chỉ số trong 24 giờ trước được dùng để dự đoán giá trị của 1 giờ tiếp theo.  
+    
+Ví dụ, xét tập dữ liệu có 100 mẫu $X_1$, $X_2$, ..., $X_{100}$. Với output size = 1, sliding window sẽ tạo ra tập dữ liệu mới có kích thước input là $(76, 1)$, output là $(76,1)$. Bảng \ref{tab:section5_3_slidingwindow} mô tả input và output sau khi áp dụng sliding window.
+
+\begin{table}[h]
+    \centering
+    \caption{Kết quả sau khi chạy sliding window}
+    \begin{tabular}{|c|c|}
+    \hline
+      Input   & Output \\
+      \hline
+      $X_1$, $X_2$, ..., $X_{24}$   & $X_{25}$\\
+      \hline
+      $X_2$, $X_3$, ..., $X_{25}$   & $X_{26}$\\
+      \hline
+      ... & ... \\
+      \hline
+      $X_{76}$, $X_{77}$, ..., $X_{99}$   & $X_{100}$\\
+      \hline
+    \end{tabular}
+    \label{tab:section5_3_slidingwindow}
+\end{table}
+\end{enumerate}
+...

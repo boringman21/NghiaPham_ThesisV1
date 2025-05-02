@@ -1,10 +1,98 @@
-\section{Các metric đánh giá}
-\subsection{Mean absolute error (MAE)} \label{2_4}
-MAE là metric để đo độ lệch giữa giá trị thực tế và giá trị dự đoán. Metric MAE sẽ ít bị ảnh hưởng khi có sự sai lệch lớn giữa giá trị thực tế và giá trị dự đoán. Công thức của MAE như sau:
-\begin{equation}
-MAE=\frac{1}{n}\sum_{t=1}^{n}|Y_{t}-\hat{Y}_{t}|
-\label{mae}
-\end{equation}
-Trong đó, $Y_t$ là giá trị thực tế và $\hat{Y_t}$ là giá trị dự đoán, $n$ là số điểm dữ liệu.
+\section{Tính toán hiệu suất và đánh giá mô hình}
+\label{sec:model_evaluation}
 
-...
+Việc đánh giá hiệu suất của mô hình học máy là một bước quan trọng trong quy trình phát triển mô hình, đặc biệt trong bối cảnh phát hiện và dự đoán rò rỉ nước. Phần này trình bày các chỉ số đánh giá chính và các phương pháp kiểm tra tính tổng quát của mô hình, nhằm đảm bảo độ chính xác và hiệu quả của hệ thống.
+
+\subsection{Các chỉ số đánh giá cơ bản}
+\subsubsection{Accuracy}
+Độ chính xác (\textit{Accuracy}) đo lường tỷ lệ các dự đoán đúng trên tổng số mẫu. Công thức tính như sau:
+\[
+\text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}
+\]
+trong đó:
+\begin{itemize}
+    \item \text{TP}: Số trường hợp dương đúng (\textit{True Positives}),
+    \item \text{TN}: Số trường hợp âm đúng (\textit{True Negatives}),
+    \item \text{FP}: Số trường hợp dương giả (\textit{False Positives}),
+    \item \text{FN}: Số trường hợp âm giả (\textit{False Negatives}).
+\end{itemize}
+
+Mặc dù \textit{Accuracy} là một chỉ số phổ biến, nó có thể gây hiểu lầm khi dữ liệu không cân bằng, ví dụ khi tỷ lệ rò rỉ thực tế rất nhỏ.
+
+\subsubsection{Precision và Recall}
+\begin{itemize}
+    \item \textbf{Precision:} Đo lường tỷ lệ các dự đoán dương đúng trong số các dự đoán dương, được tính như sau:
+    \[
+    \text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+    \]
+    Precision rất hữu ích trong việc đánh giá mức độ chính xác của các cảnh báo, đặc biệt khi cần hạn chế báo động giả.
+
+    \item \textbf{Recall:} Đo lường tỷ lệ các trường hợp dương thực sự được phát hiện, công thức như sau:
+    \[
+    \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+    \]
+    Recall quan trọng khi cần tối thiểu hóa việc bỏ sót các trường hợp rò rỉ.
+\end{itemize}
+
+\subsubsection{F1-score}
+F1-score là trung bình điều hòa giữa Precision và Recall, được tính như sau:
+\[
+\text{F1-score} = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+\]
+F1-score đặc biệt hữu ích trong các bài toán mà cần cân bằng giữa việc hạn chế báo động giả và bỏ sót rò rỉ.
+
+\subsection{AUC (Area Under the ROC Curve)}
+\subsubsection{Giới thiệu về AUC}
+AUC (Area Under the Curve) đo diện tích dưới đường cong ROC (Receiver Operating Characteristic). ROC là biểu đồ biểu diễn mối quan hệ giữa tỷ lệ dương đúng (\textit{True Positive Rate - TPR}) và tỷ lệ dương giả (\textit{False Positive Rate - FPR}) ở các ngưỡng phân loại khác nhau:
+\[
+\text{TPR} = \frac{\text{TP}}{\text{TP} + \text{FN}}, \quad \text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}
+\]
+
+AUC cung cấp một cách đánh giá tổng quan về khả năng phân biệt của mô hình mà không phụ thuộc vào một ngưỡng cụ thể.
+
+\subsubsection{Ứng dụng khi dữ liệu mất cân bằng}
+Trong trường hợp dữ liệu mất cân bằng, AUC là một chỉ số quan trọng để đánh giá mô hình, vì nó không bị ảnh hưởng bởi tỷ lệ giữa các lớp. AUC gần bằng 1 biểu thị một mô hình tốt, trong khi AUC = 0.5 biểu thị mô hình dự đoán ngẫu nhiên.
+
+\subsection{RMSE và MAE}
+\subsubsection{Root Mean Squared Error (RMSE)}
+RMSE là một chỉ số đánh giá sai số trong bài toán dự báo liên tục, được tính như sau:
+\[
+\text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^N (y_i - \hat{y}_i)^2}
+\]
+trong đó:
+\begin{itemize}
+    \item \(y_i\): Giá trị thực tế,
+    \item \(\hat{y}_i\): Giá trị dự đoán,
+    \item \(N\): Tổng số mẫu.
+\end{itemize}
+
+RMSE phạt nặng các sai số lớn, giúp mô hình tập trung vào việc giảm thiểu các dự đoán sai lệch nghiêm trọng.
+
+\subsubsection{Mean Absolute Error (MAE)}
+MAE đo lường sai số trung bình giữa giá trị thực tế và giá trị dự đoán, công thức như sau:
+\[
+\text{MAE} = \frac{1}{N} \sum_{i=1}^N |y_i - \hat{y}_i|
+\]
+Khác với RMSE, MAE ít bị ảnh hưởng bởi các giá trị ngoại lai, phù hợp để đánh giá sai số trung bình.
+
+\subsection{Cross-validation và Confusion Matrix}
+\subsubsection{Cross-validation}
+Cross-validation là một kỹ thuật phổ biến để đánh giá tính tổng quát của mô hình. Kỹ thuật này chia dữ liệu thành \(k\) tập con, trong đó:
+\begin{itemize}
+    \item \(k-1\) tập con được sử dụng để huấn luyện mô hình,
+    \item Tập còn lại được sử dụng để kiểm tra mô hình.
+\end{itemize}
+
+Phương pháp này giúp giảm thiểu rủi ro overfitting và cung cấp đánh giá khách quan hơn về hiệu suất của mô hình.
+
+\subsubsection{Confusion Matrix}
+Ma trận nhầm lẫn (Confusion Matrix) cung cấp thông tin chi tiết về hiệu suất của mô hình bằng cách phân loại các kết quả dự đoán:
+\[
+\begin{bmatrix}
+\text{TP} & \text{FP} \\
+\text{FN} & \text{TN}
+\end{bmatrix}
+\]
+
+Ma trận này cho phép phân tích các loại lỗi như báo động giả (FP) và bỏ sót (FN), từ đó đưa ra các chiến lược cải thiện mô hình.
+

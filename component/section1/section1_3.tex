@@ -1,24 +1,40 @@
-\section{Định hướng nghiên cứu} 
-\subsection{Mục tiêu nghiên cứu}
-Mục tiêu nghiên cứu của đề tài là tìm hiểu và phân tích và đề xuất các phương pháp xử lý dữ liệu bị thiếu phù hợp cho dữ liệu chuỗi thời gian, cụ thể là dữ liệu từ các trạm đo quan trắc và nguồn dữ liệu đã được trích xuất thông tin từ ảnh viễn thám. Kết quả xử lý dữ liệu bị thiếu sẽ được đưa vào vào huấn luyện các mô hình để giúp nâng cao hiệu quả dự đoán chất lượng không khí. Ngoài ra, nghiên cứu này có thể được mở rộng để áp dụng cho các bài toán liên quan đến dữ liệu thời gian và đa thuộc tính khác.
+\section{Định hướng nghiên cứu}
 
+\subsection{Mục tiêu nghiên cứu}
+Mục tiêu tổng quát của đề tài là nghiên cứu và ứng dụng các kỹ thuật học máy tiên tiến để phát hiện rò rỉ nước trong hệ thống cấp nước một cách hiệu quả và chính xác. Thông qua việc khai thác dữ liệu đo đạc từ các trạm cảm biến lưu lượng và áp suất, đề tài hướng tới việc xây dựng các mô hình học sâu có khả năng dự đoán hành vi bình thường của hệ thống, từ đó phát hiện các sai lệch bất thường có khả năng là biểu hiện của rò rỉ.
+
+Một trong những thách thức quan trọng khi làm việc với dữ liệu thực tế là sự thiếu hụt và không hoàn chỉnh của dữ liệu thu thập do nhiều nguyên nhân như lỗi cảm biến, mất tín hiệu, hoặc bảo trì hệ thống. Do đó, đề tài cũng đặt mục tiêu nghiên cứu các phương pháp xử lý dữ liệu bị thiếu, đặc biệt là các kỹ thuật phù hợp với đặc trưng của dữ liệu chuỗi thời gian, nhằm đảm bảo chất lượng dữ liệu đầu vào và nâng cao hiệu quả huấn luyện mô hình.
+
+Bên cạnh đó, đề tài còn hướng đến việc đánh giá toàn diện các phương pháp phát hiện bất thường phi giám sát như Isolation Forest, Local Outlier Factor và One-Class SVM, nhằm xác định giải pháp tối ưu cho việc phát hiện rò rỉ trong điều kiện thiếu nhãn dữ liệu (unlabeled data). Trong giai đoạn sau của nghiên cứu, tác giả sẽ đề xuất một mô hình cải tiến dựa trên hai kiến trúc học sâu là LSTM và GRU, nhằm nâng cao hơn nữa hiệu năng của hệ thống phát hiện rò rỉ.
+
+% TODO: need to revise, 
 \subsection{Nhiệm vụ nghiên cứu}
-Đề tài tập trung vào các nhiệm vụ sau:
+Để đạt được mục tiêu trên, đề tài triển khai các nhiệm vụ nghiên cứu chính như sau:
 \begin{itemize}
-    \item Nghiên cứu các phương pháp xử lý dữ liệu bị thiếu
-    \item Phân tích và tiền xử lý dữ liệu tập dữ liệu về chất lượng không khí
-     
-    \item Thực nghiệm các mô hình huấn luyện khác nhau với dữ liệu sau khi đã được xử lý để so sánh và đánh giá tổng quan về mức độ phù hợp của từng mô hình 
-    \item Từ kết quả thực nghiệm, đề xuất phương pháp phù hợp để xử lý dữ liệu cho bài toán dự đoán chất lượng không khí
+    \item Nghiên cứu và phân tích tập dữ liệu LeakDB, một tập dữ liệu mô phỏng hệ thống cấp nước với các kịch bản rò rỉ khác nhau, nhằm hiểu rõ các đặc trưng phản ánh hành vi vận hành của hệ thống cũng như các biểu hiện tiềm năng của hiện tượng rò rỉ.
+    
+    \item Phân tích và đề xuất các phương pháp xử lý dữ liệu bị thiếu phù hợp với đặc trưng dữ liệu chuỗi thời gian trong hệ thống cấp nước.
+    
+    \item Xây dựng các mô hình học sâu, cụ thể là Long Short-Term Memory (LSTM) và Gated Recurrent Unit (GRU), để dự đoán lưu lượng nước trong điều kiện bình thường. Mô hình sẽ được huấn luyện trên dữ liệu đã được xử lý đầy đủ và kiểm chứng khả năng phát hiện sai lệch tại các thời điểm có rò rỉ.
+    
+    \item Áp dụng và đánh giá các phương pháp phát hiện bất thường không giám sát như Isolation Forest, Local Outlier Factor (LOF) và One-Class SVM trên dữ liệu đo đạc nhằm phát hiện các điểm có hành vi khác thường mà không cần nhãn.
+    
+    \item Từ kết quả thực nghiệm, đề xuất một mô hình cải tiến tích hợp các ưu điểm của LSTM và GRU hoặc kết hợp học sâu với phát hiện bất thường để nâng cao độ chính xác và khả năng tổng quát hoá trong phát hiện rò rỉ.
+    
+    \item Đánh giá hiệu năng các mô hình và phương pháp đã triển khai thông qua các chỉ số đánh giá định lượng như sai số tuyệt đối trung bình (MAE), sai số bình phương trung bình (RMSE), độ chính xác (Precision), độ nhạy (Recall) và diện tích dưới đường cong ROC (AUC), từ đó đưa ra nhận định về phương pháp phù hợp nhất với yêu cầu ứng dụng thực tế.
 \end{itemize}
 
 \subsection{Đối tượng nghiên cứu}
-Đối tượng nghiên cứu của đề tài bao gồm dữ liệu từ quan trắc và viễn thám. Các dữ liệu được thu thập từ vệ tinh và 6 trạm đo đạc ở thành phố Hồ Chí Minh trong năm 2021 và 2022. 
+Đối tượng nghiên cứu chính của đề tài là dữ liệu chuỗi thời gian thu thập từ các cảm biến lắp đặt trong hệ thống cấp nước, bao gồm dữ liệu đo lưu lượng và áp suất tại các điểm khác nhau trong mạng lưới phân phối. Ngoài ra, tập dữ liệu LeakDB được sử dụng như một nguồn dữ liệu chuẩn trong nghiên cứu do có đầy đủ thông tin về điều kiện bình thường và điều kiện có rò rỉ với các mức độ nghiêm trọng khác nhau.
 
+Việc lựa chọn dữ liệu LeakDB cho phép nghiên cứu được triển khai trong môi trường có kiểm soát, đồng thời cung cấp cơ sở thực tiễn để đánh giá năng lực của các mô hình học máy trong việc phát hiện các điểm bất thường mà không cần phụ thuộc vào nhãn dữ liệu đầy đủ như trong các ứng dụng thực tế.
 
 \subsection{Phạm vi nghiên cứu}
-Đề tài được giới hạn về đối tượng và phạm vi nghiên cứu như sau:
+Phạm vi của đề tài được xác định rõ ràng nhằm tập trung vào các khía cạnh cốt lõi của bài toán, cụ thể như sau:
 \begin{itemize}
-    \item Bổ khuyết và dự đoán các chỉ số không khí: bụi $TSP$, bụi $PM_{2.5}$, $O_3$, $CO$, $NO_2$, $SO_2$.
-    \item Các mất mát dữ liệu đến từ các sự cố do máy móc, mang tính ngẫu nhiên
+    \item Nghiên cứu giới hạn trong phạm vi phát hiện rò rỉ nước thông qua dữ liệu đo đạc áp suất và lưu lượng, không xét đến các yếu tố vật lý khác như vị trí địa lý, loại ống dẫn, địa hình, hoặc điều kiện môi trường xung quanh.
+    
+    \item Tập trung vào xử lý và phân tích dữ liệu chuỗi thời gian, bao gồm dữ liệu đầy đủ và dữ liệu bị thiếu do các nguyên nhân khách quan (như lỗi cảm biến hoặc gián đoạn đường truyền), không đề cập đến bài toán khôi phục dữ liệu từ ảnh vệ tinh hay các nguồn dữ liệu không định kỳ.
+    
+    \item Việc đánh giá mô hình được thực hiện dựa trên các kịch bản có sẵn trong tập dữ liệu LeakDB, với giả định rằng các thông tin về thời điểm rò rỉ là chính xác và có thể sử dụng để kiểm chứng kết quả mô hình.
 \end{itemize}

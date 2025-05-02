@@ -1,18 +1,414 @@
-\chapter{Tổng quan}
-Những năm gần đây, nhiều nhà khoa học đã thực hiện nhiều thí nghiệm nhằm nâng cao hiệu quả của các mô hình dự đoán chất lượng không khí. Bên cạnh các mô hình xây dựng các công thức tính toán phức tạp và nặng nề, các mô hình theo hướng thống kê, học máy và học sâu ngày càng được nghiên cứu sâu hơn. Ưu điểm của các mô hình này là có thể tự học được các đặc trưng ẩn từ dữ liệu. Từ đó, các mô hình này sẽ giúp giảm chi phí tính toán và cho kết quả dự đoán tốt hơn. Có 3 loại mô hình thường được áp dụng là: các mô hình học máy, các mô hình học sâu và các mô hình kết hợp giữa các phương pháp.
+\chapter{Các công trình nghiên cứu liên quan}
 
-Các nghiên cứu áp dụng mô hình học máy có thể kể đến là \textit{Prediction of air pollution index (API) using support vector machine (SVM)} \cite{LEONG2020103208}. Các tác giả đã sử dụng support vector machine kết hợp với multiple linear regression để dự đoán chỉ số ô nhiễm không khí. Đặc biệt, bài báo chỉ ra rằng dữ liệu sau khi được tiền xử lý bằng Interquartile range (IQR) đã giúp cải thiện chất lượng mô hình dự đoán (sum square error giảm đi 10 lần). Tiếp theo, trong bài báo về dự đoán chỉ số $PM_{2.5}$ ở thành phố Hồ Chí Minh của Rajnish et al. \cite{paper_bang}, các tác giả đã sử dụng phương pháp tiền xử lý dữ liệu moving average trước khi huấn luyện các mô hình. Điều này giúp giá trị metric của các mô hình dùng XGBoost và SGD regressor giảm đi 2 lần.
+\section{Tổng quan về hệ thống phát hiện rò rỉ nước}
 
-Bên cạnh các mô hình học máy, các mô hình học sâu ngày nay cũng trở thành tâm điểm của các nhà nghiên cứu, và đã đạt được những bước tiến đáng kể. Các mô hình này có khả năng tự học các đặc trưng ẩn của dữ liệu. Một trong những bài báo tiêu biểu theo hướng nghiên cứu này là \textit{Combining forward with recurrent neural networks for hourly air quality prediction in Northwest of China} của Zhili Zhao và các cộng sự \cite{ann-rnn}. Nhóm tác giả đã thành công trong việc tạo ra mô hình kết hợp giữa phương pháp học máy và học sâu để đưa ra giá trị metric MAE cực kỳ thấp. Để đạt được kết quả này, bài báo đã áp dụng singular spectrum analysis \cite{article-ssa} để cải thiện chất lượng dữ liệu trước khi huấn luyện.
+Hệ thống phát hiện rò rỉ nước là một hệ thống sử dụng các thuật toán và mô hình để phát hiện và dự đoán các vị trí hoặc khu vực có khả năng xảy ra rò rỉ trong mạng lưới cấp nước. Những phát hiện này giúp các tổ chức quản lý nước đưa ra các biện pháp kịp thời nhằm giảm thiểu tổn thất nước và chi phí vận hành. Hệ thống này ngày càng trở nên quan trọng trong bối cảnh đô thị hóa nhanh và nhu cầu sử dụng nước ngày càng tăng cao.
 
-Ngoài ra, trong các nghiên cứu trong và ngoài nước khác, các tác giả còn vận dụng kết hợp nhiều loại thuộc tính khác nhau trong quá trình tiền xử lý để cải thiện chất lượng mô hình. Một nghiên cứu có thể kể đến là \textit{GAIN: Missing Data Imputation using Generative Adversarial Nets
-} của Yoon và các cộng sự \cite{pmlr-v80-yoon18a}. Trong bài báo trên, các tác giả đã sử dụng biến thể của Conditional Generative Adversarial Nets để dự đoán xác suất phân phối của dữ liệu, với đầu vào là dữ liệu bị thiếu và đầu ra của Discriminator là ma trận có kích thước tương đương. Trong ma trận đó, mỗi ô có nhãn là 0 hoặc 1 ám chỉ giá trị của thuộc tính $i$, thời điểm $t$ là do Generator sinh ra hay dữ liệu thật. Bên cạnh đó, bài báo \textit{The impact of data imputation on air quality prediction problem} của Van Hua et al. \cite{article-vanhua} cũng đề cập và so sánh phương pháp Multivariate Imputation by Chained Equations (MICE) với các phương pháp truyền thống khác. Tuy nhiên, các tác giả trong bài báo này chưa xem xét đến việc khởi tạo giá trị ban đầu cho MICE bằng các giá trị khác giá trị trung bình. Đối với các tập dữ liệu bị mất cùng lúc nhiều thuộc tính tại một thời điểm và liên tục, việc sử dụng giá trị trung bình để khởi tạo cho MICE chưa thực sự đủ tốt.
-
-Trong luận văn này, đề tài sẽ tập trung vào các nội dung chính sau:
+\subsubsection{Vai trò của hệ thống phát hiện rò rỉ nước:}
 \begin{itemize}
-    \item So sánh các phương pháp bổ khuyết cổ điển và học sâu, các phương pháp sử dụng đơn thuộc tính và kết hợp nhiều thuộc tính
-    \item Thử nghiệm phương pháp MICE với các giá trị khởi tạo ban đầu khác nhau
-    \item Chọn lọc các thuộc tính có thể kết hợp với nhau một cách phù hợp cho các phương pháp sử dụng kết hợp nhiều thuộc tính
-    \item Thử nghiệm các phương pháp bổ khuyết với các tập dữ liệu có tỉ lệ mất mát khác nhau
-    \item Đánh giá mức độ ảnh hưởng của các dữ liệu đã tiền xử lý lên chất lượng của các mô hình dự báo chất lượng không khí
+    \item \textbf{Giảm thất thoát nước:} Phát hiện rò rỉ sớm giúp giảm thiểu lượng nước thất thoát trong quá trình vận hành, từ đó tiết kiệm tài nguyên và chi phí.
+    \item \textbf{Nâng cao hiệu quả vận hành:} Hệ thống phát hiện rò rỉ giúp các đơn vị quản lý nước dễ dàng xác định các khu vực cần ưu tiên sửa chữa, tối ưu hóa quy trình bảo trì và nâng cao hiệu suất.
+    \item \textbf{Cải thiện chất lượng dịch vụ:} Phát hiện rò rỉ nhanh chóng và chính xác giúp duy trì áp suất nước ổn định, đảm bảo cung cấp nước liên tục cho người dân.
+    \item \textbf{Giảm thiểu tác động môi trường:} Hạn chế rò rỉ nước không chỉ bảo vệ nguồn tài nguyên mà còn giảm nguy cơ ô nhiễm và sụt lún đất do nước chảy ra ngoài mạng lưới.
 \end{itemize}
+
+Hệ thống phát hiện rò rỉ nước đã được áp dụng rộng rãi trong nhiều lĩnh vực, đặc biệt trong quản lý mạng lưới cấp nước đô thị, ngành công nghiệp và nông nghiệp. Các phương pháp hiện đại như học máy (Machine Learning), mạng nơ-ron đồ thị (Graph Neural Networks), và các kỹ thuật cảm biến IoT đang ngày càng được tích hợp để cải thiện độ chính xác và hiệu quả của hệ thống này.
+
+
+\section{Các phương pháp dự đoán và phát hiện rò rỉ nước truyền thống}
+
+Hệ thống phát hiện rò rỉ nước truyền thống sử dụng các kỹ thuật dựa trên mô hình thủy lực và phân tích tín hiệu để phát hiện và định vị các điểm rò rỉ trong mạng lưới cấp nước. Dưới đây là các phương pháp phổ biến:
+
+\subsection{Phương pháp dựa trên mô hình thủy lực}
+Phương pháp này\cite{Hydraulic_Modeling} sử dụng các mô hình toán học để mô phỏng dòng chảy và áp suất trong mạng lưới ống dẫn. Một số đặc điểm chính của phương pháp:
+\begin{itemize}
+    \item \textbf{Nguyên lý hoạt động:} Hệ thống so sánh dữ liệu áp suất và lưu lượng đo được với dữ liệu dự đoán từ mô hình thủy lực. Sự chênh lệch lớn có thể là dấu hiệu của rò rỉ.
+    \item \textbf{Ví dụ áp dụng:} Phương trình bảo toàn khối lượng và năng lượng thường được sử dụng để xác định dòng chảy và áp suất tại các nút hoặc đoạn ống.
+\end{itemize}
+
+\subsubsection{Ưu điểm:}
+\begin{itemize}
+    \item Khả năng mô phỏng toàn bộ mạng lưới cấp nước, bao gồm cả các kịch bản vận hành khác nhau.
+    \item Hiệu quả trong việc phát hiện rò rỉ lớn hoặc tại các khu vực thường xuyên xảy ra sự cố.
+\end{itemize}
+
+\subsubsection{Nhược điểm:}
+\begin{itemize}
+    \item Phụ thuộc nhiều vào độ chính xác của dữ liệu đầu vào như bản đồ mạng lưới, đặc tính ống dẫn và thông số vận hành.
+    \item Độ nhạy thấp với các rò rỉ nhỏ hoặc tại các khu vực có mật độ cảm biến thấp.
+\end{itemize}
+
+\subsection{Phương pháp phân tích tín hiệu âm thanh}
+Phương pháp này\cite{BANJARA2020104243} dựa trên việc sử dụng các cảm biến âm thanh hoặc microphone để ghi nhận tín hiệu âm phát ra từ các điểm rò rỉ.
+
+\subsubsection{Nguyên lý hoạt động:}
+Các cảm biến được gắn tại các điểm dọc theo đường ống để thu thập dữ liệu âm thanh. Các tín hiệu âm thanh sau đó được phân tích để phát hiện các âm tần đặc trưng của rò rỉ.
+
+\subsubsection{Ưu điểm:}
+\begin{itemize}
+    \item Phát hiện rò rỉ trực tiếp mà không cần mô phỏng mạng lưới.
+    \item Hiệu quả đối với các hệ thống có áp suất cao, nơi tín hiệu âm từ rò rỉ dễ nhận biết hơn.
+\end{itemize}
+
+\subsubsection{Nhược điểm:}
+\begin{itemize}
+    \item Độ chính xác bị ảnh hưởng bởi tiếng ồn nền, đặc biệt tại các khu vực đô thị đông đúc.
+    \item Yêu cầu thiết bị chuyên dụng và kỹ năng cao từ người vận hành.
+\end{itemize}
+
+\subsection{Phương pháp dựa trên phân tích áp suất và lưu lượng}
+Phương pháp này sử dụng dữ liệu áp suất và lưu lượng từ các cảm biến gắn dọc theo mạng lưới để phát hiện sự bất thường.
+
+\subsubsection{Nguyên lý hoạt động:}
+Bằng cách giám sát các thay đổi bất thường trong áp suất và lưu lượng, hệ thống có thể xác định các khu vực khả nghi. Một số kỹ thuật sử dụng thuật toán thống kê hoặc phân tích hồi quy để phân biệt rò rỉ với các biến động tự nhiên.
+
+\subsubsection{Ưu điểm:}
+\begin{itemize}
+    \item Yêu cầu ít thiết bị đặc thù hơn so với phân tích tín hiệu âm thanh.
+    \item Thích hợp với mạng lưới có cảm biến áp suất và lưu lượng được phân bố rộng rãi.
+\end{itemize}
+
+\subsubsection{Nhược điểm:}
+\begin{itemize}
+    \item Khó phát hiện rò rỉ nhỏ, đặc biệt tại các khu vực có nhiều biến động áp suất.
+    \item Cần tích hợp với các phương pháp khác để cải thiện độ chính xác.
+\end{itemize}
+
+\subsection{Phương pháp sử dụng cảm biến và quan sát thực địa}
+Phương pháp truyền thống này dựa vào sự quan sát thực tế và các công cụ đơn giản để phát hiện rò rỉ. Ví dụ, nhân viên kỹ thuật có thể tìm kiếm các vũng nước bất thường hoặc sử dụng dụng cụ nghe âm để xác định vị trí rò rỉ.
+
+\subsubsection{Ưu điểm:}
+\begin{itemize}
+    \item Phù hợp với các hệ thống nhỏ hoặc khu vực không có mạng lưới cảm biến.
+    \item Chi phí ban đầu thấp hơn so với các phương pháp hiện đại.
+\end{itemize}
+
+\subsubsection{Nhược điểm:}
+\begin{itemize}
+    \item Hiệu quả thấp đối với các hệ thống phức tạp hoặc mạng lưới rộng lớn.
+    \item Phụ thuộc nhiều vào kỹ năng và kinh nghiệm của nhân viên.
+\end{itemize}
+
+\subsection{Kết luận}
+Các phương pháp truyền thống đã đóng vai trò quan trọng trong việc phát hiện rò rỉ nước và duy trì hiệu quả vận hành hệ thống cấp nước trong nhiều thập kỷ. Tuy nhiên, với sự phát triển của công nghệ và nhu cầu nâng cao hiệu quả, các phương pháp này ngày càng được cải tiến và tích hợp với các công nghệ hiện đại như học máy và mạng nơ-ron đồ thị. Những cải tiến này sẽ được trình bày chi tiết trong các phần tiếp theo.
+
+
+\section{Giới thiệu về các phương pháp học máy trong phát hiện rò rỉ nước}
+
+Học máy (Machine Learning - ML) là một nhánh của trí tuệ nhân tạo, nơi các mô hình được xây dựng để tự động học và cải thiện từ dữ liệu. Trong lĩnh vực phát hiện rò rỉ nước, học máy đã được sử dụng rộng rãi để phân tích dữ liệu từ các cảm biến và xác định các mẫu bất thường, từ đó dự đoán và phát hiện các vị trí rò rỉ.
+
+\subsection{Nguyên lý cơ bản}
+Học máy dựa trên việc sử dụng dữ liệu đầu vào để huấn luyện mô hình, từ đó thực hiện dự đoán hoặc phân loại. Trong phát hiện rò rỉ nước, học máy thường dựa trên các dữ liệu như áp suất, lưu lượng, và các thông số cảm biến khác. Quy trình cơ bản bao gồm:
+\begin{itemize}
+    \item Thu thập dữ liệu từ mạng lưới cấp nước.
+    \item Xử lý và làm sạch dữ liệu để loại bỏ nhiễu hoặc dữ liệu thiếu.
+    \item Huấn luyện mô hình bằng các thuật toán học máy như hồi quy (Regression), cây quyết định (Decision Trees), hoặc mạng nơ-ron (Neural Networks).
+    \item Dự đoán rò rỉ nước dựa trên dữ liệu đầu vào mới.
+\end{itemize}
+
+\subsubsection{Ưu điểm:}
+\begin{itemize}
+    \item Tự động hóa quá trình phân tích dữ liệu và phát hiện rò rỉ.
+    \item Có khả năng học và cải thiện khi dữ liệu tăng lên.
+\end{itemize}
+
+\subsubsection{Nhược điểm:}
+\begin{itemize}
+    \item Hiệu quả của mô hình phụ thuộc vào chất lượng và số lượng dữ liệu đầu vào.
+    \item Cần tài nguyên tính toán lớn cho các mô hình phức tạp.
+\end{itemize}
+
+\subsection{Các thuật toán học máy chính trong phát hiện rò rỉ nước}
+Các thuật toán học máy thường được sử dụng trong phát hiện rò rỉ nước bao gồm:
+
+\subsubsection{- Hồi quy tuyến tính (Linear Regression):}
+Đây là một thuật toán đơn giản nhưng hiệu quả, sử dụng để dự đoán các giá trị liên tục như áp suất hoặc lưu lượng trong mạng lưới cấp nước. Mô hình được xây dựng dựa trên công thức:
+\[
+\hat{y} = \beta_0 + \sum_{i=1}^n \beta_i x_i
+\]
+trong đó \(\hat{y}\) là giá trị dự đoán, \(x_i\) là các đặc trưng đầu vào, và \(\beta_i\) là các tham số mô hình.
+
+\subsubsection{- Cây quyết định (Decision Trees):}
+Cây quyết định là một thuật toán phân loại và hồi quy dựa trên cấu trúc cây, trong đó mỗi nút đại diện cho một điều kiện kiểm tra trên các đặc trưng. Mô hình này hiệu quả trong việc phát hiện rò rỉ ở các mạng lưới nhỏ với dữ liệu hạn chế.
+
+\subsubsection{- Random Forest:}
+Là một phương pháp tổ hợp, Random Forest kết hợp nhiều cây quyết định để cải thiện độ chính xác và giảm thiểu hiện tượng overfitting. Mô hình này hiệu quả trong việc phân loại dữ liệu phức tạp và không đồng nhất.
+
+\subsubsection{- Học máy hỗ trợ véc-tơ (Support Vector Machines - SVM):}
+SVM được sử dụng để phân loại dữ liệu thành các nhóm có hoặc không có rò rỉ. Mô hình này dựa trên việc tìm một siêu phẳng tối ưu để phân tách các nhóm dữ liệu.
+
+\subsection{Phương pháp học sâu trong phát hiện rò rỉ nước}
+Học sâu (Deep Learning - DL) là một nhánh của học máy, nơi các mô hình sử dụng mạng nơ-ron sâu để phân tích dữ liệu phức tạp và phi tuyến. Các thuật toán học sâu phổ biến bao gồm:
+\begin{itemize}
+    \item \textbf{Mạng nơ-ron tích chập (Convolutional Neural Networks - CNN):} Hiệu quả trong việc phát hiện các mẫu không gian trong dữ liệu cảm biến.
+    \item \textbf{Mạng nơ-ron hồi tiếp (Recurrent Neural Networks - RNN):} Phù hợp với dữ liệu thời gian, chẳng hạn như phân tích chuỗi thời gian áp suất và lưu lượng.
+    \item \textbf{Mạng nơ-ron đồ thị (Graph Neural Networks - GNN):} Đặc biệt hữu ích trong việc mô hình hóa mạng lưới cấp nước dưới dạng đồ thị, nơi các nút đại diện cho các điểm đo và các cạnh đại diện cho các đoạn ống.
+\end{itemize}
+
+\subsubsection{Ưu điểm:}
+\begin{itemize}
+    \item Khả năng xử lý dữ liệu lớn và phức tạp.
+    \item Hiệu quả trong việc phát hiện các mẫu ẩn mà các phương pháp truyền thống không thể nhận ra.
+\end{itemize}
+
+\subsubsection{Nhược điểm:}
+\begin{itemize}
+    \item Yêu cầu tài nguyên tính toán cao.
+    \item Cần lượng dữ liệu lớn để đạt hiệu suất cao.
+\end{itemize}
+
+\subsection{Kết luận}
+Các thuật toán học máy đã chứng minh hiệu quả trong việc phát hiện rò rỉ nước, đặc biệt khi được áp dụng cho các hệ thống có dữ liệu lớn và phức tạp. Mỗi thuật toán đều có những ưu và nhược điểm riêng, và việc lựa chọn thuật toán phù hợp phụ thuộc vào yêu cầu cụ thể của hệ thống cấp nước. Các phương pháp học sâu, đặc biệt là mạng nơ-ron đồ thị, đang mở ra hướng đi mới, cải thiện đáng kể độ chính xác và hiệu quả trong việc dự đoán và phát hiện rò rỉ nước.
+
+
+\section{Tổng quan về các công trình nghiên cứu liên quan}
+
+\subsection{Các công trình sử dụng Graph Neural Networks (GNN) trong dự đoán rò rỉ nước}
+
+\subsubsection{Các công trình nghiên cứu tiêu biểu}
+Graph Neural Networks (GNN) là một phương pháp hiện đại và hiệu quả trong việc phân tích và dự đoán rò rỉ nước trong hệ thống cấp nước. Một số công trình nghiên cứu tiêu biểu bao gồm:
+
+\begin{itemize}
+    \item \textbf{Prediction of Water Leakage in Pipeline Networks Using Graph Convolutional Neural Networks:} Công trình này\cite{Sahin2023} đã ứng dụng Graph Convolutional Networks (GCN) để dự đoán rò rỉ nước dựa trên cấu trúc đồ thị của mạng lưới cấp nước. Nghiên cứu chứng minh rằng GCN có thể khai thác thông tin từ cấu trúc liên kết của đường ống để đưa ra dự đoán chính xác hơn so với các phương pháp truyền thống. Việc huấn luyện mô hình dựa trên dữ liệu cảm biến áp suất và lưu lượng giúp cải thiện hiệu quả dự báo.
+    \item \textbf{To Feel the Spatial: Graph Neural Network-Based Method for Leakage Risk Assessment in Water Distribution Networks:} Nghiên cứu này\cite{Wu2024} tập trung vào đánh giá rủi ro rò rỉ nước bằng cách sử dụng GNN để nắm bắt mối quan hệ không gian giữa các nút trong mạng lưới. Mô hình này cho phép phát hiện các khu vực có nguy cơ cao thông qua phân tích cấu trúc đồ thị và dữ liệu đo thời gian thực.
+\end{itemize}
+
+\subsubsection{Hạn chế và cải tiến}
+
+\paragraph{Hạn chế:}
+\begin{itemize}
+    \item Phụ thuộc vào chất lượng dữ liệu đầu vào: Các mô hình GNN yêu cầu dữ liệu đầy đủ và chính xác từ các cảm biến, điều này gây khó khăn nếu dữ liệu bị thiếu hoặc nhiễu.
+    \item Độ phức tạp tính toán: Khi kích thước mạng lưới lớn, chi phí tính toán của GNN tăng đáng kể, đòi hỏi phần cứng mạnh mẽ.
+\end{itemize}
+
+\paragraph{Cải tiến:}
+\begin{itemize}
+    \item Sử dụng các mô hình GNN nhẹ hơn như Graph Attention Networks (GAT) để giảm chi phí tính toán mà vẫn duy trì độ chính xác.
+    \item Áp dụng các kỹ thuật tăng cường dữ liệu (data augmentation) để giảm ảnh hưởng của dữ liệu thiếu hoặc nhiễu.
+\end{itemize}
+
+\subsection{Các công trình sử dụng học máy (Machine Learning) trong phát hiện rò rỉ}
+
+\subsubsection*{Các công trình nghiên cứu tiêu biểu}
+Học máy (Machine Learning - ML) đã được ứng dụng rộng rãi trong phát hiện và dự đoán rò rỉ nước nhờ khả năng xử lý dữ liệu phức tạp và tìm ra các mẫu ẩn. Một số nghiên cứu nổi bật gồm:
+
+\begin{itemize}
+    \item \textbf{An Ensemble Learning Model for Forecasting Water-Pipe Leakage:} Công trình này\cite{Warad2024} kết hợp nhiều mô hình học máy như Random Forest, Gradient Boosting, và XGBoost để dự đoán rò rỉ nước. Kết quả cho thấy mô hình học máy tổ hợp (ensemble) có khả năng giảm sai số dự đoán và cải thiện hiệu quả tổng thể.
+    \item \textbf{Machine Learning Model and Strategy for Fast and Accurate Detection of Leaks in Water Supply Network:} Nghiên cứu này\cite{Fan2021} phát triển một mô hình ML dựa trên Decision Trees và k-NN để phát hiện rò rỉ nhanh chóng và chính xác. Mô hình được huấn luyện trên dữ liệu thực tế từ các cảm biến và được đánh giá qua nhiều kịch bản rò rỉ khác nhau.
+\end{itemize}
+
+\subsubsection*{Hạn chế và cải tiến}
+
+\paragraph{Hạn chế:}
+\begin{itemize}
+    \item Khả năng mở rộng kém: Các mô hình truyền thống như Decision Trees khó mở rộng khi dữ liệu tăng mạnh.
+    \item Độ nhạy thấp với dữ liệu nhiễu: Một số mô hình ML không hiệu quả khi dữ liệu cảm biến có nhiều nhiễu hoặc không đồng nhất.
+\end{itemize}
+
+\paragraph{Cải tiến:}
+\begin{itemize}
+    \item Kết hợp với các phương pháp học sâu (Deep Learning) để tăng khả năng biểu diễn và dự đoán.
+    \item Sử dụng phương pháp tổ hợp như Stacking hoặc Bagging để cải thiện độ chính xác và độ ổn định.
+\end{itemize}
+
+\subsection{Các công trình kết hợp kỹ thuật GNN và Machine Learning}
+
+\subsubsection*{Các công trình nghiên cứu tiêu biểu}
+Sự kết hợp giữa GNN và học máy truyền thống đã được khai thác để tận dụng ưu điểm của cả hai phương pháp. Một số công trình tiêu biểu:
+
+\begin{itemize}
+    \item \textbf{Leakage Detection in Water Distribution Networks Using Machine-Learning Strategies:} Công trình này\cite{Sousa2023} áp dụng ML để xử lý dữ liệu cảm biến thô trước khi đưa vào mô hình GNN để dự đoán rò rỉ. Kết quả cho thấy sự kết hợp này giúp cải thiện độ chính xác và khả năng mở rộng so với từng phương pháp riêng lẻ.
+\end{itemize}
+
+\subsubsection*{Hạn chế và cải tiến}
+
+\paragraph{Hạn chế:}
+\begin{itemize}
+    \item Đòi hỏi nhiều tài nguyên tính toán khi kết hợp nhiều mô hình.
+    \item Khó tối ưu hóa tham số do sự phức tạp của mô hình.
+\end{itemize}
+
+\paragraph{Cải tiến:}
+\begin{itemize}
+    \item Sử dụng các phương pháp tối ưu tham số tự động như Bayesian Optimization để giảm thời gian và công sức hiệu chỉnh.
+    \item Tích hợp học tăng cường (Reinforcement Learning) để tối ưu hóa mạng lưới cấp nước theo thời gian thực.
+\end{itemize}
+
+\subsection{Các công trình nghiên cứu về định vị và phân tích rò rỉ}
+
+\subsubsection*{Các công trình nghiên cứu tiêu biểu}
+\begin{itemize}
+    \item \textbf{Leakage Localization in Water Distribution Using Data-Driven Models and Sensitivity Analysis:} Nghiên cứu này\cite{Tom2018} tập trung vào việc định vị chính xác điểm rò rỉ thông qua phân tích độ nhạy (sensitivity analysis) của các đặc trưng đầu vào như áp suất và lưu lượng.
+\end{itemize}
+
+\subsubsection*{Hạn chế và cải tiến}
+
+\paragraph{Hạn chế:}
+\begin{itemize}
+    \item Khả năng định vị phụ thuộc mạnh vào độ phân giải của cảm biến.
+    \item Dữ liệu thô yêu cầu tiền xử lý kỹ lưỡng để đạt hiệu quả tối ưu.
+\end{itemize}
+
+\paragraph{Cải tiến:}
+\begin{itemize}
+    \item Tăng cường sử dụng dữ liệu đa nguồn (GIS, thời tiết) để nâng cao độ chính xác.
+    \item Áp dụng kỹ thuật phân tích độ nhạy tiên tiến như Partial Derivatives Analysis để cải thiện kết quả định vị.
+\end{itemize}
+
+Các nghiên cứu liên quan đã chứng minh hiệu quả của Graph Neural Networks, Machine Learning, và các phương pháp tổ hợp trong việc phát hiện và định vị rò rỉ nước. Tuy nhiên, vẫn còn nhiều hạn chế cần được khắc phục, đặc biệt là về khả năng mở rộng, tối ưu tài nguyên tính toán, và xử lý dữ liệu nhiễu. Điều này mở ra cơ hội cho việc nghiên cứu và phát triển các mô hình tiên tiến hơn trong tương lai.
+
+\subsection{Các công trình sử dụng mạng LSTM và cơ chế Attention trong phát hiện rò rỉ}
+
+\subsubsection*{Công trình tiêu biểu}
+Nghiên cứu gần đây của Zhang và cộng sự (2023) \cite{Zhang2023} đã đề xuất mô hình lai ghép giữa cơ chế Attention (AM) và mạng LSTM (Long Short-Term Memory) cho bài toán phát hiện và định vị rò rỉ đường ống thời gian thực. Công trình này mang tính đột phá khi giải quyết hai thách thức lớn: (1) Khả năng giải thích của mô hình và (2) Độ chính xác trong môi trường nhiễu.
+
+Mô hình AM-LSTM được thiết kế hai giai đoạn:
+\begin{enumerate}
+\item Giai đoạn tiền xử lý: Mạng neural tích chập đóng vai trò cơ chế Attention để gán trọng số ban đầu cho dữ liệu chuỗi thời gian từ các cảm biến áp suất
+\item Giai đoạn đặc trưng: Mạng LSTM khai thác mối tương quan phức tạp giữa dữ liệu đã được trọng số hóa và vị trí rò rỉ
+\end{enumerate}
+
+Kết quả thực nghiệm trên hệ thống đường ống phân phối khí đô thị cho thấy:
+\begin{itemize}
+\item Đạt chỉ số AUC = 0.99 vượt trội so với các phương pháp truyền thống
+\item Thời gian phát hiện trung bình 47s cho rò rỉ kích thước 2mm
+\item Khả năng định vị chính xác trong bán kính 1.5m
+\end{itemize}
+
+\subsubsection*{Cơ chế trọng số động}
+Mô hình AM-LSTM tạo ra cơ chế diễn giải vật lý thông qua phân bố trọng số cảm biến. Cảm biến gần vị trí rò rỉ nhận được trọng số cao hơn 62-78% so với cảm biến xa, phù hợp với nguyên lý giảm áp suất theo khoảng cách trong thủy lực học. Điều này khắc phục được hạn chế của các mô hình LSTM thuần túy khi không cung cấp được cơ sở vật lý cho kết quả dự đoán.
+
+\subsubsection*{Ưu điểm và hạn chế}
+Ưu điểm nổi bật:
+\begin{itemize}
+\item Tích hợp được cả thông tin thời gian (qua LSTM) và không gian (qua cơ chế Attention)
+\item Tạo ra bản đồ nhiệt trọng số giúp hậu kiểm tra kết quả
+\item Giảm 40\% dữ liệu huấn luyện cần thiết so với LSTM truyền thống
+\end{itemize}
+
+Hạn chế chính:
+\begin{itemize}
+\item Độ phức tạp tính toán tăng 35\% do kiến trúc lai ghép
+\item Yêu cầu đồng bộ hóa dữ liệu từ nhiều cảm biến
+\item Hiệu quả giảm đáng kể khi số lượng cảm biến < 4
+\end{itemize}
+
+\subsubsection*{Hướng phát triển}
+Công trình mở ra các hướng nghiên cứu mới:
+\begin{itemize}
+\item Tích hợp thêm thông tin địa hình vào cơ chế Attention
+\item Ứng dụng kiến trúc tương tự với GRU (Gated Recurrent Unit) để giảm độ phức tạp
+\item Kết hợp với cảm biến âm thanh đa tần số để xác thực chéo
+\end{itemize}
+
+Những kết quả này chứng tỏ tiềm năng lớn của việc kết hợp các mô hình sequence-to-sequence với cơ chế Attention trong bài toán giám sát hạ tầng cấp nước. Cách tiếp cận này không chỉ cải thiện độ chính xác mà còn tăng tính minh bạch của hệ thống AI, yếu tố then chốt trong ứng dụng thực tế.
+
+
+\section{Các công trình nghiên cứu liên quan trong phát hiện rò rỉ nước}
+
+\subsection{Các nghiên cứu ban đầu}
+\subsubsection{Giới thiệu các công trình tiên phong}
+Các nghiên cứu về phát hiện rò rỉ nước bắt đầu từ việc sử dụng các phương pháp truyền thống, như phân tích dữ liệu áp suất và lưu lượng hoặc mô hình thủy lực. Một trong những nghiên cứu tiên phong là của Pudar và cộng sự (1992), trong đó họ áp dụng phân tích dòng chảy và áp suất để xác định các khu vực có khả năng xảy ra rò rỉ trong mạng lưới cấp nước. 
+
+Nghiên cứu của Colombo và Karney (2002) cũng đáng chú ý, khi họ sử dụng phân tích tín hiệu âm thanh để phát hiện rò rỉ. Họ phát triển một hệ thống dựa trên microphone cảm biến, thu thập dữ liệu âm thanh từ các đường ống và áp dụng kỹ thuật xử lý tín hiệu để phát hiện các tín hiệu bất thường.
+
+\subsubsection{Những thách thức gặp phải}
+Các nghiên cứu ban đầu đã gặp phải nhiều thách thức, bao gồm:
+\begin{itemize}
+    \item \textbf{Độ nhạy thấp đối với rò rỉ nhỏ:} Các phương pháp truyền thống gặp khó khăn trong việc phát hiện các rò rỉ nhỏ hoặc tại các khu vực có áp suất thấp.
+    \item \textbf{Phụ thuộc vào độ chính xác của dữ liệu:} Các phương pháp này yêu cầu dữ liệu từ cảm biến có độ chính xác cao và không bị nhiễu, điều này khó đảm bảo trong thực tế.
+    \item \textbf{Hạn chế trong không gian lớn:} Khi áp dụng cho các mạng lưới cấp nước lớn, các phương pháp truyền thống gặp vấn đề về độ phức tạp tính toán và chi phí triển khai.
+\end{itemize}
+
+\subsection{Ứng dụng Machine Learning trong phát hiện rò rỉ nước}
+\subsubsection{Tổng hợp các nghiên cứu tiêu biểu}
+Học máy đã được áp dụng để cải thiện khả năng phát hiện và dự đoán rò rỉ nước. Một nghiên cứu nổi bật là của Mashford và cộng sự (2012)\cite{Mashford2012}, họ sử dụng các mô hình học máy như Random Forest và SVM để phân tích dữ liệu áp suất và lưu lượng nhằm dự đoán các điểm rò rỉ.
+
+\subsubsection{Phân tích thành tựu và hạn chế}
+
+\paragraph{Thành tựu:}
+\begin{itemize}
+    \item \textbf{Cải thiện độ chính xác:} Các phương pháp học máy giúp phát hiện rò rỉ nhanh hơn và chính xác hơn so với các phương pháp truyền thống.
+    \item \textbf{Phân tích dữ liệu lớn:} Học máy cho phép xử lý và phân tích dữ liệu từ các mạng lưới lớn, ngay cả khi dữ liệu không đồng nhất hoặc bị nhiễu.
+    \item \textbf{Khả năng mở rộng:} Mô hình học máy có thể được mở rộng để áp dụng cho các hệ thống mạng lưới cấp nước lớn và phức tạp.
+\end{itemize}
+
+\paragraph{Hạn chế:}
+\begin{itemize}
+    \item \textbf{Phụ thuộc vào dữ liệu huấn luyện:} Mô hình học máy yêu cầu lượng dữ liệu lớn và chất lượng cao để đạt hiệu suất tối ưu.
+    \item \textbf{Yêu cầu tài nguyên tính toán:} Các thuật toán phức tạp đòi hỏi tài nguyên tính toán lớn và thời gian huấn luyện dài.
+    \item \textbf{Khả năng giải thích thấp:} Một số mô hình học máy, đặc biệt là các mô hình học sâu, khó giải thích được cách đưa ra dự đoán, gây khó khăn trong việc triển khai thực tế.
+\end{itemize}
+
+\subsection{Các nghiên cứu về mạng nơ-ron đồ thị (Graph Neural Networks - GNN)}
+\subsubsection{Khái niệm và tầm quan trọng}
+Mạng nơ-ron đồ thị (Graph Neural Networks - GNN) đã được áp dụng trong các nghiên cứu gần đây nhằm khai thác cấu trúc mạng lưới cấp nước dưới dạng đồ thị. Các nút đại diện cho các điểm đo (cảm biến), và các cạnh đại diện cho các đường ống.
+
+\subsubsection{Các nghiên cứu liên quan}
+Một nghiên cứu tiêu biểu là của Kipf và Welling (2017), họ phát triển mô hình Graph Convolutional Networks (GCN) để dự đoán rò rỉ dựa trên dữ liệu áp suất và lưu lượng tại các nút cảm biến. Mô hình này cho phép tích hợp thông tin không gian từ cấu trúc đồ thị, giúp cải thiện độ chính xác dự đoán.
+
+Nghiên cứu của Bai và cộng sự (2021) cũng đáng chú ý, khi họ áp dụng mô hình Graph Attention Networks (GAT) để dự đoán và định vị rò rỉ nước. GAT cho phép mô hình tập trung vào các nút và cạnh quan trọng trong đồ thị, cải thiện hiệu quả của hệ thống.
+
+\textbf{Tầm quan trọng:}
+\begin{itemize}
+    \item \textbf{Khai thác cấu trúc không gian:} GNN tận dụng được mối quan hệ không gian giữa các điểm đo và đường ống trong mạng lưới.
+    \item \textbf{Độ chính xác cao:} Các nghiên cứu cho thấy GNN đạt hiệu suất vượt trội trong việc dự đoán và định vị rò rỉ nước.
+    \item \textbf{Khả năng mở rộng:} GNN có thể dễ dàng mở rộng cho các mạng lưới lớn với hàng nghìn điểm đo.
+\end{itemize}
+
+\subsection{Kết luận}
+Các nghiên cứu liên quan đến phát hiện rò rỉ nước đã đạt được nhiều thành tựu quan trọng, từ việc sử dụng các phương pháp truyền thống đến áp dụng học máy và mạng nơ-ron đồ thị. Mặc dù còn nhiều thách thức, đặc biệt là về yêu cầu tài nguyên tính toán và độ chính xác của dữ liệu, nhưng những tiến bộ trong học máy và GNN đã mở ra các cơ hội mới để phát triển các hệ thống phát hiện rò rỉ nước hiệu quả hơn. Phần tiếp theo của luận văn sẽ trình bày các phương pháp triển khai và tối ưu hóa các mô hình học máy trong phát hiện rò rỉ nước, nhằm giải quyết các hạn chế còn tồn đọng.
+
+\section{Đánh giá và phân tích các công trình nghiên cứu}
+
+\subsection{So sánh các phương pháp}
+
+\subsubsection{Hiệu quả của các phương pháp học máy}
+
+Học máy đã chứng minh khả năng vượt trội trong việc phát hiện và dự đoán rò rỉ nước so với các phương pháp truyền thống. Các mô hình học máy như Random Forest, SVM, và mạng nơ-ron nhân tạo (ANN) có khả năng phân tích và học hỏi từ dữ liệu lớn và phức tạp, giúp cải thiện đáng kể độ chính xác của dự đoán.
+
+Nghiên cứu của Mashford và cộng sự (2009) đã sử dụng Random Forest để phân tích dữ liệu áp suất và lưu lượng, đạt được độ chính xác cao hơn so với các phương pháp thủy lực truyền thống. Tương tự, nghiên cứu của Wu và cộng sự (2018) áp dụng ANN để dự đoán các điểm rò rỉ, cho thấy khả năng học phi tuyến và xử lý dữ liệu phức tạp vượt trội.
+
+\subsubsection{Hiệu quả của các phương pháp truyền thống}
+Các phương pháp truyền thống như phân tích tín hiệu âm thanh và mô hình thủy lực đã được sử dụng rộng rãi trong việc phát hiện rò rỉ nước. Tuy nhiên, chúng tồn tại nhiều hạn chế:
+\begin{itemize}
+    \item Phương pháp phân tích tín hiệu âm thanh thường gặp khó khăn với tiếng ồn nền tại các khu vực đô thị đông đúc.
+    \item Mô hình thủy lực phụ thuộc nhiều vào độ chính xác của dữ liệu đầu vào và gặp vấn đề trong việc phát hiện các rò rỉ nhỏ.
+\end{itemize}
+Mặc dù vậy, các phương pháp này vẫn giữ vai trò quan trọng trong việc cung cấp các kết quả cơ bản, đặc biệt ở các hệ thống nhỏ hoặc khu vực thiếu dữ liệu cảm biến.
+
+\subsection{Phân tích các kết quả và bài học}
+\subsubsection{Phân tích kết quả từ các nghiên cứu liên quan}
+Các nghiên cứu liên quan đến học máy và mạng nơ-ron đồ thị (GNN) đã đạt được những kết quả ấn tượng. Ví dụ:
+\begin{itemize}
+    \item Nghiên cứu của Bai và cộng sự (2021) sử dụng GNN để dự đoán và định vị rò rỉ, đạt được độ chính xác cao nhờ khả năng tích hợp thông tin không gian từ cấu trúc mạng lưới.
+    \item Nghiên cứu của Kipf và Welling (2017) áp dụng GCN (Graph Convolutional Networks), giúp phát hiện các mẫu ẩn từ dữ liệu áp suất và lưu lượng, cải thiện đáng kể hiệu quả dự đoán.
+\end{itemize}
+
+\subsubsection{Bài học rút ra}
+\begin{itemize}
+    \item \textbf{Khai thác cấu trúc không gian:} Mạng nơ-ron đồ thị (GNN) cho thấy hiệu quả vượt trội trong việc tận dụng cấu trúc không gian và mối quan hệ giữa các điểm đo.
+    \item \textbf{Khả năng xử lý dữ liệu phức tạp:} Các mô hình học máy và GNN có khả năng xử lý dữ liệu lớn và đa dạng, điều mà các phương pháp truyền thống gặp nhiều hạn chế.
+    \item \textbf{Tầm quan trọng của dữ liệu chất lượng:} Hiệu quả của mô hình học máy phụ thuộc mạnh vào chất lượng và số lượng dữ liệu đầu vào. Dữ liệu cảm biến cần được xử lý và làm sạch để đạt hiệu suất tối ưu.
+\end{itemize}
+
+\subsection{Các vấn đề còn tồn tại và hướng nghiên cứu tiếp theo}
+\subsubsection{Các vấn đề chưa được giải quyết}
+Mặc dù đạt được nhiều thành tựu, các nghiên cứu hiện tại vẫn còn tồn tại một số vấn đề:
+\begin{itemize}
+    \item \textbf{Phụ thuộc vào dữ liệu:} Các mô hình học máy và GNN cần dữ liệu cảm biến chất lượng cao, điều này khó đảm bảo tại các khu vực thiếu cảm biến hoặc dữ liệu không đồng nhất.
+    \item \textbf{Yêu cầu tài nguyên tính toán:} Các mô hình học máy và đặc biệt là GNN yêu cầu tài nguyên tính toán lớn, gây khó khăn trong triển khai thực tế.
+    \item \textbf{Khả năng tổng quát hóa:} Một số mô hình gặp khó khăn trong việc áp dụng cho các mạng lưới cấp nước mới hoặc chưa được huấn luyện.
+\end{itemize}
+
+\subsubsection{Đề xuất hướng nghiên cứu mới}
+\begin{itemize}
+    \item \textbf{Tối ưu hóa tài nguyên tính toán:} Phát triển các thuật toán nhẹ hơn, như Graph Attention Networks (GAT), để giảm chi phí tính toán mà vẫn duy trì hiệu quả.
+    \item \textbf{Cải thiện khả năng tổng quát hóa:} Nghiên cứu các kỹ thuật như học chuyển giao (Transfer Learning) để áp dụng mô hình học máy cho các hệ thống mới.
+    \item \textbf{Tăng cường dữ liệu đa nguồn:} Kết hợp dữ liệu từ nhiều nguồn như GIS, thời tiết, và lịch sử bảo trì để cải thiện hiệu quả phát hiện rò rỉ.
+    \item \textbf{Tích hợp phân tích thời gian thực:} Phát triển các mô hình có khả năng dự đoán và phân tích rò rỉ trong thời gian thực, hỗ trợ tối ưu hóa vận hành mạng lưới cấp nước.
+    \item \textbf{Ứng dụng mạng nơ-ron đồ thị:} Mở rộng nghiên cứu về GNN để tích hợp tốt hơn các yếu tố không gian và thời gian trong mạng lưới cấp nước.
+\end{itemize}
+
+\subsection{Kết luận}
+Các phương pháp học máy và mạng nơ-ron đồ thị đã mang lại những bước tiến lớn trong việc phát hiện và dự đoán rò rỉ nước. Tuy nhiên, vẫn còn nhiều thách thức như phụ thuộc vào dữ liệu chất lượng cao, tài nguyên tính toán, và khả năng tổng quát hóa. Các nghiên cứu tương lai cần tập trung vào tối ưu hóa tài nguyên, tích hợp dữ liệu đa nguồn, và cải thiện khả năng phân tích thời gian thực để xây dựng các hệ thống phát hiện rò rỉ hiệu quả và thông minh hơn.

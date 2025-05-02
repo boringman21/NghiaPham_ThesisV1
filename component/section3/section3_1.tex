@@ -1,9 +1,10 @@
 \chapter{Cơ sở lý thuyết}
-\section{Dữ liệu time series và dữ liệu bị thiếu}
-\subsection{Dữ liệu time series}
-Dữ liệu time series là một chuỗi giá trị của một đối tượng được ghi nhận trong một khoảng thời gian. Đặc điểm quan trọng của dữ liệu time series là nó có thể mô tả đặc trưng của đối tượng đang xét theo trục thời gian, có thể dự đoán các giá trị tiếp theo trong tương lai. Các đặc trưng của dữ liệu time series có thể kể đến là:
-.....
-\begin{equation}
-    Missing\_rate = \frac{\Sigma^n_{i=1} \Sigma^m_{j=1}{A_{ij}}}{m * n}
-\end{equation}
-    
+\section{Dữ liệu chuỗi thời gian và xử lý dữ liệu thiếu}
+
+Dữ liệu chuỗi thời gian (\textit{time series data}) là loại dữ liệu được thu thập theo trình tự thời gian, trong đó mỗi quan sát được gắn với một thời điểm xác định. Loại dữ liệu này xuất hiện phổ biến trong các hệ thống giám sát thực tế, tiêu biểu như dữ liệu áp suất và lưu lượng từ các cảm biến trong mạng lưới cấp nước. Mục tiêu chính của việc phân tích chuỗi thời gian thường bao gồm dự báo xu hướng, khai thác quy luật và phát hiện các hiện tượng bất thường.
+
+Một thách thức phổ biến trong thu thập chuỗi thời gian là tình trạng thiếu dữ liệu, thường bắt nguồn từ sự cố thiết bị, mất kết nối truyền thông hoặc gián đoạn quá trình ghi nhận. Nếu không được xử lý phù hợp, dữ liệu thiếu có thể gây nhiễu nghiêm trọng cho quá trình huấn luyện và suy luận của mô hình, đặc biệt là các mô hình học sâu như LSTM hoặc GRU vốn yêu cầu sự liên tục về thời gian để duy trì trạng thái ẩn chính xác.
+
+Trong các tài liệu nghiên cứu, nhiều phương pháp đã được đề xuất nhằm xử lý dữ liệu thiếu, bao gồm: (i) nội suy tuyến tính hoặc bậc cao; (ii) hồi quy dựa trên các biến liên quan; và (iii) sử dụng mô hình học máy để ước lượng giá trị bị thiếu. Tuy nhiên, các phương pháp này có nguy cơ làm sai lệch phân phối xác suất gốc của dữ liệu, đặc biệt trong các bài toán nhạy cảm như phát hiện bất thường.
+
+Trong khuôn khổ nghiên cứu này, nhóm lựa chọn chiến lược xử lý đơn giản nhưng đảm bảo tính toàn vẹn chuỗi thời gian: loại bỏ toàn bộ các ngày có chứa bất kỳ điểm dữ liệu bị thiếu. Phương pháp này được biết đến với tên gọi \textit{listwise deletion} và được xem là phù hợp khi tỷ lệ dữ liệu thiếu là thấp và các điểm thiếu xảy ra một cách ngẫu nhiên (MCAR -- \textit{Missing Completely At Random})~\cite{schafer2002missing}. Chiến lược này cũng từng được áp dụng hiệu quả trong nhiều nghiên cứu liên quan đến phát hiện bất thường trong chuỗi thời gian~\cite{malhotra2016lstm, hundman2018detecting}, nhằm duy trì tính nhất quán của chuỗi và giảm thiểu rủi ro lan truyền sai lệch trong quá trình huấn luyện mô hình học sâu.

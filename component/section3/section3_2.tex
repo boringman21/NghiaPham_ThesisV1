@@ -1,16 +1,43 @@
-\section{Xử lý dữ liệu bất thường - outlier detection}
-\subsection{Interquartile range - IQR}
-Interquartile range hay IQR là một phương pháp đo lường sự biến thiên của dữ liệu bằng cách chia dữ liệu thành các tứ phân vị. Dữ liệu sẽ được sắp xếp tăng dần sau đó chia thành 4 phần với ba mốc tứ phân vị $Q1$, $Q2$, $Q3$:
+\section{Đặc điểm dữ liệu chuỗi thời gian trong các hệ thống giám sát thực tế}
+
+Dữ liệu chuỗi thời gian trong các hệ thống giám sát, chẳng hạn như giám sát môi trường, năng lượng hoặc hạ tầng cấp nước, thường mang những đặc trưng phức tạp mà các mô hình phân tích cần phải nhận diện và xử lý hiệu quả. Trong phần này, chúng tôi trình bày ba đặc điểm nổi bật thường gặp: tính mùa vụ, biến động theo thời gian trong ngày (đặc biệt ban đêm), và sự hiện diện của các bất thường.
+
+\subsection{Tính mùa vụ}
+
+Một trong những đặc điểm cơ bản của chuỗi thời gian là \textbf{tính mùa vụ} (seasonality) --- sự lặp lại theo chu kỳ của các mẫu hành vi. Tính mùa vụ có thể xảy ra theo giờ, ngày, tuần hoặc theo mùa trong năm, và thường được biểu diễn như thành phần điều hòa trong chuỗi. Chuỗi thời gian \( y_t \) có thể được phân rã như sau:
+
+\begin{equation}
+    y_t = T_t + S_t + R_t,
+\end{equation}
+
+trong đó:
 \begin{itemize}
-    \item $Q1$ thể hiện $25\%$ dữ liệu
-    \item $Q2$ thể hiện $50\%$ dữ liệu
-    \item $Q3$ thể hiện $75\%$ dữ liệu
+    \item \( T_t \): thành phần xu hướng (trend),
+    \item \( S_t \): thành phần mùa vụ (seasonal),
+    \item \( R_t \): nhiễu ngẫu nhiên (residual).
 \end{itemize}
+
+Trong bối cảnh hệ thống cấp nước, tính mùa vụ có thể thể hiện qua sự gia tăng lưu lượng vào buổi sáng và chiều tối --- các thời điểm sinh hoạt cao điểm~\cite{zhou2000pattern, yang2019urban}.
+
+\subsection{Biến động dữ liệu vào ban đêm}
+
+Một hiện tượng đáng chú ý trong các chuỗi thời gian thực tế là \textbf{sự ổn định tương đối của dữ liệu ban đêm}. Vào các khung giờ từ 00:00 đến 05:00, nhiều hệ thống như tiêu thụ điện hoặc cấp nước ghi nhận mức sử dụng thấp và ổn định hơn~\cite{ratnam2020real}. Điều này không chỉ phản ánh hành vi người dùng mà còn mở ra cơ hội phát hiện bất thường rõ ràng hơn trong khoảng thời gian này.
+
+\subsection{Sự hiện diện của dữ liệu bất thường}
+
+Dữ liệu bất thường (anomalies hoặc outliers) là các quan sát khác biệt đáng kể so với mẫu hành vi thông thường của chuỗi thời gian. Chúng có thể là kết quả của lỗi cảm biến, sự kiện đột ngột hoặc hành vi bất thường thực sự trong hệ thống. Một cách hình thức, một giá trị \( y_t \) được coi là bất thường nếu:
+
+\begin{equation}
+    |y_t - \hat{y}_t| > \delta,
+\end{equation}
+
+trong đó \( \hat{y}_t \) là giá trị dự đoán từ mô hình hoặc giá trị trung bình kỳ vọng, và \( \delta \) là ngưỡng xác định dựa trên phân phối dữ liệu.
+
+Việc nhận diện và loại bỏ hoặc gán nhãn dữ liệu bất thường là bước quan trọng để đảm bảo tính ổn định và độ chính xác cho các mô hình học máy, đặc biệt là trong phát hiện dị thường (anomaly detection)~\cite{hundman2018detecting, malhotra2016lstm}.
+
 \begin{figure}[h]
     \centering
-\includegraphics[width=\textwidth]{image/section3_2/iqr.drawio.png}
-    \caption{Trực quan hoá khoảng tứ phân vị và các điểm dữ liệu bất thường}
-    \label{fig:section3_2_iqr}
+    \includegraphics[width=0.95\textwidth]{image/section3_2/time_series_example.png}
+    \caption{Mẫu dữ liệu chuỗi thời gian minh hoạ tính mùa vụ, ổn định ban đêm và sự hiện diện của bất thường (chấm đỏ).}
+    \label{fig:section3_2__1}
 \end{figure}
-
-....

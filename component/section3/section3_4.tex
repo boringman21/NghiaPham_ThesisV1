@@ -1,14 +1,146 @@
-\section{Các mô hình học sâu}
-\subsection{Multilayer perceptron (MLP)}
+\section{Các phương pháp học máy trong dự báo rò rỉ}
+\label{sec:ml_methods}
+
+Học máy đã chứng minh vai trò quan trọng trong việc phân tích và dự đoán các sự kiện phức tạp, chẳng hạn như rò rỉ nước trong hệ thống ống dẫn. Các phương pháp học máy phổ biến bao gồm mạng nơ-ron, phương pháp học máy ensembles, và các thuật toán học máy truyền thống. Phần này trình bày các phương pháp học máy và vai trò của chúng trong dự báo rò rỉ nước.
+
+\subsection{Mạng Nơ-ron (Neural Networks)}
+Mạng nơ-ron nhân tạo (Artificial Neural Networks - ANN) là một trong những phương pháp học máy tiên tiến được sử dụng rộng rãi. Trong bối cảnh dự báo rò rỉ nước, các biến thể sau đây thường được áp dụng:
+
+\begin{itemize}
+    \item \textbf{Mạng Nơ-ron Đa Lớp (Multilayer Perceptron - MLP):} Sử dụng các lớp ẩn để học các đặc trưng phi tuyến từ dữ liệu đầu vào, giúp cải thiện độ chính xác trong dự báo. Một MLP được biểu diễn dưới dạng:
+    \[
+    \mathbf{h}^{(l+1)} = \sigma(\mathbf{W}^{(l)} \mathbf{h}^{(l)} + \mathbf{b}^{(l)})
+    \]
+    trong đó:
+    \begin{itemize}
+        \item \(\mathbf{h}^{(l)}\): Đầu ra tại lớp thứ \(l\),
+        \item \(\mathbf{W}^{(l)}\): Ma trận trọng số tại lớp \(l\),
+        \item \(\mathbf{b}^{(l)}\): Vector bias,
+        \item \(\sigma(\cdot)\): Hàm kích hoạt phi tuyến (ví dụ: ReLU, Sigmoid).
+    \end{itemize}
+    
+    \item \textbf{Mạng Nơ-ron Tích Chập (Convolutional Neural Networks - CNN):} Được sử dụng khi dữ liệu đầu vào có dạng lưới (grid-like), chẳng hạn dữ liệu thời gian không gian. CNN có thể học các mẫu không gian hoặc thời gian từ dữ liệu áp suất hoặc lưu lượng. Phép tích chập trong CNN được định nghĩa như:
+    \[
+    z_{ij}^{(l)} = \sigma\left(\sum_{m,n} W_{mn}^{(l)} x_{i+m,j+n}^{(l-1)} + b^{(l)}\right)
+    \]
+    trong đó:
+    \begin{itemize}
+        \item \(x_{i+m,j+n}^{(l-1)}\): Giá trị đầu vào từ lớp \(l-1\),
+        \item \(W_{mn}^{(l)}\): Trọng số của kernel (bộ lọc),
+        \item \(b^{(l)}\): Bias,
+        \item \(\sigma(\cdot)\): Hàm kích hoạt.
+    \end{itemize}
+\end{itemize}
+
+Mạng nơ-ron mang lại hiệu quả cao trong các bài toán phức tạp nhờ khả năng học biểu diễn phi tuyến của dữ liệu. Tuy nhiên, nhược điểm chính của chúng là yêu cầu tài nguyên tính toán lớn và khả năng dễ bị overfitting nếu dữ liệu không đủ lớn.
+
+\subsection{Phương pháp Học Máy Ensembles}
+Phương pháp học máy ensembles kết hợp sức mạnh của nhiều mô hình dự đoán để tăng độ chính xác và độ ổn định. Một số kỹ thuật phổ biến trong ensemble learning bao gồm:
+
+\begin{itemize}
+    \item \textbf{Random Forest (RF):} Sử dụng nhiều cây quyết định (decision trees) để giảm thiểu overfitting và cải thiện khả năng tổng quát hóa. Mỗi cây trong RF được huấn luyện trên một tập con ngẫu nhiên của dữ liệu, và đầu ra của RF là trung bình hoặc đa số phiếu của các cây:
+    \[
+    \hat{y} = \frac{1}{T} \sum_{t=1}^T f_t(\mathbf{x})
+    \]
+    trong đó:
+    \begin{itemize}
+        \item \(T\): Số lượng cây trong rừng,
+        \item \(f_t(\mathbf{x})\): Dự đoán từ cây thứ \(t\),
+        \item \(\hat{y}\): Dự đoán cuối cùng.
+    \end{itemize}
+
+    \item \textbf{Gradient Boosting Machines (GBM):} Xây dựng các mô hình tuần tự, trong đó mỗi mô hình mới được huấn luyện để khắc phục lỗi của các mô hình trước đó. Hàm mất mát \(L\) được giảm thiểu thông qua việc cộng dồn các mô hình:
+    \[
+    F_m(\mathbf{x}) = F_{m-1}(\mathbf{x}) + \eta h_m(\mathbf{x})
+    \]
+    trong đó:
+    \begin{itemize}
+        \item \(F_m(\mathbf{x})\): Mô hình tại bước \(m\),
+        \item \(h_m(\mathbf{x})\): Mô hình bổ sung tại bước \(m\),
+        \item \(\eta\): Tốc độ học.
+    \end{itemize}
+
+    \item \textbf{Stacking:} Kết hợp các mô hình khác nhau (như Random Forest, SVM, và GBM) để tận dụng thế mạnh của từng mô hình. Đầu ra của các mô hình con được sử dụng làm đầu vào cho một mô hình meta (meta-model) để tạo ra dự đoán cuối cùng.
+\end{itemize}
+
+Phương pháp ensembles thường được sử dụng khi dữ liệu có nhiễu hoặc các đặc điểm phi tuyến phức tạp, nhờ khả năng kết hợp và học từ các khuyết điểm của từng mô hình riêng lẻ.
+
+\subsection{Các thuật toán học máy truyền thống}
+
+Mặc dù các mô hình học sâu đã đạt được nhiều thành tựu vượt trội trong lĩnh vực dự báo rò rỉ nước, nhưng các thuật toán học máy truyền thống vẫn giữ vai trò nền tảng và cung cấp giải pháp hiệu quả trong nhiều trường hợp với dữ liệu có kích thước vừa phải hoặc không yêu cầu tính phi tuyến phức tạp. Dưới đây là một số phương pháp học máy truyền thống tiêu biểu, bao gồm Linear Regression, Support Vector Machines, K-Nearest Neighbors, Decision Trees, và Multilayer Perceptron.
+
+\subsubsection*{Linear Regression (LR)}
+
+Linear Regression là một trong những phương pháp đơn giản nhưng hiệu quả, đặc biệt hữu ích khi mối quan hệ giữa đầu vào và đầu ra mang tính tuyến tính. Mô hình LR tìm kiếm một siêu phẳng để ánh xạ các biến đầu vào \(\mathbf{x} \in \mathbb{R}^d\) tới đầu ra \(y \in \mathbb{R}\) thông qua công thức:
+
+\[
+\hat{y} = \mathbf{w}^\top \mathbf{x} + b
+\]
+
+Trong đó, \(\mathbf{w} \in \mathbb{R}^d\) là vector trọng số, và \(b \in \mathbb{R}\) là hệ số chệch (bias). Quá trình huấn luyện nhằm mục tiêu tối thiểu hóa hàm mất mát bình phương trung bình (MSE):
+
+\[
+\mathcal{L}(\mathbf{w}, b) = \frac{1}{N} \sum_{i=1}^N \left(y_i - (\mathbf{w}^\top \mathbf{x}_i + b)\right)^2
+\]
+
+Mặc dù đơn giản, LR cung cấp một chuẩn mực cơ sở (baseline) hữu ích trong các bài toán dự đoán, và đặc biệt hiệu quả khi dữ liệu có dạng tuyến tính hoặc gần tuyến tính \cite{montgomery2012linear}.
+
+\subsubsection*{Support Vector Machines (SVM)}
+
+SVM là thuật toán mạnh mẽ trong các bài toán phân loại nhị phân và phát hiện bất thường. Mục tiêu của SVM là tìm một siêu phẳng tối ưu phân tách các lớp với biên rộng nhất. Bài toán tối ưu hóa có dạng:
+
+\[
+\min_{\mathbf{w}, b} \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^N \xi_i
+\]
+với ràng buộc:
+\[
+y_i (\mathbf{w} \cdot \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0
+\]
+
+Trong đó \(C > 0\) là tham số điều chỉnh giữa độ chính xác và tính khái quát của mô hình \cite{cortes1995support}.
+
+\subsubsection*{K-Nearest Neighbors (KNN)}
+
+KNN là một thuật toán phi tham số, hoạt động dựa trên khoảng cách trong không gian đặc trưng. Khi dự đoán nhãn cho một điểm mới, thuật toán tìm \(k\) điểm gần nhất trong tập huấn luyện và sử dụng nhãn phổ biến nhất (đa số) làm dự đoán:
+
+\[
+\hat{y} = \text{mode}(y_{k})
+\]
+
+Mặc dù không yêu cầu giai đoạn huấn luyện rõ ràng, KNN đòi hỏi chi phí tính toán cao trong quá trình dự đoán và nhạy cảm với kích thước của dữ liệu \cite{cover1967nearest}.
+
+\subsubsection*{Decision Trees}
+
+Decision Trees là thuật toán học có giám sát mang tính diễn giải cao. Cây quyết định hoạt động bằng cách phân tách không gian đầu vào thành các vùng nhỏ dựa trên các thuộc tính quan trọng nhất. Tiêu chí phân tách phổ biến là độ lợi thông tin:
+
+\[
+\text{Gain}(A) = H(\text{Data}) - H(\text{Data} | A)
+\]
+
+Trong đó \(H(\cdot)\) là entropy và \(A\) là thuộc tính dùng để phân chia. Cây quyết định có ưu điểm là dễ hiểu và phù hợp với các hệ thống cần tính minh bạch \cite{quinlan1986induction}.
+
+\subsubsection*{Multilayer Perceptron (MLP)}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{image/section3_4/mlp.png}
-    \caption[Mô hình multilayer perceptron]{Mô hình multilayer perceptron \cite{mlp-img}}
+    \caption{Ví dụ về MLP có hai lớp ẩn}
     \label{fig:section3_4__1}
 \end{figure}
 
 
-Mô hình mạng neuron nhiều lớp là mô hình gồm nhiều tầng neuron được kết nối đầy đủ với nhau. Các tầng này gồm các neuron (perceptron), được dùng để học các thuộc tính ẩn của dữ liệu. Hình \ref{fig:section3_4__1} mô tả một mô hình 
-multilayer perceptron. Multilayer perceptron được sử dụng rộng rãi trong nhiều bài toán dự đoán và hồi quy, đặc biệt là các bài toán dự đoán dữ liệu phi tuyến tính kết hợp với chuỗi thời gian.
-...
+MLP là một biến thể mở rộng của Perceptron đơn lớp, bao gồm nhiều lớp ẩn và có khả năng mô hình hóa các mối quan hệ phi tuyến giữa đầu vào và đầu ra. Một MLP với một lớp ẩn có thể được biểu diễn như sau:
+
+\[
+\hat{y} = \phi(\mathbf{w}^{(2)\top} \cdot \sigma(\mathbf{w}^{(1)\top} \mathbf{x} + \mathbf{b}^{(1)}) + b^{(2)})
+\]
+
+Trong đó:
+\begin{itemize}
+    \item \(\mathbf{w}^{(1)}, \mathbf{w}^{(2)}\): Trọng số của các lớp,
+    \item \(\mathbf{b}^{(1)}, b^{(2)}\): Bias,
+    \item \(\sigma(\cdot)\): Hàm kích hoạt (ví dụ ReLU hoặc sigmoid),
+    \item \(\phi(\cdot)\): Hàm đầu ra (thường là softmax hoặc hàm tuyến tính).
+\end{itemize}
+
+MLP được huấn luyện bằng phương pháp lan truyền ngược kết hợp với tối ưu hóa (như gradient descent), và đã chứng minh hiệu quả cao trong nhiều bài toán phân loại và hồi quy \cite{bishop1995neural}.

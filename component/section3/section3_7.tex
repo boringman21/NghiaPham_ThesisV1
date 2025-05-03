@@ -1,3 +1,71 @@
 \section{Optimizer}
-\subsection{Gradient descent}
-Trong các mô hình học sâu, gradient descent là một trong những kỹ thuật phổ biến để cập nhật trọng số cho mô hình. Một trong những yêu cầu khi huấn luyện các mô hình học sâu là tìm giá trị nhỏ nhất của hàm loss. Tuy nhiên, việc tìm ra giá trị nhỏ nhất này là vô cùng khó khăn và gradient descent là một phương pháp để tìm giá trị cận nhỏ nhất hiệu quả. Công thức của gradient descent là:
+Tối ưu hóa là một trong những thành phần thiết yếu của học máy và đặc biệt là trong học sâu. Các thuật toán tối ưu có nhiệm vụ cập nhật các tham số của mô hình sao cho hàm mất mát (loss function) được giảm thiểu. Quá trình này thường được thực hiện thông qua việc tính gradient của hàm mất mát đối với các tham số và sử dụng các kỹ thuật cập nhật tương ứng để điều chỉnh tham số theo hướng làm giảm giá trị hàm mất mát.
+
+\subsection{Gradient Descent}
+Gradient Descent (GD) là thuật toán tối ưu hóa cơ bản nhất, được sử dụng rộng rãi trong nhiều mô hình học máy. Ý tưởng cốt lõi của GD là di chuyển theo hướng ngược lại với gradient của hàm mất mát theo từng bước nhỏ được điều khiển bởi hệ số học (learning rate).
+
+Công thức cập nhật tham số \( \theta \) tại bước thứ \( t \) là:
+\begin{equation}
+    \theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}(\theta_t),
+\end{equation}
+trong đó \( \eta \) là learning rate, và \( \nabla_\theta \mathcal{L}(\theta_t) \) là gradient của hàm mất mát tại thời điểm \( t \).
+
+Tuy nhiên, GD cổ điển có một số hạn chế như dễ mắc kẹt vào cực tiểu cục bộ, hội tụ chậm, và nhạy cảm với việc lựa chọn learning rate.
+
+\subsection{Stochastic Gradient Descent (SGD)}
+Để giảm chi phí tính toán và tăng khả năng tổng quát hóa, Stochastic Gradient Descent (SGD) được đề xuất, trong đó cập nhật trọng số dựa trên từng mẫu hoặc một minibatch thay vì toàn bộ tập dữ liệu.
+
+\begin{equation}
+    \theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}(\theta_t; x^{(i)}),
+\end{equation}
+với \( x^{(i)} \) là một mẫu huấn luyện được chọn ngẫu nhiên.
+
+\subsection{Momentum}
+Momentum cải thiện SGD bằng cách thêm một yếu tố quán tính giúp quá trình tối ưu hóa tránh dao động mạnh và tăng tốc hội tụ.
+
+\begin{align}
+    v_{t} &= \gamma v_{t-1} + \eta \nabla_\theta \mathcal{L}(\theta_t), \\
+    \theta_{t+1} &= \theta_t - v_{t},
+\end{align}
+trong đó \( \gamma \in [0,1) \) là hệ số momentum.
+
+\subsection{RMSProp}
+RMSProp là một biến thể cải tiến của AdaGrad nhằm khắc phục việc learning rate giảm quá nhanh. Nó sử dụng trung bình luỹ thừa bậc hai của các gradient để điều chỉnh learning rate theo từng tham số.
+
+\begin{align}
+    E[g^2]_t &= \rho E[g^2]_{t-1} + (1 - \rho) \nabla_\theta \mathcal{L}^2, \\
+    \theta_{t+1} &= \theta_t - \frac{\eta}{\sqrt{E[g^2]_t + \epsilon}} \nabla_\theta \mathcal{L},
+\end{align}
+trong đó \( \rho \) là hệ số làm trơn và \( \epsilon \) là số nhỏ để tránh chia cho 0.
+
+\subsection{Adam Optimizer}
+Adam (Adaptive Moment Estimation) kết hợp ý tưởng của Momentum và RMSProp, tính toán cả trung bình động bậc nhất và bậc hai của gradient.
+
+\begin{align}
+    m_t &= \beta_1 m_{t-1} + (1 - \beta_1) \nabla_\theta \mathcal{L}, \\
+    v_t &= \beta_2 v_{t-1} + (1 - \beta_2) \nabla_\theta \mathcal{L}^2, \\
+    \hat{m}_t &= \frac{m_t}{1 - \beta_1^t}, \\
+    \hat{v}_t &= \frac{v_t}{1 - \beta_2^t}, \\
+    \theta_{t+1} &= \theta_t - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}.
+\end{align}
+
+Adam được xem là một trong những thuật toán tối ưu hóa hiệu quả nhất cho huấn luyện mạng nơ-ron sâu \cite{kingma2014adam}.
+
+\subsection{So sánh các Optimizer}
+Bảng sau tóm tắt một số đặc điểm chính của các thuật toán tối ưu:
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Optimizer} & \textbf{Tốc độ hội tụ} & \textbf{Bộ nhớ} & \textbf{Đặc điểm nổi bật} \\
+\hline
+GD & Chậm & Thấp & Đơn giản, yêu cầu toàn bộ dữ liệu \\
+SGD & Nhanh hơn & Thấp & Nhiễu, tốt cho tổng quát hóa \\
+Momentum & Nhanh & Trung bình & Hạn chế dao động \\
+RMSProp & Nhanh & Trung bình & Learning rate thích ứng \\
+Adam & Rất nhanh & Cao & Kết hợp tốt nhất của nhiều kỹ thuật \\
+\hline
+\end{tabular}
+\end{center}
+
+Việc lựa chọn thuật toán tối ưu hóa phù hợp là yếu tố then chốt trong huấn luyện mô hình học sâu. Các thuật toán hiện đại như Adam, RMSProp đã khắc phục nhiều điểm yếu của phương pháp Gradient Descent cổ điển, giúp mô hình hội tụ nhanh hơn và đạt hiệu suất cao hơn.

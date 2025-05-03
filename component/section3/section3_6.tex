@@ -1,7 +1,33 @@
-\section{Loss function}
-\subsection{Mean absolute error loss function (MAE loss function)}
-MAE loss function là hàm loss để đo độ lệch giữa giá trị thực tế và giá trị dự đoán. Khác với Mean square error loss function (giá trị MSE loss sẽ có sự thay đổi lớn khi có các điểm dữ liệu bất thường), MAE xem các sai khác là như nhau và giảm ảnh hưởng của các dữ liệu bất thường lên giá trị của hàm loss. Công thức của MAE đã đề cập ở công thức \ref{mae}.
+\section{Loss Function}
 
-\subsection{Mean square error loss function (MSE loss function)}
-MSE loss function được tính dựa trên bình phương sự chênh lệch giữa giá trị thực tế và giá trị dự đoán. MSE sẽ điều chỉnh mạnh trọng số nếu có sự khác biệt lớn giữa giá trị thực tế và giá trị dự đoán. Công thức của MSE đã đề cập ở công thức \ref{mse}.
+Loss function (hàm mất mát) đóng vai trò trung tâm trong các mô hình học máy, đặc biệt là trong bài toán hồi quy, nơi mục tiêu là ước lượng một hàm ánh xạ từ tập dữ liệu đầu vào đến các giá trị thực. Một hàm mất mát tốt cần có khả năng phản ánh chính xác mức độ sai lệch giữa giá trị dự đoán và giá trị thực tế. Trong phần này, chúng tôi sẽ trình bày chi tiết hai hàm mất mát phổ biến: Mean Absolute Error (MAE) và Mean Squared Error (MSE), phân tích ưu nhược điểm của từng loại, và nêu bật những bối cảnh ứng dụng phù hợp.
 
+\subsection{Mean Absolute Error (MAE) Loss Function}
+
+Hàm mất mát MAE được định nghĩa tương tự như công thức MAE đã được trình bày trong phần \ref{sec:model_evaluation}:
+
+\begin{equation}
+\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} \left| y_i - \hat{y}_i \right|,
+\label{mae}
+\end{equation}
+
+trong đó $y_i$ là giá trị thực tế, $\hat{y}_i$ là giá trị dự đoán và $n$ là số lượng mẫu trong tập dữ liệu. MAE đo lường trung bình độ lệch tuyệt đối giữa các giá trị dự đoán và giá trị thực tế. Vì sử dụng giá trị tuyệt đối, MAE duy trì mức phạt tuyến tính cho tất cả các sai số, khiến cho nó trở nên đặc biệt hữu ích trong các bài toán mà dữ liệu chứa các giá trị ngoại lai (outliers).
+
+Một ưu điểm nổi bật của MAE là tính chất bền vững trước nhiễu (robustness). Khác với MSE, MAE không bị ảnh hưởng quá mức bởi các sai số lớn bất thường. Tuy nhiên, vì MAE không khả vi tại điểm $y_i = \hat{y}_i$, điều này có thể gây khó khăn trong quá trình tối ưu hóa gradient-based \cite{willmott2005advantages}.
+
+\subsection{Mean Squared Error (MSE) Loss Function}
+
+Hàm mất mát MSE có dạng tương tự như RMSE đã được trình bày trong phần \ref{sec:model_evaluation} (nhưng không lấy căn bậc hai):
+
+\begin{equation}
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2,
+\label{mse}
+\end{equation}
+
+MSE đo lường trung bình bình phương sai số giữa giá trị dự đoán và giá trị thực tế. Do sự hiện diện của bình phương, các sai số lớn sẽ bị phạt mạnh hơn, giúp mô hình học tập nhanh hơn khi xảy ra các chênh lệch lớn. MSE còn có tính khả vi toàn cục, là một thuộc tính quan trọng đối với các thuật toán tối ưu dựa trên đạo hàm như gradient descent.
+
+Tuy nhiên, chính việc khuếch đại sai số lớn khiến MSE trở nên nhạy cảm với outliers. Trong trường hợp dữ liệu có nhiều nhiễu, MSE có thể dẫn đến overfitting \cite{chung2020comprehensive}. Mặt khác, MSE thường được ưu tiên trong các mô hình học sâu, nơi tính khả vi và đặc tính lồi (convexity) mang lại lợi thế tính toán rõ rệt.
+
+\subsection{So sánh và lựa chọn}
+
+Việc lựa chọn giữa MAE và MSE phụ thuộc vào mục tiêu cụ thể của bài toán và bản chất dữ liệu. Nếu dữ liệu chứa nhiều outliers hoặc nhiễu đo lường, MAE là lựa chọn phù hợp do tính chất robust. Ngược lại, khi muốn nhấn mạnh các sai số lớn và dữ liệu được xử lý kỹ càng, MSE là sự lựa chọn hiệu quả.

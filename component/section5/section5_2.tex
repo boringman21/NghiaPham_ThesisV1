@@ -1,9 +1,45 @@
-\section{Dữ liệu}
-Dữ liệu dùng trong cả hai lược đồ thí nghiệm là tập dữ liệu quan trắc và tập dữ liệu viễn thám. Trong khi dữ liệu quan trắc có độ chia dữ liệu nhỏ nhất theo giờ thì dữ liệu viễn thám có độ chia dữ liệu nhỏ nhất theo ngày nên cần gộp dữ liệu khi tiến hành các thí nghiệm yêu cầu dữ liệu tổng hợp. Phương pháp gộp sẽ được tiến hành theo các bước sau:
-\begin{enumerate}
-    \item Lặp lại các mẫu dữ liệu viễn thám 24 lần mỗi ngày
-    \item Gộp tập dữ liệu viễn thám vừa thu được với tập quan trắc theo từng ngày
-\end{enumerate}
-Bảng \ref{tab:a_part_of_merged_dataset} mô tả một phần tập dữ liệu tổng hợp sau khi gộp tập quan trắc và viễn thám.
+\section{Thông tin về bộ dữ liệu}
 
-...
+Bộ dữ liệu \textbf{Leakage Diagnosis Benchmark (LeakDB)} được tạo ra bằng cách sử dụng công cụ \textbf{Water Network Tool for Resilience (WNTR)}, một gói phần mềm mã nguồn mở bằng Python, được thiết kế để hỗ trợ các công ty cấp nước nghiên cứu tính bền vững của các hệ thống phân phối nước đối với các mối nguy hiểm \cite{EPANET_EPA}.
+
+\subsection{Đặc điểm của các mạng lưới trong bộ dữ liệu}
+
+Các mạng lưới trong bộ dữ liệu được chọn lọc kỹ lưỡng để có nhiều đặc điểm thay đổi về kích thước, cấu trúc và loại các thành phần chứa trong chúng. Việc thay đổi kích thước mạng, tức là số lượng các nút và liên kết, giúp thể hiện khả năng mở rộng của thuật toán. Các mạng lưới có số lượng bể chứa khác nhau thể hiện khả năng của các thuật toán chẩn đoán rò rỉ để xử lý các trạng thái động. Cấu trúc của mạng cũng được xem xét, đặc biệt là sự phức tạp phát sinh khi các mạng chứa vòng lặp. Điều này được định lượng bằng cách tính toán \textit{circuit rank} của mạng, sau đó chuẩn hóa nó theo \textit{circuit rank} của mạng nếu nó được kết nối đầy đủ. Chỉ số này được định nghĩa là \textit{Loop Ratio}, có giá trị bằng không khi không có vòng lặp trong mạng, trong khi đó giá trị bằng một trong trường hợp của mạng được kết nối đầy đủ.
+
+\subsection{Mô hình của các mạng lưới}
+
+Mô hình các mạng lưới trong bộ dữ liệu được cung cấp dưới dạng tệp \texttt{EPANET INP}. Trong các kịch bản khác nhau của LeakDB, các mạng lưới này thay đổi về các tham số mô hình, do đó tạo ra sự không chắc chắn trong mô hình. Các tham số này bao gồm chiều dài ống, đường kính và độ nhám, đường cong và cài đặt bơm và kích thước của các bể chứa, những tham số này thay đổi trong khoảng ±$\mu$ \% giá trị ban đầu của chúng. Trong nghiên cứu này, khoảng thay đổi này được đặt là $\mu = 25\%$. Sự không chắc chắn về cấu trúc được giới thiệu dưới dạng các cài đặt van chưa xác định, tức là trong mỗi kịch bản, trạng thái ban đầu của $n$ ống (đóng hoặc mở) được thay đổi ngẫu nhiên so với mô hình cung cấp.
+
+\subsection{Các điều kiện tải của mạng}
+
+Các điều kiện tải của mạng có thể ảnh hưởng lớn đến hiệu suất của các thuật toán, vì vậy các kịch bản tải khác nhau tại các nút trong mạng đã được xem xét. Các yêu cầu này được tạo ra nhân tạo dựa trên dữ liệu thực tế từ các công ty cấp nước, sau đó được phân tách thành ba thành phần tín hiệu: 
+\begin{itemize}
+    \item (a) Thành phần tuần hoàn hàng tuần.
+    \item (b) Thành phần thay đổi theo mùa trong năm.
+    \item (c) Thành phần ngẫu nhiên.
+\end{itemize}
+Thành phần tuần hoàn hàng tuần mô tả sự dao động của tín hiệu yêu cầu trong suốt một tuần, phụ thuộc vào các đặc điểm kinh tế và xã hội của người tiêu dùng. Thành phần thay đổi theo mùa trong năm mô tả sự thay đổi về tiêu thụ nước do tính mùa vụ trong năm. Thành phần ngẫu nhiên xem xét các dao động tần số cao, có thể do yêu cầu người tiêu dùng không thể đoán trước, sự thay đổi ngẫu nhiên, sửa chữa và các hoạt động khác trong mạng. Tất cả các thành phần được chuẩn hóa quanh giá trị trung bình bằng không trong phạm vi $[-1, 1]$. Các xu hướng dài hạn không được xem xét trong việc tạo ra yêu cầu, vì mỗi kịch bản kéo dài một năm.
+
+\subsection{Mô hình tín hiệu yêu cầu}
+
+Việc tạo ra các tín hiệu yêu cầu duy nhất được thực hiện bằng cách sử dụng các thành phần trích xuất từ dữ liệu thực tế và công thức nhân với các thành phần tín hiệu. Hai thành phần tuần hoàn cơ bản được xấp xỉ bằng chuỗi Fourier (FS). Đối với thành phần tuần hoàn hàng tuần (a), một xấp xỉ chuỗi Fourier bậc 20 được sử dụng với chu kỳ là một tuần. Đối với thành phần thay đổi theo mùa trong năm (b), một xấp xỉ chuỗi Fourier bậc 3 được sử dụng với chu kỳ một năm. Để tạo ra các mô hình yêu cầu duy nhất giống với các mô hình thực tế ban đầu, các hệ số chuỗi Fourier tính được được thay đổi ngẫu nhiên trong phạm vi ±$\delta$\% giá trị ban đầu của chúng, trong đó trong công trình này $\delta = 10\%$. Thành phần tuần hoàn hàng tuần và thành phần thay đổi theo mùa của mỗi nút được chỉ định lần lượt bởi $C_w$ và $C_y$. Thành phần ngẫu nhiên $C_r$ được tạo ra bằng cách sinh các biến có phân phối chuẩn quanh giá trị trung bình bằng không và độ lệch chuẩn là $\varepsilon$, trong đó trong nghiên cứu này $\varepsilon = 0.33$. Thêm vào đó, một yêu cầu cơ bản $\beta$ được tính bằng cách thay đổi ngẫu nhiên quanh giá trị yêu cầu cơ bản thích hợp cho mỗi mạng. Cuối cùng, mô hình yêu cầu duy nhất $d$ cho mỗi nút được tạo ra bằng cách nhân tất cả các thành phần như sau: 
+$$
+d = \beta (C_w + 1)(C_y + 1)(C_r + 1)
+$$
+Lưu ý rằng, các yêu cầu mô phỏng trong mỗi kịch bản có thể khác với mô hình yêu cầu, do việc sử dụng bộ giải quyết có áp suất.
+
+\subsection{Mô phỏng rò rỉ trong bộ dữ liệu}
+
+Rò rỉ được coi là loại lỗi duy nhất có thể xảy ra trong các kịch bản của bộ dữ liệu LeakDB. Các rò rỉ này được mô phỏng tại các nút trong mạng và tại mỗi kịch bản, vị trí, thời gian bắt đầu, thời gian kết thúc và số lượng rò rỉ được chọn ngẫu nhiên. Độ lớn của rò rỉ thay đổi tùy thuộc vào đường kính lỗ rò rỉ $\varphi$, trong nghiên cứu này, giá trị $\varphi$ thay đổi trong phạm vi $[2cm, 20cm]$, cũng như áp suất tại vị trí rò rỉ. Mỗi rò rỉ cũng được gán một hồ sơ thời gian, phân loại chúng thành các rò rỉ đột ngột hoặc rò rỉ khởi phát. Các rò rỉ khởi phát tăng dần và khó phát hiện hơn bởi nhiều thuật toán sử dụng hành vi trong quá khứ để xác định các điểm bất thường trong dữ liệu, vì chúng coi hành vi mới có thể là bất thường lúc đầu nhưng sẽ không còn là bất thường nếu nó kéo dài; tức là một mô hình bình thường mới được thiết lập.
+
+\subsection{Cấu trúc bộ dữ liệu và tệp nhãn}
+
+Thông tin về các rò rỉ xảy ra tại mỗi kịch bản được cung cấp trong bộ dữ liệu. Bộ dữ liệu LeakDB chia các kịch bản mô phỏng của mỗi mạng lưới thành các thư mục khác nhau, để có thể thực hiện các đánh giá thuật toán đặc trưng cho từng mạng. Mỗi thư mục Mạng chứa số lượng kịch bản $n_{sc}$ (ví dụ: 500 kịch bản), với số lượng sự kiện rò rỉ khác nhau (hoặc không có sự kiện nào). Trong mỗi thư mục Kịch bản, mạng được sử dụng đã được sửa đổi sẽ được cung cấp dưới dạng tệp EPANET \texttt{INP}. Thêm vào đó, đối với mỗi kịch bản, yêu cầu nút, áp suất nút, dòng chảy liên kết và dòng chảy rò rỉ được cung cấp trong các tệp dữ liệu \texttt{CSV}. Mỗi tệp dữ liệu có cấu trúc giống nhau, bao gồm các cột "Timestamp" (dạng \texttt{YYYY-MM-DD hh:mm:ss}) và cột "Value" (số thực).
+
+Bộ dữ liệu LeakDB đi kèm với các tệp nhãn, chỉ ra lỗi dưới dạng nhị phân. Một tệp nhãn trong mỗi thư mục Mạng gắn nhãn cho các kịch bản riêng lẻ, chỉ ra liệu chúng có chứa lỗi hay không. Trong mỗi thư mục Kịch bản, một tệp nhãn sẽ gắn nhãn cho từng bước thời gian của kịch bản trong đó có lỗi xảy ra. Trong thư mục chứa thông tin về rò rỉ của mỗi kịch bản, thời gian bắt đầu và kết thúc của mỗi lỗi riêng biệt, đường kính lỗ rò rỉ và loại rò rỉ sẽ được cung cấp.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{image/section5_2/structure_of_leak_db.PNG}
+\caption{Cấu trúc của bộ dữ liệu LeakDB và ví dụ về tệp dữ liệu}
+\end{figure}

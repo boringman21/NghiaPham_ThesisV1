@@ -1,176 +1,61 @@
-\section{Các phương pháp bổ khuyết dữ liệu}
-Các phương pháp được đề xuất và sử dụng có thể chia thành các nhóm:
+\section{Mô hình mạng lưới và dữ liệu đầu vào}
+
+Trong nghiên cứu này, chúng tôi sử dụng một mô hình mạng lưới cấp nước giả lập nhằm phục vụ cho quá trình phân tích và phát hiện rò rỉ. Mạng lưới được giữ cố định trong toàn bộ quá trình mô phỏng, với cấu trúc bao gồm các nút (nodes), tuyến ống (pipes), van (valves), và cảm biến (sensors) được bố trí tại các vị trí chiến lược. Các cảm biến cung cấp dữ liệu dòng chảy và áp suất với tần suất lấy mẫu nhất quán theo thời gian.
+
+Tập dữ liệu \textbf{LeakDB} được xây dựng từ \textbf{500 kịch bản rò rỉ khác nhau}, được mô phỏng trên cùng một cấu trúc mạng lưới bằng cách thay đổi vị trí và thông số đặc trưng của điểm rò rỉ (ví dụ: lưu lượng rò, thời điểm rò rỉ xuất hiện). Mỗi kịch bản bao gồm dữ liệu vận hành trong cả hai giai đoạn: trước và sau khi xảy ra rò rỉ, cho phép mô phỏng chính xác sự biến đổi trong điều kiện vận hành của hệ thống.
+
+Bên cạnh đó, tập dữ liệu cũng bao gồm các kịch bản không có rò rỉ để phục vụ mục đích so sánh giữa hai trạng thái: bình thường và bất thường. Việc thiết kế dữ liệu theo hướng này tạo điều kiện thuận lợi cho việc huấn luyện và đánh giá các mô hình phát hiện rò rỉ tự động trong các giai đoạn tiếp theo.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{image/section5_3/hanoi_network.png}
+    \caption{Sơ đồ cấu trúc mạng lưới giả lập sử dụng trong nghiên cứu}
+    \label{fig:network_diagram}
+\end{figure}
+
+\section{So sánh kịch bản có rò rỉ và không rò rỉ (Leak vs. Non-leak Scenario)}
+
+Trong quá trình xây dựng và phân tích dữ liệu, chúng tôi tiến hành phân loại các kịch bản mô phỏng thành hai nhóm chính: \textbf{có rò rỉ (leaky)} và \textbf{không có rò rỉ (non-leaky)}. Tập dữ liệu tổng thể từ mạng lưới \textbf{Hanoi} bao gồm hàng trăm kịch bản mô phỏng với sự đa dạng về vị trí rò rỉ, lưu lượng tiêu thụ và thời điểm phát sinh. Trong đó:
+
 \begin{itemize}
-    \item Phương pháp cổ điển:
-        \begin{itemize}
-            \item Sử dụng đơn thuộc tính:
-                \begin{itemize}
-                    \item Mean imputation
-                    \item Median imputation
-                    \item Last observation carried forward
-                    \item Next observation carried backward
-                    \item Spline interpolation
-                    \item Linear interpolation
-                    \item Moving average
-                \end{itemize}
-            \item Sử dụng kết hợp các thuộc tính của tập quan trắc:
-                \begin{itemize}
-                    \item MICE - khởi tạo giá trị ban đầu bằng Mean
-                    \item MICE - khởi tạo giá trị ban đầu bằng Median
-                    \item MICE - khởi tạo giá trị ban đầu bằng Last observation carried forward 
-                    \item MICE - khởi tạo giá trị ban đầu bằng Next observation carried backward
-                    \item MICE - khởi tạo giá trị ban đầu bằng Spline interpolation
-                    \item MICE - khởi tạo giá trị ban đầu bằng Linear interpolation
-                    \item MICE - khởi tạo giá trị ban đầu bằng Moving average
-                \end{itemize}
-            \item Sử dụng kết hợp các thuộc tính của tập tổng hợp (viễn thám và quan trắc):
-                \begin{itemize}
-                    \item MICE - khởi tạo giá trị ban đầu bằng Mean
-                    \item MICE - khởi tạo giá trị ban đầu bằng Median
-                    \item MICE - khởi tạo giá trị ban đầu bằng Last observation carried forward 
-                    \item MICE - khởi tạo giá trị ban đầu bằng Next observation carried backward
-                    \item MICE - khởi tạo giá trị ban đầu bằng Spline interpolation
-                    \item MICE - khởi tạo giá trị ban đầu bằng Linear interpolation
-                    \item MICE - khởi tạo giá trị ban đầu bằng Moving average
-                \end{itemize}
-        \end{itemize}
-    \item Phương pháp sử dụng học sâu:
-        \begin{itemize}
-            \item Sử dụng đơn thuộc tính:            
-                \begin{itemize}
-                    \item RNN network: Kiến trúc mạng RNN được mô tả ở hình \ref{fig:section5_3-rnn} và bảng \ref{tab:section5_3-rnn} với $m=1$, $n=1$
-
-                    \begin{figure}[h!]
-                        \centering
-                        \includegraphics[width=0.6\linewidth]{image/section5_3/rnn.drawio.png}
-                        \caption{Kiến trúc mạng RNN}
-                        \label{fig:section5_3-rnn}
-                    \end{figure}
-
-                    \newpage
-                    
-                    \begin{table}[h]
-                        \caption{Kiến trúc mạng RNN}
-                        \centering
-                        \begin{tabular}{|l|l|c|}
-                        \hline
-                    Thành phần  &  Thông số \\
-                          \hline
-                     Loss fuction & MAE \\
-                     Optimizer & Adam\\
-                    Learning rate & 0.001 \\
-                     Epoch & 50 \\
-                     Activation function & RELU \\
-                    \hline
-                        \end{tabular}
-                        \label{tab:section5_3-rnn}
-                    \end{table}
-                    
-                    \item LSTM network: Kiến trúc mạng LSTM được mô tả ở hình \ref{fig:section5_3_lstm} và bảng \ref{tab:section5_3-lstm} với $m=1$, $n=1$
-                    \begin{figure}[h]
-                        \centering
-                        \includegraphics[width=0.6\linewidth]{image/section5_3/lstm.drawio.png}
-                        \caption{Kiến trúc mạng LSTM}
-                        \label{fig:section5_3_lstm}
-                    \end{figure}
-                    
-                    \begin{table}[h!]
-                        \caption{Kiến trúc mạng LSTM}
-                        \centering
-                        \begin{tabular}{|l|c|}
-                        \hline
-                     Thành phần  &  Thông số \\
-                          \hline
-                     Loss fuction & MAE \\
-                     Optimizer & Adam\\
-                     Learning rate & 0.001 \\
-                     Epoch & 50 \\
-                    Activation function & sigmoid \\
-                    \hline
-                        \end{tabular}
-                        \label{tab:section5_3-lstm}
-                    \end{table}
-                    
-
-                    \newpage
-                    \item LSTM-LSTM network: Kiến trúc mạng LSTM-LSTM được mô tả ở hình \ref{fig:section5_3_lstm_lstm} và bảng \ref{tab:section5_3_lstm_lstm} với $m=1$, $n=1$
-                    
-                    \begin{figure}[h!]
-                        \centering
-                        \includegraphics[width=0.6\linewidth]{image/section5_3/lstm-lstm.drawio.png}
-                        \caption{Kiến trúc mạng LSTM-LSTM}
-                        \label{fig:section5_3_lstm_lstm}
-                    \end{figure}
-
-                    \begin{table}[h]
-                        \caption{Kiến trúc mạng LSTM-LSTM}
-                        \centering
-                        \begin{tabular}{|l|c|}
-                        \hline
-                    Thành phần  &  Thông số \\
-                          \hline
-                     Loss fuction & MAE \\
-                    Learning rate & 0.001 \\
-                     Optimizer & Adam \\
-                     Epoch & 50 \\
-                    Activation function & sigmoid \\
-                    \hline
-                        \end{tabular}
-                        \label{tab:section5_3_lstm_lstm}
-                    \end{table}
-                    
-                    \newpage
-                    \item CNN-LSTM network: Kiến trúc mạng CNN-LSTM được mô tả ở hình \ref{fig:section5_3_cnn_lstm} và bảng \ref{tab:section5_3_cnn_lstm} với $m=1$, $n=1$
-                    \begin{figure}[h!]
-                        \centering
-                        \includegraphics[width=0.45\linewidth]{image/section5_3/cnn-lstm.png}
-                        \caption{Kiến trúc mạng CNN-LSTM}
-                        \label{fig:section5_3_cnn_lstm}
-                    \end{figure}
-                    
-                    \begin{table}[h!]
-                        \caption{Kiến trúc mạng CNN-LSTM}
-                        \centering
-                        \begin{tabular}{|l|c|}
-                        \hline
-                     Thành phần  &  Thông số \\
-                          \hline
-                     Loss fuction & MAE \\
-                     Learning rate & 0.001 \\
-                    Optimizer & Adam \\
-                     Epoch & 50 \\
-                    Activation function & sigmoid \\
-                    \hline
-                        \end{tabular}
-                        \label{tab:section5_3_cnn_lstm}
-                    \end{table}
-                   
-                    \newpage
-                    
-                \end{itemize}
-            \item Sử dụng kết hợp nhiều thuộc tính:
-                \begin{itemize}
-                    \item GAIN network: Hình \ref{fig:gain_generator} và  \ref{fig:gain_discriminator} mô tả kiến trúc Generator và Discriminator của GAIN.
-                    \begin{figure}[h!]
-                        \centering
-                        \includegraphics[width=0.5\linewidth]{image/section5_3/gain-generator.drawio.png}
-                        \caption{Kiến trúc Generator của GAIN}
-                        \label{fig:gain_generator}
-                    \end{figure}
-
-                    \newpage
-                    
-                    \begin{figure}
-                        \centering
-                        \includegraphics[width=0.5\linewidth]{image/section5_3/discriminator-gain.drawio.png}
-                        \caption{Kiến trúc Discriminator của GAIN}
-                        \label{fig:gain_discriminator}
-                    \end{figure}
-
-
-                    
-                    \item RNN, LSTM, LSTM-LSTM, CNN-LSTM network với kiến trúc được mô tả ở lần lượt ở (hình \ref{fig:section5_3-rnn} và bảng \ref{tab:section5_3-rnn}), (hình \ref{fig:section5_3_lstm} và bảng \ref{tab:section5_3-lstm}), (hình \ref{fig:section5_3_lstm_lstm} và bảng \ref{tab:section5_3_lstm_lstm}), và (hình \ref{fig:section5_3_cnn_lstm} và bảng \ref{tab:section5_3_cnn_lstm}) với $n=1$ và $m$ là số lượng thuộc tính đầu vào. Đầu vào của các mô hình này được xác định dựa trên mối tương quan giữa các thuộc tính với nhau. Các thuộc tính có mối tương quan cao sẽ được chọn để dự đoán lẫn nhau.
-                    
-                \end{itemize}
-        \end{itemize}
+    \item Số lượng kịch bản rò rỉ: \textbf{360}
+    \item Số lượng kịch bản không rò rỉ: \textbf{120}
 \end{itemize}
+
+Hình~\ref{fig:scenario_stats} minh họa phân bố số lượng các kịch bản theo từng loại. Sự mất cân bằng giữa số lượng hai nhóm phản ánh thực tế vận hành trong mạng lưới cấp nước, nơi rò rỉ là hiện tượng bất thường và hiếm gặp.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{image/section5_3/scenario_statistics.png}
+    \caption{Phân bố số lượng kịch bản rò rỉ và không rò rỉ trong tập dữ liệu Hanoi}
+    \label{fig:scenario_stats}
+\end{figure}
+
+Trong các thí nghiệm đánh giá, chúng tôi lựa chọn ngẫu nhiên một tập con gồm \textbf{64 kịch bản rò rỉ} từ tập rò rỉ gốc để huấn luyện và kiểm thử mô hình.
+
+Các đặc điểm vận hành như dòng chảy, áp suất, và các đột biến thời gian được phân tích sâu hơn ở các phần tiếp theo nhằm xác định sự khác biệt giữa hai nhóm kịch bản và trích xuất đặc trưng phục vụ phát hiện rò rỉ.
+
+\subsection{Cấu trúc của một kịch bản mô phỏng}
+
+Mỗi kịch bản mô phỏng trong tập dữ liệu Hanoi được tổ chức theo cấu trúc thư mục riêng biệt, chứa đầy đủ thông tin về điều kiện vận hành, cấu hình mạng lưới, thông số rò rỉ (nếu có), và dữ liệu thời gian tương ứng. Hình~\ref{fig:scenario_structure} mô tả cấu trúc thư mục điển hình của một kịch bản rò rỉ.
+
+\begin{itemize}
+    \item \texttt{Hanoi\_CMH\_Scenario-X.inp}: Tệp đầu vào định dạng EPANET mô tả cấu trúc mạng lưới, bao gồm các nút (nodes), liên kết (pipes), bể chứa (tanks), bơm (pumps), và các thông số vận hành.
+    \item \texttt{Labels.csv}: Tệp nhãn đánh dấu thời điểm và vị trí rò rỉ (nếu có), dùng làm dữ liệu mục tiêu trong huấn luyện mô hình phát hiện.
+    \item \texttt{Scenario-X\_info.csv}: Thông tin tổng quan về kịch bản, bao gồm số lượng rò rỉ, thời điểm bắt đầu/kết thúc rò, và thông số tổng hợp.
+    \item \texttt{Leaks/}: Thư mục chứa thông tin chi tiết cho từng vị trí rò rỉ. Mỗi rò rỉ được biểu diễn bằng một cặp tệp:
+    \begin{itemize}
+        \item \texttt{Leak\_\#\_demand.csv}: Mô tả lưu lượng rò rỉ theo thời gian tại vị trí tương ứng.
+        \item \texttt{Leak\_\#\_info.csv}: Chứa thông tin định danh của rò rỉ, như ID node, thời điểm xảy ra, và hệ số cường độ.
+    \end{itemize}
+    \item \texttt{Demands/}: Bao gồm 32 tệp \texttt{Node\_X.csv}, mỗi tệp ghi nhận dữ liệu lưu lượng tiêu thụ tại một nút theo thời gian.
+    \item \texttt{Flows/}: Bao gồm 34 tệp \texttt{Link\_X.csv}, ghi lại lưu lượng qua từng ống trong mạng.
+    \item \texttt{Pressures/}: Bao gồm 32 tệp \texttt{Node\_X.csv}, ghi nhận áp suất tại các nút tương ứng trong suốt quá trình mô phỏng.
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.4\textwidth]{image/section5_3/scenario_structure.png}
+    \caption{Cấu trúc thư mục của một kịch bản mô phỏng rò rỉ trong tập dữ liệu Hanoi}
+    \label{fig:scenario_structure}
+\end{figure}

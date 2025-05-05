@@ -1,6 +1,109 @@
 \chapter{Thực nghiệm dữ liệu thực tế và đánh giá}
 \section{Bổ khuyết và huấn luyện mô hình dự đoán chất lượng không khí dựa trên mất mát dữ liệu nhân tạo trên tập quan trắc}\label{ex-1}
 \subsection{Tổng quan}
+% flowchart LR
+%     classDef dataPrep fill:#d4f1f9,stroke:#05445E,stroke-width:2px,color:#05445E,font-weight:bold
+%     classDef modelDev fill:#d8f3dc,stroke:#1B4332,stroke-width:2px,color:#1B4332,font-weight:bold
+%     classDef anomalyAnalysis fill:#fff1e6,stroke:#9E2A2B,stroke-width:2px,color:#9E2A2B,font-weight:bold
+%     classDef evaluation fill:#e9ecef,stroke:#343a40,stroke-width:2px,color:#343a40,font-weight:bold
+%     classDef phaseTitle font-weight:bold,font-size:14px
+    
+%     subgraph Process ["Quy trình phát hiện bất thường"]
+%         direction TB
+        
+%         subgraph DataPrep ["GIAI ĐOẠN 1 CHUẨN BỊ DỮ LIỆU"]
+%             direction LR
+%             A["1.Thu thập dữ liệu<br>từ các điểm đo"] --> 
+%             B["2.Lọc điểm đo<br>đủ 3 kênh dữ liệu"] --> 
+%             C["3.Tiền xử lý"]
+            
+%             subgraph Preprocessing
+%                 direction TB
+%                 C1["3.1 Chuyển đổi sang<br>DataFrame chuỗi thời gian"]
+%                 C2["3.2 Loại bỏ dữ liệu<br>thiếu hoặc lỗi"]
+%                 C3["3.3 Tạo chuỗi<br>dữ liệu huấn luyện"]
+                
+%                 C1 --> C2 --> C3
+%             end
+            
+%             C --- Preprocessing
+%         end
+        
+%         subgraph ModelDev ["GIAI ĐOẠN 2 PHÁT TRIỂN MÔ HÌNH"]
+%             direction LR
+%             D["4.Phân chia<br>dữ liệu 80/20"] -->
+%             E["5.Huấn luyện<br>mô hình dự báo"]
+            
+%             subgraph Training
+%                 direction TB
+%                 E1["5.1 Huấn luyện<br>chuyên biệt"]
+%                 E2["5.2 Huấn luyện<br>tổng hợp"]
+                
+%                 E1 --> E2
+%             end
+            
+%             E --- Training -->
+%             F["6.Đánh giá<br>hiệu quả mô hình"]
+%         end
+        
+%         subgraph AnomalyDetection ["GIAI ĐOẠN 3 PHÁT HIỆN BẤT THƯỜNG"]
+%             direction LR
+%             G["7.Phương pháp<br>phát hiện bằng sai số"]
+            
+%             H["8. Phương pháp<br>học không giám sát"]
+            
+%             subgraph Methods
+%                 direction TB
+%                 H1["8.1 Isolation<br>Forest"]
+%                 H2["8.2 Local<br>Outlier Factor"]
+%                 H3["8.3 One-Class<br>SVM"]
+                
+%                 H1 --> H2 --> H3
+%             end
+            
+%             G & H --- Methods
+%         end
+        
+%         subgraph ResultAnalysis ["GIAI ĐOẠN 4 PHÂN TÍCH KẾT QUẢ"]
+%             I["9 So sánh và đánh giá<br>các phương pháp<br>phát hiện bất thường"]
+%         end
+%     end
+    
+%     DataPrep --> ModelDev --> AnomalyDetection --> ResultAnalysis
+    
+%     subgraph Details ["THÔNG TIN BỔ SUNG"]
+%         direction TB
+%         N1["Kênh dữ liệu<br>Lưu lượng (chNumber = 1)<br>Áp suất trước (chNumber = 0)<br>Áp suất sau (chNumber = 2)"]
+%         N2["Chuỗi huấn luyện<br>Input: 6 giờ dữ liệu liên tục<br>Output: giá trị sau 15 phút"]
+%         N3["Mô hình sử dụng<br>LSTM và GRU"]
+%         N4["Ngưỡng phát hiện<br>error > 3 x std(error)"]
+%     end
+    
+%     A:::dataPrep
+%     B:::dataPrep
+%     C:::dataPrep
+%     C1:::dataPrep
+%     C2:::dataPrep
+%     C3:::dataPrep
+%     D:::modelDev
+%     E:::modelDev
+%     E1:::modelDev
+%     E2:::modelDev
+%     F:::evaluation
+%     G:::anomalyAnalysis
+%     H:::anomalyAnalysis
+%     H1:::anomalyAnalysis
+%     H2:::anomalyAnalysis
+%     H3:::anomalyAnalysis
+%     I:::evaluation
+    
+%     DataPrep:::phaseTitle
+%     ModelDev:::phaseTitle
+%     AnomalyDetection:::phaseTitle
+%     ResultAnalysis:::phaseTitle
+%     Details:::phaseTitle
+
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{image/section6_1/experiment.drawio.png}
@@ -40,14 +143,14 @@ Mỗi bản ghi dữ liệu bao gồm:
 \textbf{Lưu ý:} Các trường dữ liệu dạng \texttt{dataValues.n.dataTime} và \texttt{dataValues.n.dataValue} được trải rộng dưới dạng các cột riêng biệt (flattened) thay vì mảng lồng nhau như trong JSON.
 
 \vspace{1em}
-% Hình~\ref{fig:sample_data_structure} dưới đây minh họa cách tổ chức một dòng dữ liệu trong tệp CSV, thể hiện rõ dạng bảng 96 cặp giá trị tương ứng với từng khung giờ trong ngày.
+Hình~\ref{fig:sample_data_structure} dưới đây minh họa cách tổ chức một dòng dữ liệu trong tệp CSV, thể hiện rõ dạng bảng 96 cặp giá trị tương ứng với từng khung giờ trong ngày.
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.95\textwidth]{images/sample_data_structure.png}
-%     \caption{Cấu trúc dữ liệu một dòng trong tệp \texttt{find\_query\_x.csv}. Mỗi dòng tương ứng với một ngày đo tại một kênh cảm biến.}
-%     \label{fig:sample_data_structure}
-% \end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{image/section6_1/sample_data_structure.png}
+    \caption{Cấu trúc dữ liệu một dòng trong tệp \texttt{find\_query\_x.csv}. Mỗi dòng tương ứng với một ngày đo tại một kênh cảm biến.}
+    \label{fig:sample_data_structure}
+\end{figure}
 
 \subsection{Thông tin ánh xạ kênh đo}
 
@@ -67,12 +170,12 @@ Bảng ánh xạ giúp xác định rõ ý nghĩa dữ liệu từ mỗi kênh �
 \vspace{0.5em}
 Một ví dụ minh họa được trình bày trong Hình~\ref{fig:channel_mapping_table}.
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.85\textwidth]{images/channel_mapping_table.png}
-%     \caption{Ví dụ bảng ánh xạ từ tệp \texttt{channel\_data\_type.csv}, liên kết giữa thiết bị, kênh đo, và đơn vị.}
-%     \label{fig:channel_mapping_table}
-% \end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{image/section6_1/channel_mapping_table.png}
+    \caption{Ví dụ bảng ánh xạ từ tệp \texttt{channel\_data\_type.csv}, liên kết giữa thiết bị, kênh đo, và đơn vị.}
+    \label{fig:channel_mapping_table}
+\end{figure}
 
 \subsection{Đặc điểm kỹ thuật của chuỗi dữ liệu}
 
@@ -114,23 +217,60 @@ Nhờ quy ước này, ta có thể phân loại logic cấu trúc điểm đo v
 % \end{figure}
 
 
-% \subsection*{Ghi chú kỹ thuật khi sử dụng LaTeX}
-
-% \begin{itemize}
-%     \item Tạo thư mục \texttt{images} cùng cấp với file \texttt{.tex}.
-%     \item Đảm bảo ảnh minh họa (ảnh bảng CSV hoặc snapshot Excel) được lưu với định dạng \texttt{.png} hoặc \texttt{.jpg} có độ phân giải cao.
-%     \item Nạp thêm các gói:
-%     \begin{verbatim}
-%     \usepackage{graphicx}
-%     \usepackage{float}
-%     \end{verbatim}
-%     \item Nếu tài liệu dài, nên đánh số bảng và hình ảnh tự động với \texttt{label} và tham chiếu chéo bằng \texttt{ref}.
-% \end{itemize}
-
 \section{Tiền xử lý dữ liệu}
 \subsection{Tổng quan}
 \subsection{Chuyển đổi dữ liệu}
 \subsection{Chọn dữ liệu để huấn luyện mô hình}
+Trong quá trình nghiên cứu, việc lựa chọn tập dữ liệu phù hợp đóng vai trò quyết định đến hiệu suất và độ tin cậy của mô hình học máy. Sau khi phân tích cấu trúc và đặc điểm của bộ dữ liệu, chúng tôi quyết định tập trung vào các điểm đo có đầy đủ ba kênh đo (\texttt{chNumber} = 0, 1, 2) với các lý do sau:
+
+\subsubsection{Tính đầy đủ của thông tin vật lý}
+Các điểm đo có đủ ba kênh cung cấp bức tranh toàn diện về trạng thái thủy lực tại mỗi vị trí. Cụ thể, việc đồng thời có thông tin về áp suất đầu vào, lưu lượng, và áp suất đầu ra cho phép:
+
+\begin{itemize}
+    \item Tính toán chênh lệch áp suất ($\Delta P = P_{in} - P_{out}$) trực tiếp, là chỉ số quan trọng để phát hiện tổn thất áp suất bất thường.
+    \item Thiết lập mối tương quan giữa lưu lượng và chênh lệch áp suất, tuân theo định luật Darcy-Weisbach và các nguyên lý thủy lực cơ bản.
+    \item Xây dựng các đặc trưng phái sinh (derived features) có giá trị cao trong việc phát hiện rò rỉ, như hệ số tổn thất cục bộ, chỉ số biến thiên áp suất theo lưu lượng, v.v.
+\end{itemize}
+
+\subsubsection{Khả năng phát hiện bất thường đa chiều}
+Với ba kênh đo, mô hình có thể phát hiện bất thường theo nhiều chiều và dạng biểu hiện khác nhau:
+
+\begin{itemize}
+    \item \textbf{Bất thường về áp suất đầu vào:} Có thể phản ánh vấn đề từ nguồn cung cấp hoặc đoạn ống phía trước.
+    \item \textbf{Bất thường về lưu lượng:} Phát hiện tiêu thụ bất thường, rò rỉ lớn, hoặc sự cố van.
+    \item \textbf{Bất thường về áp suất đầu ra:} Phản ánh vấn đề ở phía hạ nguồn hoặc tình trạng tắc nghẽn.
+    \item \textbf{Bất thường về mối tương quan:} Quan trọng nhất, có thể phát hiện rò rỉ nhỏ thông qua sự thay đổi trong mối quan hệ giữa ba thông số, ngay cả khi mỗi thông số riêng lẻ vẫn nằm trong ngưỡng bình thường.
+\end{itemize}
+
+\subsubsection{Tính ổn định và độ tin cậy của mô hình}
+Mô hình được huấn luyện trên dữ liệu đầy đủ ba kênh sẽ có độ tin cậy cao hơn vì:
+
+\begin{itemize}
+    \item Giảm thiểu sự phụ thuộc vào một kênh đo duy nhất, từ đó giảm tác động của nhiễu cục bộ hoặc lỗi cảm biến.
+    \item Cho phép áp dụng các kỹ thuật kiểm tra chéo (cross-validation) giữa các kênh để xác nhận tính hợp lệ của dữ liệu.
+    \item Tạo điều kiện cho việc áp dụng các phương pháp học sâu phức tạp hơn như mạng nơ-ron tích chập (CNN) hoặc mạng LSTM đa đầu vào, vốn hoạt động hiệu quả với dữ liệu đa chiều.
+\end{itemize}
+
+\subsubsection{Khả năng mở rộng và ứng dụng thực tế}
+Mặc dù việc tập trung vào các điểm đo có đủ ba kênh có thể làm giảm số lượng điểm đo khả dụng trong tập dữ liệu, nhưng lợi ích về mặt chất lượng và khả năng ứng dụng thực tế là đáng kể:
+
+\begin{itemize}
+    \item Các mô hình được huấn luyện trên dữ liệu đầy đủ có thể được điều chỉnh để hoạt động với các điểm đo có ít kênh hơn thông qua các kỹ thuật như transfer learning hoặc feature imputation.
+    \item Trong thực tế vận hành, các điểm đo quan trọng (như trạm bơm, điểm phân phối chính, hoặc khu vực có nguy cơ rò rỉ cao) thường được trang bị đầy đủ cảm biến, phù hợp với mô hình của chúng tôi.
+    \item Kết quả nghiên cứu có thể được sử dụng để đề xuất cải tiến cấu hình đo lường trong tương lai, hướng tới việc nâng cấp các điểm đo hiện có lên cấu hình ba kênh.
+\end{itemize}
+
+\subsubsection{Phương pháp lựa chọn cụ thể}
+Dựa trên các lý do trên, chúng tôi áp dụng quy trình lựa chọn dữ liệu như sau:
+
+\begin{enumerate}
+    \item Quét toàn bộ tập dữ liệu để xác định các điểm đo có đủ ba kênh (\texttt{chNumber} = 0, 1, 2).
+    \item Đối với mỗi điểm đo được chọn, kiểm tra tính đầy đủ của dữ liệu theo thời gian (tỷ lệ giá trị thiếu không vượt quá 10\%).
+    \item Kiểm tra tính hợp lệ của dữ liệu thông qua các ràng buộc vật lý (ví dụ: áp suất đầu vào luôn lớn hơn hoặc bằng áp suất đầu ra trong điều kiện bình thường).
+    \item Ưu tiên các điểm đo có lịch sử ghi nhận sự cố hoặc bảo trì, tạo điều kiện để đánh giá khả năng phát hiện bất thường của mô hình.
+\end{enumerate}
+
+Kết quả của quá trình lựa chọn này là một tập con gồm $N$ điểm đo đáp ứng đầy đủ các tiêu chí, sẽ được sử dụng làm cơ sở cho các bước tiền xử lý và huấn luyện mô hình tiếp theo.
 \subsubsection{Phân tích các dữ liệu tại từng điểm đo}
 Các điểm đo thiếu dữ liệu
 

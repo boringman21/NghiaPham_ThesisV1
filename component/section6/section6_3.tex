@@ -495,3 +495,88 @@ Chúng tôi áp dụng hai chiến lược khác nhau trong việc tạo dữ li
 \end{table}
 
 Mỗi chiến lược đều có ưu điểm riêng: chiến lược 1 tập trung vào độ chính xác cục bộ, trong khi chiến lược 2 hướng đến khả năng tổng quát hóa và hiệu quả về mặt tài nguyên tính toán. Việc so sánh hiệu suất của hai chiến lược này sẽ giúp xác định phương pháp tối ưu cho hệ thống phát hiện rò rỉ.
+
+
+\section{Huấn luyện mô hình}
+\subsection{Tổng quan}
+% TODO: tạo lược đồ tại đây
+\subsection{Huấn luyện mô hình}
+
+Từ dữ liệu chuỗi thời gian đã được tiền xử lý ở các phần trước, chúng tôi tiến hành huấn luyện các mô hình học sâu cho bài toán dự báo lưu lượng nước. Trong quá trình này, hai chiến lược huấn luyện khác nhau được triển khai nhằm khám phá phương pháp tối ưu cho hệ thống dự báo và phát hiện bất thường.
+
+\subsubsection{Các chiến lược huấn luyện}
+
+\begin{itemize}
+    \item \textbf{Chiến lược 1 - Mô hình riêng cho từng điểm đo:} Mỗi điểm đo trong hệ thống được huấn luyện một mô hình riêng biệt, với dữ liệu đầu vào chỉ từ điểm đo đó. Cách tiếp cận này cho phép mô hình nắm bắt các đặc thù cục bộ, như mẫu tiêu thụ nước đặc trưng, tính mùa vụ, và các đặc điểm thủy lực riêng tại mỗi vị trí trong mạng lưới cấp nước.
+    
+    \item \textbf{Chiến lược 2 - Mô hình chung cho tất cả điểm đo:} Một mô hình duy nhất được huấn luyện trên dữ liệu kết hợp từ tất cả các điểm đo. Chiến lược này nhằm tạo ra một mô hình tổng quát có khả năng dự báo trên nhiều điểm đo khác nhau, đồng thời học được các mẫu và mối tương quan chung trong toàn bộ hệ thống cấp nước.
+\end{itemize}
+
+Việc so sánh hiệu suất của hai chiến lược này không chỉ giúp xác định phương pháp huấn luyện tối ưu mà còn cung cấp hiểu biết sâu sắc về mức độ tương đồng hoặc khác biệt trong đặc điểm của các điểm đo.
+
+\subsubsection{Kiến trúc mô hình học sâu}
+
+Dựa trên khả năng xử lý dữ liệu chuỗi thời gian và tính hiệu quả đã được chứng minh trong nhiều nghiên cứu trước đây, chúng tôi chọn hai kiến trúc mạng nơ-ron hồi quy phổ biến là LSTM (Long Short-Term Memory) và GRU (Gated Recurrent Unit) cho bài toán dự báo lưu lượng.
+
+\paragraph{Mô hình LSTM}
+Mạng LSTM được thiết kế với khả năng nắm bắt phụ thuộc dài hạn trong chuỗi thời gian thông qua cơ chế cổng (gate mechanism), cho phép mô hình quyết định thông tin nào cần được lưu trữ, cập nhật hoặc loại bỏ trong quá trình xử lý chuỗi. Kiến trúc mô hình LSTM được triển khai như sau:
+
+\begin{itemize}
+    \item Lớp LSTM đầu tiên với 50 đơn vị, trả về chuỗi đầu ra đầy đủ
+    \item Lớp Dropout với tỷ lệ 20\% để ngăn ngừa hiện tượng quá khớp
+    \item Lớp LSTM thứ hai với 25 đơn vị (giảm một nửa so với lớp đầu tiên)
+    \item Lớp Dropout thứ hai với tỷ lệ 20\%
+    \item Lớp kết nối đầy đủ (Dense) với 1 đơn vị đầu ra, đại diện cho giá trị lưu lượng dự đoán
+\end{itemize}
+
+Mô hình được biên dịch với hàm tối ưu Adam, tốc độ học 0,001, hàm mất mát MSE (Mean Squared Error) và đo lường hiệu suất MAE (Mean Absolute Error).
+
+\paragraph{Mô hình GRU}
+Mạng GRU là một biến thể đơn giản hóa của LSTM, sử dụng ít tham số hơn nhưng vẫn duy trì hiệu quả trong việc nắm bắt phụ thuộc thời gian. Kiến trúc mô hình GRU được triển khai tương tự như LSTM:
+
+\begin{itemize}
+    \item Lớp GRU đầu tiên với 50 đơn vị, trả về chuỗi đầu ra đầy đủ
+    \item Lớp Dropout với tỷ lệ 20\%
+    \item Lớp GRU thứ hai với 25 đơn vị
+    \item Lớp Dropout thứ hai với tỷ lệ 20\%
+    \item Lớp kết nối đầy đủ với 1 đơn vị đầu ra
+\end{itemize}
+
+Mô hình GRU cũng được biên dịch với cấu hình tương tự như mô hình LSTM.
+
+\subsubsection{Quá trình huấn luyện}
+
+Quy trình huấn luyện đối với cả hai mô hình được thiết kế nhằm tối ưu hóa hiệu suất và khả năng tổng quát hóa. Các tham số huấn luyện chính bao gồm:
+
+\begin{itemize}
+    \item \textbf{Epochs:} Tối đa 100 chu kỳ huấn luyện, kết hợp với cơ chế dừng sớm
+    \item \textbf{Batch size:} 32 mẫu, cân bằng giữa hiệu suất tính toán và tốc độ hội tụ
+    \item \textbf{Early stopping:} Dừng huấn luyện nếu không có cải thiện về val\_loss sau 10 epoch, giúp tránh quá khớp
+    \item \textbf{Model checkpoint:} Lưu mô hình có hiệu suất tốt nhất trên tập validation
+\end{itemize}
+
+Quá trình huấn luyện được hỗ trợ bởi các cơ chế giám sát hiệu suất trực quan, bao gồm biểu đồ theo dõi sự biến thiên của các độ đo mất mát (loss) và sai số tuyệt đối trung bình (MAE) trong quá trình huấn luyện.
+
+\subsubsection{Triển khai các chiến lược huấn luyện}
+
+Đối với mỗi chiến lược, chúng tôi tiến hành huấn luyện các mô hình như sau:
+
+\paragraph{Chiến lược 1: Mô hình riêng cho từng điểm đo}
+\begin{itemize}
+    \item Cho mỗi điểm đo (841211914190 và 8401210607558), dữ liệu được chia thành tập huấn luyện (80\%) và tập kiểm tra (20\%).
+    \item Hai mô hình LSTM và GRU được huấn luyện riêng biệt cho mỗi điểm đo với cùng cấu hình.
+    \item Tổng cộng sẽ có 4 mô hình được huấn luyện (2 điểm đo × 2 kiến trúc).
+    \item Mỗi mô hình được lưu với định danh riêng biệt để dễ dàng theo dõi và đánh giá.
+\end{itemize}
+
+\paragraph{Chiến lược 2: Mô hình chung cho tất cả điểm đo}
+\begin{itemize}
+    \item Dữ liệu từ cả hai điểm đo được kết hợp lại thành một tập dữ liệu duy nhất.
+    \item Tập dữ liệu kết hợp này cũng được chia theo tỷ lệ 80:20 cho quá trình huấn luyện và kiểm tra.
+    \item Hai mô hình LSTM và GRU được huấn luyện trên tập dữ liệu kết hợp với cùng cấu hình như trong chiến lược 1.
+    \item Tổng cộng sẽ có 2 mô hình được huấn luyện (1 tập dữ liệu kết hợp × 2 kiến trúc).
+\end{itemize}
+
+Chiến lược kép này không chỉ cho phép đánh giá hiệu suất của các kiến trúc mô hình khác nhau mà còn cung cấp cái nhìn sâu sắc về tính hiệu quả của việc huấn luyện mô hình chuyên biệt so với mô hình tổng quát trong bối cảnh dự báo lưu lượng nước và phát hiện bất thường. Kết quả của quá trình huấn luyện và đánh giá hiệu suất sẽ được trình bày chi tiết trong phần tiếp theo.
+
+\subsection{Đánh giá mô hình}

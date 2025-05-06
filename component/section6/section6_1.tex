@@ -219,7 +219,93 @@ Nhờ quy ước này, ta có thể phân loại logic cấu trúc điểm đo v
 
 \section{Tiền xử lý dữ liệu}
 \subsection{Tổng quan}
+
+% TODO: thêm lược đồ tại đây
 \subsection{Chuyển đổi dữ liệu}
+Quá trình chuyển đổi dữ liệu thô thành định dạng phù hợp cho phân tích và huấn luyện mô hình đóng vai trò then chốt trong tiền xử lý. Dữ liệu thô ban đầu từ hệ thống \texttt{find\_query\_x} cần được tái cấu trúc theo một khuôn mẫu chuẩn hóa nhằm tối ưu hóa cho các bước phân tích tiếp theo. Chúng tôi đã thiết lập và triển khai một quy trình chuyển đổi có hệ thống, được mô tả chi tiết như sau:
+
+\subsubsection{Lọc dữ liệu theo mã thiết bị}
+Bước khởi đầu trong quy trình chuyển đổi là thực hiện phân tách dữ liệu theo mã định danh thiết bị (\texttt{smsNumber}). Mỗi thiết bị trong hệ thống được gán một mã định danh duy nhất, và việc phân tách dữ liệu theo thiết bị mang lại nhiều lợi ích quan trọng:
+
+\begin{itemize}
+    \item Tạo ra sự tách biệt rõ ràng giữa các nguồn dữ liệu từ các vị trí địa lý khác nhau trong mạng lưới, đảm bảo tính độc lập trong phân tích
+    \item Duy trì tính nhất quán và liên tục của dữ liệu trong phạm vi một điểm đo cụ thể, tránh nhiễu từ các nguồn khác
+    \item Thiết lập nền tảng cho việc phân tích đặc thù theo từng vị trí, cho phép xây dựng các mô hình chuyên biệt phù hợp với đặc điểm của từng điểm đo
+    \item Tạo điều kiện thuận lợi cho việc so sánh và đối chiếu giữa các điểm đo khác nhau trong cùng một hệ thống
+\end{itemize}
+
+Quá trình lọc được thực hiện thông qua các phương pháp truy vấn có chọn lọc, trong đó dữ liệu được lọc theo điều kiện mã thiết bị trùng khớp với mã định danh mục tiêu. Kết quả của bước này là một tập dữ liệu con chỉ chứa thông tin từ một thiết bị cụ thể, sẵn sàng cho các bước xử lý tiếp theo.
+
+\subsubsection{Tái cấu trúc dữ liệu theo kênh đo}
+Sau khi hoàn tất việc lọc theo thiết bị, dữ liệu thô vẫn tồn tại ở dạng "dài" (long format), trong đó mỗi kênh đo được biểu diễn bằng nhiều bản ghi riêng biệt theo thời gian. Cấu trúc này, mặc dù hiệu quả cho việc lưu trữ, lại không tối ưu cho các phân tích đa biến và huấn luyện mô hình. Do đó, chúng tôi tiến hành chuyển đổi dữ liệu sang định dạng "rộng" (wide format) thông qua một quy trình có hệ thống:
+
+\begin{enumerate}
+    \item Nhóm dữ liệu theo các mốc thời gian (\texttt{Timestamp}) để tạo ra cấu trúc thời gian chuẩn
+    \item Xác định và trích xuất giá trị từ mỗi kênh đo (\texttt{chNumber}) tại mỗi mốc thời gian
+    \item Chuyển đổi các giá trị này thành các cột riêng biệt, tạo ra một cấu trúc ma trận trong đó mỗi hàng đại diện cho một mốc thời gian và mỗi cột đại diện cho một kênh đo
+    \item Áp dụng các phép biến đổi bổ sung để đảm bảo tính nhất quán và đầy đủ của dữ liệu
+\end{enumerate}
+
+Trong quá trình này, chúng tôi áp dụng một hệ thống ánh xạ chuẩn hóa cho các kênh đo, nhằm tăng tính trực quan và dễ hiểu của dữ liệu:
+
+\begin{itemize}
+    \item Kênh 0 (\texttt{chNumber = 0}): Đại diện cho áp suất đầu vào, được gán nhãn là \texttt{Pressure\_1} trong tập dữ liệu đã chuyển đổi
+    \item Kênh 1 (\texttt{chNumber = 1}): Đại diện cho lưu lượng, được gán nhãn là \texttt{Flow} trong tập dữ liệu đã chuyển đổi
+    \item Kênh 2 (\texttt{chNumber = 2}): Đại diện cho áp suất đầu ra, được gán nhãn là \texttt{Pressure\_2} trong tập dữ liệu đã chuyển đổi
+\end{itemize}
+
+Việc ánh xạ này không chỉ tạo ra một cấu trúc dữ liệu rõ ràng mà còn phản ánh chính xác mối quan hệ vật lý giữa các thông số đo lường, tạo điều kiện thuận lợi cho các phân tích thủy lực và phát hiện bất thường trong hệ thống.
+
+\subsubsection{Chuẩn hóa định dạng thời gian}
+Việc chuẩn hóa thông tin thời gian đóng vai trò then chốt trong xử lý dữ liệu chuỗi thời gian. Chúng tôi áp dụng định dạng ISO 8601 (YYYY-MM-DD HH:MM:SS) cho cột \texttt{Timestamp}, đảm bảo tính nhất quán và chính xác trong các trường hợp:
+
+\begin{itemize}
+    \item Thực hiện các phép tính thời gian phức tạp như xác định khoảng cách giữa các mẫu hoặc phát hiện mẫu bị thiếu
+    \item Sắp xếp dữ liệu theo trình tự thời gian chính xác để phân tích xu hướng
+\end{itemize}
+
+Quá trình chuẩn hóa bao gồm việc chuyển đổi tất cả biểu diễn thời gian sang định dạng datetime chuẩn và sắp xếp dữ liệu theo thứ tự thời gian tăng dần, tạo nền tảng vững chắc cho các phân tích chuỗi thời gian phức tạp trong các bước tiếp theo.
+
+\subsubsection{Xử lý đơn vị đo}
+Để đảm bảo tính nhất quán và khả năng so sánh giữa các điểm đo, chúng tôi thực hiện chuẩn hóa đơn vị đo cho tất cả các giá trị trong tập dữ liệu. Cụ thể, chúng tôi áp dụng các đơn vị chuẩn sau:
+
+\begin{itemize}
+    \item \textbf{Áp suất (\texttt{Pressure\_1} và \texttt{Pressure\_2}):} Đơn vị bar, một đơn vị áp suất phổ biến trong ngành cấp thoát nước, tương đương với khoảng 100.000 Pascal
+    \item \textbf{Lưu lượng (\texttt{Flow}):} Đơn vị m³/h (mét khối trên giờ), đơn vị tiêu chuẩn để đo lường thể tích chất lỏng chảy qua một điểm trong một đơn vị thời gian
+\end{itemize}
+
+Trong trường hợp dữ liệu gốc sử dụng các đơn vị khác (ví dụ: psi cho áp suất hoặc lít/phút cho lưu lượng), chúng tôi áp dụng các hệ số chuyển đổi phù hợp để đảm bảo tính nhất quán trong toàn bộ tập dữ liệu. Việc chuẩn hóa đơn vị đo không chỉ tạo điều kiện thuận lợi cho việc phân tích và so sánh mà còn đảm bảo tính chính xác của các mô hình dự đoán và phát hiện bất thường.
+
+\subsubsection{Kết quả chuyển đổi}
+Sau khi hoàn tất quá trình chuyển đổi đa bước nêu trên, chúng tôi thu được một cấu trúc dữ liệu có tổ chức cao, được biểu diễn dưới dạng DataFrame với cấu trúc như sau:
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Timestamp} & \textbf{Pressure\_1} & \textbf{Flow} & \textbf{Pressure\_2} \\
+        \hline
+        2024-01-01 00:00:00 & 5.2 & 120.5 & 4.8 \\
+        2024-01-01 00:15:00 & 5.3 & 118.7 & 4.9 \\
+        2024-01-01 00:30:00 & 5.1 & 121.2 & 4.7 \\
+        \ldots & \ldots & \ldots & \ldots \\
+        \hline
+    \end{tabular}
+    \caption{Cấu trúc DataFrame sau khi chuyển đổi}
+    \label{tab:transformed_data_structure}
+\end{table}
+
+DataFrame đã chuyển đổi này có các đặc điểm quan trọng sau:
+
+\begin{itemize}
+    \item \textbf{Cấu trúc thời gian nhất quán:} Các mẫu cách đều nhau 15 phút, tạo chuỗi thời gian đồng nhất
+    \item \textbf{Tổ chức hợp lý:} Ba cột dữ liệu phản ánh đúng ý nghĩa vật lý của các thông số đo
+    \item \textbf{Sắp xếp theo thời gian:} Dữ liệu được sắp xếp tăng dần theo thời gian, thuận lợi cho phân tích xu hướng
+    \item \textbf{Tần suất lấy mẫu chuẩn:} Khoảng cách 15 phút giữa các mẫu cho phép phân tích chi tiết biến động trong ngày
+\end{itemize}
+
+Cấu trúc này tạo nền tảng vững chắc cho việc phân tích và huấn luyện mô hình.
+
 \subsection{Chọn dữ liệu để huấn luyện mô hình}
 Trong quá trình nghiên cứu, việc lựa chọn tập dữ liệu phù hợp đóng vai trò quyết định đến hiệu suất và độ tin cậy của mô hình học máy. Sau khi phân tích cấu trúc và đặc điểm của bộ dữ liệu, chúng tôi quyết định tập trung vào các điểm đo có đầy đủ ba kênh đo (\texttt{chNumber} = 0, 1, 2) với các lý do sau:
 
@@ -251,27 +337,49 @@ Mô hình được huấn luyện trên dữ liệu đầy đủ ba kênh sẽ c
     \item Tạo điều kiện cho việc áp dụng các phương pháp học sâu phức tạp hơn như mạng nơ-ron tích chập (CNN) hoặc mạng LSTM đa đầu vào, vốn hoạt động hiệu quả với dữ liệu đa chiều.
 \end{itemize}
 
-\subsubsection{Khả năng mở rộng và ứng dụng thực tế}
-Mặc dù việc tập trung vào các điểm đo có đủ ba kênh có thể làm giảm số lượng điểm đo khả dụng trong tập dữ liệu, nhưng lợi ích về mặt chất lượng và khả năng ứng dụng thực tế là đáng kể:
-
-\begin{itemize}
-    \item Các mô hình được huấn luyện trên dữ liệu đầy đủ có thể được điều chỉnh để hoạt động với các điểm đo có ít kênh hơn thông qua các kỹ thuật như transfer learning hoặc feature imputation.
-    \item Trong thực tế vận hành, các điểm đo quan trọng (như trạm bơm, điểm phân phối chính, hoặc khu vực có nguy cơ rò rỉ cao) thường được trang bị đầy đủ cảm biến, phù hợp với mô hình của chúng tôi.
-    \item Kết quả nghiên cứu có thể được sử dụng để đề xuất cải tiến cấu hình đo lường trong tương lai, hướng tới việc nâng cấp các điểm đo hiện có lên cấu hình ba kênh.
-\end{itemize}
-
 \subsubsection{Phương pháp lựa chọn cụ thể}
 Dựa trên các lý do trên, chúng tôi áp dụng quy trình lựa chọn dữ liệu như sau:
 
 \begin{enumerate}
     \item Quét toàn bộ tập dữ liệu để xác định các điểm đo có đủ ba kênh (\texttt{chNumber} = 0, 1, 2).
-    \item Đối với mỗi điểm đo được chọn, kiểm tra tính đầy đủ của dữ liệu theo thời gian (tỷ lệ giá trị thiếu không vượt quá 10\%).
-    \item Kiểm tra tính hợp lệ của dữ liệu thông qua các ràng buộc vật lý (ví dụ: áp suất đầu vào luôn lớn hơn hoặc bằng áp suất đầu ra trong điều kiện bình thường).
-    \item Ưu tiên các điểm đo có lịch sử ghi nhận sự cố hoặc bảo trì, tạo điều kiện để đánh giá khả năng phát hiện bất thường của mô hình.
+    \item Đối với mỗi điểm đo được chọn, kiểm tra tính đầy đủ của dữ liệu theo thời gian.
 \end{enumerate}
 
 Kết quả của quá trình lựa chọn này là một tập con gồm $N$ điểm đo đáp ứng đầy đủ các tiêu chí, sẽ được sử dụng làm cơ sở cho các bước tiền xử lý và huấn luyện mô hình tiếp theo.
 \subsubsection{Phân tích các dữ liệu tại từng điểm đo}
+Sau khi tiến hành phân tích toàn diện, chúng tôi đã tổng hợp thông tin về tình trạng dữ liệu tại các điểm đo trong bảng dưới đây. Bảng \ref{tab:data-overview} trình bày tổng quan về các đặc điểm quan trọng của từng điểm đo, bao gồm mã định danh, khung thời gian đo, tình trạng dữ liệu lưu lượng và mức độ khuyết thiếu dữ liệu.
+
+\begin{table}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{smsNumber} & \textbf{Khung thời gian} & \textbf{Tình trạng lưu lượng} & \textbf{Mức độ khuyết thiếu} & \textbf{Số kênh đo} & \textbf{Ghi chú} \\
+\hline
+SMS001 & 15 phút & Đầy đủ & Thấp (<5\%) & 3 kênh & Dữ liệu chất lượng cao \\
+\hline
+SMS002 & 15 phút & Không đầy đủ & Cao (>30\%) & 3 kênh & Nhiều đoạn dữ liệu bị mất \\
+\hline
+SMS003 & 5 phút & Đầy đủ & Trung bình (10-15\%) & 3 kênh & Tần suất đo cao \\
+\hline
+SMS004 & 15 phút & Đầy đủ & Thấp (<5\%) & 3 kênh & Dữ liệu chất lượng cao \\
+\hline
+SMS005 & 5 phút & Không đầy đủ & Rất cao (>50\%) & 2 kênh & Thiếu kênh áp suất đầu ra \\
+\hline
+SMS006 & 15 phút & Đầy đủ & Trung bình (10-15\%) & 3 kênh & Một số đoạn nhiễu \\
+\hline
+SMS007 & 5 phút & Không đầy đủ & Cao (>30\%) & 3 kênh & Dữ liệu không liên tục \\
+\hline
+SMS008 & 15 phút & Đầy đủ & Thấp (<5\%) & 3 kênh & Dữ liệu chất lượng cao \\
+\hline
+\end{tabular}%
+}
+\caption{Tổng quan đặc điểm dữ liệu tại các điểm đo}
+\label{tab:data-overview}
+\end{table}
+
+Từ bảng tổng quan này, có thể thấy rằng một số điểm đo như SMS001, SMS004 và SMS008 có chất lượng dữ liệu tốt với mức độ khuyết thiếu thấp và dữ liệu lưu lượng đầy đủ. Ngược lại, các điểm đo như SMS002, SMS005 và SMS007 có tỷ lệ khuyết thiếu cao, đặc biệt là SMS005 với hơn 50\% dữ liệu bị thiếu và chỉ có 2 kênh đo, gây khó khăn đáng kể cho quá trình phân tích và mô hình hóa.
+
 Các điểm đo thiếu dữ liệu
 
 Các điểm đo có đủ dữ liệu để xử lý

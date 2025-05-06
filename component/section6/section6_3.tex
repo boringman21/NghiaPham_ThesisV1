@@ -263,8 +263,235 @@ Từ các biểu đồ trực quan, có thể thấy rõ rằng dữ liệu thi�
 Phân tích trực quan và thống kê chi tiết về dữ liệu thiếu giúp chúng tôi xác định rõ các khoảng thời gian cần được xử lý trong bước tiếp theo của quá trình tiền xử lý dữ liệu. Đặc biệt, việc hiểu rõ đặc điểm của dữ liệu thiếu sẽ giúp lựa chọn phương pháp bổ khuyết phù hợp nhất cho từng trường hợp cụ thể.
 
 \subsection{Xử lý dữ liệu thiếu}
+\subsubsection{Tổng quan phương pháp}
+Dữ liệu thiếu là một thách thức phổ biến trong các chuỗi thời gian thực tế, có thể xuất hiện do nhiều nguyên nhân như sự cố thiết bị, mất kết nối truyền thông hoặc gián đoạn quá trình ghi nhận dữ liệu \cite{schafer2002missing}. Trong quá trình phân tích tại Phần \ref{sec:data-overview}, chúng tôi đã xác định rằng tập dữ liệu từ các điểm đo đều tồn tại hiện tượng dữ liệu thiếu ở những mức độ khác nhau, từ 2,74\% đến hơn 69\% tổng số điểm dữ liệu. Hiện tượng này đòi hỏi một chiến lược xử lý phù hợp để đảm bảo tính nhất quán và độ tin cậy của các mô hình dự đoán được huấn luyện trên dữ liệu.
 
+Như đã trình bày trong Phần \ref{sec:model_evaluation}, các phương pháp xử lý dữ liệu thiếu trong chuỗi thời gian có thể được phân thành nhiều nhóm, bao gồm phương pháp nội suy, phương pháp dựa trên mô hình và phương pháp loại bỏ. Mỗi phương pháp đều có ưu nhược điểm riêng, và việc lựa chọn phương pháp phù hợp phụ thuộc vào nhiều yếu tố như tỷ lệ dữ liệu thiếu, cơ chế thiếu dữ liệu, và yêu cầu của bài toán.
+
+\subsubsection{Phương pháp xóa ngày có dữ liệu thiếu (Listwise Deletion)}
+Trong nghiên cứu này, chúng tôi lựa chọn áp dụng phương pháp loại bỏ toàn bộ các ngày có chứa bất kỳ điểm dữ liệu thiếu, còn được gọi là \textit{listwise deletion}. Phương pháp này đã được chứng minh là hiệu quả trong nhiều nghiên cứu về phát hiện bất thường trong chuỗi thời gian \cite{malhotra2016lstm, hundman2018detecting}.
+
+Quyết định này dựa trên các cơ sở lý thuyết và thực tiễn sau:
+
+\begin{enumerate}
+    \item \textbf{Đảm bảo tính toàn vẹn của chuỗi thời gian}: Các mô hình học sâu như LSTM và GRU đòi hỏi tính liên tục của dữ liệu để duy trì trạng thái ẩn chính xác. Việc loại bỏ hoàn toàn các ngày có dữ liệu thiếu giúp đảm bảo rằng các chuỗi thời gian được sử dụng trong quá trình huấn luyện đều hoàn chỉnh và liên tục.
+    
+    \item \textbf{Giảm thiểu bias trong quá trình học}: Các phương pháp bổ khuyết dữ liệu như nội suy tuyến tính hoặc dự đoán từ mô hình có thể làm sai lệch phân phối xác suất gốc của dữ liệu, đặc biệt trong các bài toán nhạy cảm như phát hiện bất thường. Phương pháp loại bỏ giúp tránh việc đưa vào mô hình các giá trị không chính xác.
+    
+    \item \textbf{Phù hợp với đặc điểm chuỗi thời gian}: Dữ liệu chuỗi thời gian trong hệ thống giám sát thường thể hiện tính mùa vụ rõ rệt và sự biến động theo thời gian trong ngày. Việc loại bỏ toàn bộ các ngày có dữ liệu thiếu giúp bảo toàn các đặc điểm này trong các chuỗi thời gian còn lại.
+\end{enumerate}
+
+\subsubsection{Quy trình thực hiện}
+Quá trình xử lý dữ liệu thiếu được thực hiện theo các bước sau:
+
+\begin{enumerate}
+    \item \textbf{Xác định các ngày có dữ liệu thiếu}: Đối với mỗi điểm đo, chúng tôi tiến hành phân tích chuỗi thời gian để xác định các ngày có chứa ít nhất một điểm dữ liệu thiếu trong bất kỳ kênh đo nào (áp suất đầu vào, lưu lượng, áp suất đầu ra). Một ngày được định nghĩa là khoảng thời gian từ 00:00 đến 23:59, bao gồm 96 điểm dữ liệu với tần suất lấy mẫu 15 phút.
+    
+    \item \textbf{Loại bỏ toàn bộ dữ liệu trong các ngày bị ảnh hưởng}: Thay vì chỉ loại bỏ các điểm dữ liệu thiếu cụ thể, chúng tôi loại bỏ toàn bộ dữ liệu của các ngày có chứa bất kỳ điểm dữ liệu thiếu nào. Điều này đảm bảo rằng các mẫu dữ liệu ngày được sử dụng trong các bước tiếp theo đều đầy đủ và nhất quán.
+    
+    \item \textbf{Chuẩn hóa chỉ số thời gian}: Sau khi loại bỏ các ngày có dữ liệu thiếu, chúng tôi cập nhật chỉ số thời gian để đảm bảo tính liên tục của chuỗi, giúp các mô hình học máy có thể xử lý dữ liệu một cách hiệu quả.
+\end{enumerate}
+
+\subsubsection{Kết quả xử lý dữ liệu thiếu}
+Việc áp dụng phương pháp loại bỏ ngày có dữ liệu thiếu đã mang lại những kết quả đáng chú ý:
+
+\begin{itemize}
+    \item \textbf{Đối với điểm đo 841211914190}: Sau khi loại bỏ các ngày có dữ liệu thiếu, tập dữ liệu còn lại bao gồm 248 ngày đầy đủ, chiếm khoảng 67,95\% tổng số ngày trong khoảng thời gian thu thập dữ liệu. Các ngày bị loại bỏ chủ yếu tập trung vào khoảng thời gian từ 2024-01-01 đến 2024-04-11 (102 ngày) và một số ngày rải rác trong tháng 9/2024.
+    
+    \item \textbf{Đối với điểm đo 8401210607558}: Tập dữ liệu sau khi xử lý bao gồm 354 ngày đầy đủ, chiếm 96,99\% tổng số ngày. Các ngày bị loại bỏ chủ yếu nằm trong khoảng thời gian từ 2024-09-10 đến 2024-09-19, cùng với một ngày riêng lẻ (2024-02-29).
+\end{itemize}
+
+Mặc dù phương pháp này dẫn đến việc giảm số lượng dữ liệu huấn luyện, đặc biệt đối với điểm đo 841211914190, nhưng lợi ích từ việc đảm bảo tính nhất quán và độ tin cậy của dữ liệu vượt trội hơn hạn chế về khối lượng dữ liệu. Hơn nữa, với đặc điểm tính mùa vụ rõ rệt trong dữ liệu chuỗi thời gian hệ thống cấp nước, các mẫu dữ liệu còn lại vẫn đủ đại diện cho các mẫu hành vi điển hình của hệ thống.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\textwidth]{image/section6_3/time_series_after_cleaning.png}
+%     \caption{Biểu đồ minh họa chuỗi thời gian sau khi áp dụng phương pháp xóa ngày có dữ liệu thiếu tại điểm đo 841211914190}
+%     \label{fig:time_series_after_cleaning}
+% \end{figure}
+
+Thông qua phương pháp xử lý dữ liệu thiếu này, chúng tôi đã tạo ra các tập dữ liệu sạch và đầy đủ, tạo nền tảng vững chắc cho các bước tiếp theo trong quá trình tiền xử lý dữ liệu và huấn luyện mô hình học máy. Phương pháp này cũng phù hợp với quan điểm được đề xuất trong nghiên cứu của Schafer và Graham \cite{schafer2002missing}, rằng khi tỷ lệ dữ liệu thiếu tương đối thấp và cơ chế thiếu dữ liệu là ngẫu nhiên hoàn toàn (MCAR), việc loại bỏ các mẫu có dữ liệu thiếu là một chiến lược hợp lý và hiệu quả.
 
 \subsection{Feature selection}
+
+Quá trình lựa chọn đặc trưng (\textit{feature selection}) đóng vai trò then chốt trong xây dựng mô hình dự đoán hiệu quả. Đối với bài toán dự báo lưu lượng nước và phát hiện rò rỉ trong hệ thống cấp nước, việc xác định tập đặc trưng phù hợp không chỉ ảnh hưởng đến độ chính xác mà còn quyết định khả năng mô hình hóa mối quan hệ thủy lực phức tạp trong hệ thống.
+
+\subsubsection{Cơ sở lý thuyết cho việc lựa chọn đặc trưng}
+
+Như đã trình bày trong Phần \ref{sec:ml_methods}, các mô hình học máy cần được cung cấp đặc trưng đầu vào phù hợp để tối ưu hóa khả năng học và dự đoán. Dựa trên hiểu biết về tính mùa vụ và các đặc điểm của chuỗi thời gian được đề cập trong Phần \ref{sec:data-overview}, chúng tôi xác định rằng dữ liệu lưu lượng nước thể hiện các mẫu hành vi tự tương quan mạnh mẽ theo thời gian, đồng thời cũng chịu ảnh hưởng bởi các yếu tố thủy lực khác như áp suất đầu vào và đầu ra.
+
+Việc lựa chọn đặc trưng trong nghiên cứu này được thực hiện dựa trên cả kiến thức chuyên ngành thủy lực và phân tích thực nghiệm, hướng đến việc khám phá hai chiến lược mô hình hóa khác nhau:
+
+\subsubsection{Chiến lược 1: Mô hình đơn biến sử dụng chuỗi lưu lượng}
+
+Chiến lược đầu tiên tập trung vào việc xây dựng mô hình dự báo lưu lượng chỉ dựa trên dữ liệu lưu lượng lịch sử. Phương pháp này dựa trên nguyên lý rằng chuỗi thời gian lưu lượng thường thể hiện tính tự tương quan (\textit{autocorrelation}) mạnh mẽ, trong đó các giá trị trong quá khứ chứa thông tin có giá trị để dự đoán giá trị tương lai.
+
+Cụ thể, các đặc trưng đầu vào cho mô hình này bao gồm:
+\begin{itemize}
+    \item \textbf{Chuỗi lưu lượng trễ} (\textit{lagged flow series}): Đây là tập hợp các giá trị lưu lượng trong $n$ khoảng thời gian trước đó, tức là $\{Flow_{t-n}, Flow_{t-n+1}, \ldots, Flow_{t-1}\}$ để dự đoán $Flow_t$
+\end{itemize}
+
+Việc sử dụng các giá trị trễ này dựa trên nhận định rằng mẫu tiêu thụ nước thường lặp lại theo chu kỳ nhất định (24 giờ, 7 ngày), như đã được chứng minh trong nghiên cứu về tính mùa vụ của dữ liệu chuỗi thời gian. Bằng cách khai thác tính mùa vụ và các mẫu tự tương quan trong dữ liệu lưu lượng, mô hình đơn biến có thể nắm bắt được các mẫu tiêu thụ nước định kỳ và dự đoán giá trị lưu lượng tương lai với độ chính xác hợp lý trong điều kiện vận hành bình thường.
+
+Ưu điểm chính của chiến lược này là:
+\begin{itemize}
+    \item Đơn giản và dễ triển khai
+    \item Yêu cầu ít dữ liệu đầu vào, phù hợp khi thiếu thông tin từ các cảm biến khác
+    \item Mô hình hóa hiệu quả tính mùa vụ và các mẫu lặp lại trong dữ liệu lưu lượng
+\end{itemize}
+
+Tuy nhiên, chiến lược này có hạn chế là khả năng phát hiện các bất thường không tuân theo mẫu lịch sử chỉ dựa vào dữ liệu lưu lượng có thể bị hạn chế, đặc biệt khi rò rỉ xảy ra chậm và từ từ.
+
+\subsubsection{Chiến lược 2: Mô hình đa biến kết hợp lưu lượng và áp suất}
+
+Chiến lược thứ hai mở rộng tập đặc trưng đầu vào bằng cách kết hợp cả dữ liệu lưu lượng và áp suất, dựa trên nguyên lý thủy lực cơ bản là mối quan hệ giữa áp suất và lưu lượng trong hệ thống ống dẫn. Như được mô tả trong phương trình Darcy-Weisbach, tổn thất áp suất trong ống tỷ lệ thuận với bình phương lưu lượng trong điều kiện dòng chảy rối. Do đó, sự thay đổi trong mối quan hệ này có thể là dấu hiệu của rò rỉ hoặc các bất thường khác trong hệ thống.
+
+Các đặc trưng đầu vào cho mô hình đa biến bao gồm:
+\begin{itemize}
+    \item \textbf{Chuỗi lưu lượng trễ}: $\{Flow_{t-n}, Flow_{t-n+1}, \ldots, Flow_{t-1}\}$
+    \item \textbf{Chuỗi áp suất đầu vào trễ}: $\{Pressure1_{t-n}, Pressure1_{t-n+1}, \ldots, Pressure1_{t-1}\}$
+    \item \textbf{Chuỗi áp suất đầu ra trễ}: $\{Pressure2_{t-n}, Pressure2_{t-n+1}, \ldots, Pressure2_{t-1}\}$
+\end{itemize}
+
+Việc kết hợp cả ba chuỗi thời gian này cho phép mô hình nắm bắt không chỉ các mẫu lưu lượng mà còn cả mối tương quan phức tạp giữa áp suất và lưu lượng. Điều này đặc biệt có giá trị trong việc phát hiện rò rỉ, vì các sự cố rò rỉ thường biểu hiện thông qua sự thay đổi trong mối quan hệ áp suất-lưu lượng trước khi chúng trở nên rõ ràng trong dữ liệu lưu lượng đơn thuần.
+
+Ưu điểm của chiến lược này bao gồm:
+\begin{itemize}
+    \item Khả năng mô hình hóa mối quan hệ thủy lực phức tạp
+    \item Tăng cường nhạy cảm đối với các dạng rò rỉ khác nhau, bao gồm cả rò rỉ nhỏ và phát triển chậm
+    \item Giảm thiểu tác động của nhiễu cục bộ trong dữ liệu từ một cảm biến đơn lẻ
+\end{itemize}
+
+Tuy nhiên, chiến lược này cũng đòi hỏi nhiều dữ liệu đầu vào hơn và có thể gặp thách thức khi một số cảm biến gặp sự cố hoặc cung cấp dữ liệu không đáng tin cậy.
+
+\subsubsection{Cân nhắc về kích thước cửa sổ thời gian}
+
+Đối với cả hai chiến lược, việc xác định kích thước cửa sổ thời gian $n$ (số lượng điểm dữ liệu trong quá khứ được sử dụng để dự đoán) là một cân nhắc quan trọng. Trong nghiên cứu này, chúng tôi xác định rằng:
+
+\begin{itemize}
+    \item Cửa sổ ngắn (ví dụ: 1-6 giờ, tương đương 4-24 điểm dữ liệu với tần suất lấy mẫu 15 phút) thích hợp cho việc nắm bắt các biến động ngắn hạn và phản ứng nhanh với các thay đổi đột ngột.
+    \item Cửa sổ trung bình (ví dụ: 24 giờ, tương đương 96 điểm dữ liệu) cho phép mô hình học được mẫu tiêu thụ hàng ngày.
+    \item Cửa sổ dài (ví dụ: 7 ngày, tương đương 672 điểm dữ liệu) giúp nắm bắt các mẫu tiêu thụ hàng tuần nhưng đòi hỏi nhiều tài nguyên tính toán hơn.
+\end{itemize}
+
+Trong thực tế vận hành hệ thống cấp nước, các chuyên gia thường sử dụng khung thời gian 7 ngày để theo dõi và phát hiện bất thường. Khung thời gian này cho phép họ quan sát đầy đủ các chu kỳ tiêu thụ nước theo ngày trong tuần, bao gồm cả sự khác biệt giữa ngày làm việc và cuối tuần. Tuy nhiên, trong thực nghiệm của chúng tôi, sau khi cân nhắc kỹ lưỡng, chúng tôi quyết định sử dụng cửa sổ 6 giờ (24 điểm dữ liệu) vì những lý do sau:
+
+\begin{itemize}
+    \item \textbf{Phản ứng nhanh với bất thường}: Cửa sổ ngắn hơn cho phép mô hình phát hiện và phản ứng nhanh hơn với các sự cố rò rỉ đột ngột, giảm thời gian phát hiện từ vài ngày xuống còn vài giờ.
+    \item \textbf{Giảm độ trễ tính toán}: Với khối lượng dữ liệu nhỏ hơn, mô hình có thể được huấn luyện và cập nhật thường xuyên hơn, phù hợp với yêu cầu giám sát thời gian thực.
+    \item \textbf{Tập trung vào biến động ngắn hạn}: Nhiều loại rò rỉ thể hiện dấu hiệu rõ ràng nhất trong các biến động ngắn hạn của lưu lượng và áp suất, mà cửa sổ dài có thể làm mờ đi.
+    \item \textbf{Tối ưu hóa tài nguyên}: Giảm đáng kể yêu cầu về bộ nhớ và sức mạnh tính toán, cho phép triển khai trên các thiết bị cạnh với tài nguyên hạn chế.
+\end{itemize}
+
+Mặc dù cửa sổ 24 giờ hoặc 7 ngày có thể nắm bắt tốt hơn các mẫu tiêu thụ theo chu kỳ, thực nghiệm của chúng tôi cho thấy cửa sổ 6 giờ cung cấp sự cân bằng tối ưu giữa độ chính xác dự đoán và khả năng phát hiện bất thường kịp thời, đặc biệt trong bối cảnh phát hiện rò rỉ nước - nơi thời gian phản ứng là yếu tố then chốt để giảm thiểu thiệt hại.
+
+\subsubsection{Xử lý mục tiêu dự đoán}
+
+Cả hai chiến lược đều nhắm đến việc dự đoán lưu lượng tại thời điểm $t$ ($Flow_t$) dựa trên dữ liệu lịch sử. Tuy nhiên, trong một số trường hợp, việc dự đoán chênh lệch lưu lượng hoặc tỷ lệ thay đổi có thể mang lại hiệu quả tốt hơn cho việc phát hiện bất thường. Trong phạm vi nghiên cứu này, chúng tôi tập trung vào dự đoán trực tiếp giá trị lưu lượng tuyệt đối, vì phương pháp này đơn giản hơn và phù hợp với mục tiêu xây dựng mô hình cơ sở.
+
+Việc lựa chọn đặc trưng như đã trình bày tạo nền tảng vững chắc cho các bước tiếp theo trong quá trình xây dựng mô hình dự đoán lưu lượng và phát hiện bất thường trong hệ thống cấp nước. Phương pháp tiếp cận kép này không chỉ cho phép so sánh hiệu suất của mô hình đơn biến và đa biến mà còn mang lại hiểu biết sâu sắc về mối quan hệ phức tạp giữa các thông số thủy lực trong hệ thống cấp nước.
+
 \subsection{Tạo chuỗi dữ liệu huấn luyện}
+
+Dựa trên chiến lược và cửa sổ thời gian đã được xác định ở phần trước, chúng tôi tiến hành tạo chuỗi dữ liệu huấn luyện cho các mô hình dự báo. Với tần suất lấy mẫu 15 phút của hệ thống SCADA, cửa sổ thời gian 6 giờ tương ứng với 24 điểm dữ liệu liên tiếp. Quá trình tạo chuỗi dữ liệu được thực hiện như sau:
+
+\begin{itemize}
+    \item \textbf{Dữ liệu đầu vào (X)}: Mỗi mẫu đầu vào bao gồm 24 điểm dữ liệu liên tiếp, tương ứng với chuỗi thời gian 6 giờ. Tùy theo chiến lược được áp dụng, dữ liệu đầu vào có thể là:
+    \begin{itemize}
+        \item \textbf{Chiến lược 1 (đơn biến)}: $X = \{Flow_{t-24}, Flow_{t-23}, \ldots, Flow_{t-1}\}$
+        \item \textbf{Chiến lược 2 (đa biến)}: $X = \{Flow_{t-24}, \ldots, Flow_{t-1}, Pressure1_{t-24}, \ldots, Pressure1_{t-1}, Pressure2_{t-24}, \ldots, Pressure2_{t-1}\}$
+    \end{itemize}
+    
+    \item \textbf{Dữ liệu đầu ra (y)}: Giá trị lưu lượng tại thời điểm tiếp theo $Flow_t$, tương ứng với dự báo cho 15 phút kế tiếp.
+\end{itemize}
+
+Chuỗi dữ liệu được tạo bằng phương pháp cửa sổ trượt (sliding window), trong đó:
+
+\begin{enumerate}
+    \item Cửa sổ đầu tiên bao gồm các điểm dữ liệu từ $t=1$ đến $t=24$ làm đầu vào, và điểm $t=25$ làm đầu ra.
+    \item Cửa sổ tiếp theo trượt một bước (15 phút), bao gồm các điểm từ $t=2$ đến $t=25$ làm đầu vào, và điểm $t=26$ làm đầu ra.
+    \item Quá trình này tiếp tục cho đến khi đạt đến cuối chuỗi dữ liệu.
+\end{enumerate}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Mẫu} & \textbf{Dữ liệu đầu vào (X)} & \textbf{Dữ liệu đầu ra (y)} \\
+        \hline
+        1 & $\{Flow_1, Flow_2, \ldots, Flow_{24}\}$ & $Flow_{25}$ \\
+        \hline
+        2 & $\{Flow_2, Flow_3, \ldots, Flow_{25}\}$ & $Flow_{26}$ \\
+        \hline
+        3 & $\{Flow_3, Flow_4, \ldots, Flow_{26}\}$ & $Flow_{27}$ \\
+        \hline
+        $\vdots$ & $\vdots$ & $\vdots$ \\
+        \hline
+        n & $\{Flow_{n}, Flow_{n+1}, \ldots, Flow_{n+23}\}$ & $Flow_{n+24}$ \\
+        \hline
+    \end{tabular}
+    \caption{Minh họa phương pháp cửa sổ trượt trong tạo dữ liệu huấn luyện}
+    \label{tab:sliding_window_example}
+\end{table}
+
+Phương pháp này tạo ra một tập dữ liệu huấn luyện với số lượng mẫu gần bằng tổng số điểm dữ liệu ban đầu trừ đi kích thước cửa sổ. Với dữ liệu một năm (35.040 điểm với tần suất 15 phút), chúng tôi thu được khoảng 35.016 mẫu huấn luyện.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
+        \hline
+        \textbf{Đặc điểm} & \textbf{Chiến lược 1 (Đơn biến)} & \textbf{Chiến lược 2 (Đa biến)} \\
+        \hline
+        Số lượng đặc trưng & 24 & 72 (24 × 3 chuỗi) \\
+        \hline
+        Loại dữ liệu & Chỉ lưu lượng & Lưu lượng và áp suất (đầu vào/đầu ra) \\
+        \hline
+        Kích thước ma trận đầu vào & n × 24 & n × 72 \\
+        \hline
+        Ưu điểm & Đơn giản, yêu cầu ít dữ liệu & Nắm bắt mối quan hệ thủy lực phức tạp \\
+        \hline
+        Nhược điểm & Không nắm bắt mối quan hệ áp suất-lưu lượng & Phức tạp hơn, yêu cầu nhiều dữ liệu \\
+        \hline
+    \end{tabular}
+    \caption{So sánh cấu trúc dữ liệu đầu vào giữa hai chiến lược}
+    \label{tab:strategy_input_comparison}
+\end{table}
+
+Việc chuẩn hóa dữ liệu cũng được thực hiện trong quá trình này để đảm bảo hiệu suất tối ưu của các mô hình học máy. Các giá trị đầu vào được chuẩn hóa về khoảng [0,1] hoặc có trung bình 0 và độ lệch chuẩn 1, tùy thuộc vào yêu cầu cụ thể của từng thuật toán.
+
+Cách tiếp cận này cho phép mô hình học được các mẫu biến động ngắn hạn trong dữ liệu lưu lượng và áp suất, đồng thời duy trì khả năng phản ứng nhanh với các thay đổi đột ngột - yếu tố quan trọng trong việc phát hiện rò rỉ kịp thời.
+
 \subsection{Tạo tập dữ liệu huấn luyện và kiểm tra}
+
+Để đảm bảo tính khách quan trong đánh giá hiệu suất của mô hình, chúng tôi chia tập dữ liệu theo tỷ lệ 80:20 cho quá trình huấn luyện và kiểm tra. Cụ thể, 80\% dữ liệu đầu tiên được sử dụng làm tập huấn luyện (training set) và 20\% dữ liệu còn lại dùng làm tập kiểm tra (test set).
+
+Chúng tôi áp dụng hai chiến lược khác nhau trong việc tạo dữ liệu huấn luyện:
+
+\begin{enumerate}
+    \item \textbf{Chiến lược 1 - Mô hình riêng cho từng điểm đo:} Dữ liệu được tách biệt theo từng điểm đo cụ thể. Mỗi điểm đo sẽ có tập dữ liệu huấn luyện và kiểm tra riêng, từ đó huấn luyện một mô hình dự báo chuyên biệt cho điểm đo đó. Cách tiếp cận này cho phép mô hình nắm bắt được đặc thù riêng của từng vị trí trong mạng lưới.
+    
+    \item \textbf{Chiến lược 2 - Mô hình chung cho tất cả điểm đo:} Dữ liệu từ tất cả các điểm đo được gộp lại thành một tập dữ liệu lớn duy nhất. Từ đó, một mô hình duy nhất được huấn luyện để dự báo cho tất cả các điểm đo trong hệ thống. Chiến lược này giúp mô hình học được các mối tương quan tổng thể và có khả năng tổng quát hóa tốt hơn cho toàn bộ mạng lưới.
+\end{enumerate}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|p{4cm}|p{5cm}|p{5cm}|}
+        \hline
+        \textbf{Đặc điểm} & \textbf{Chiến lược 1} & \textbf{Chiến lược 2} \\
+        \hline
+        Phạm vi mô hình & Mô hình riêng cho từng điểm đo & Mô hình chung cho tất cả điểm đo \\
+        \hline
+        Tập dữ liệu & Tách biệt theo từng điểm đo & Gộp từ tất cả điểm đo \\
+        \hline
+        Ưu điểm & Nắm bắt đặc thù riêng của từng vị trí, độ chính xác cục bộ cao & Học được mối tương quan tổng thể, tổng quát hóa tốt, tiết kiệm tài nguyên \\
+        \hline
+        Nhược điểm & Tốn nhiều tài nguyên tính toán, khó tổng quát hóa & Có thể bỏ qua đặc thù riêng của từng điểm đo \\
+        \hline
+        Phù hợp với & Hệ thống có điểm đo ít, đặc thù riêng biệt cao & Hệ thống lớn, nhiều điểm đo có tính chất tương đồng \\
+        \hline
+    \end{tabular}
+    \caption{So sánh hai chiến lược tạo dữ liệu huấn luyện}
+    \label{tab:training_strategy_comparison}
+\end{table}
+
+Mỗi chiến lược đều có ưu điểm riêng: chiến lược 1 tập trung vào độ chính xác cục bộ, trong khi chiến lược 2 hướng đến khả năng tổng quát hóa và hiệu quả về mặt tài nguyên tính toán. Việc so sánh hiệu suất của hai chiến lược này sẽ giúp xác định phương pháp tối ưu cho hệ thống phát hiện rò rỉ.

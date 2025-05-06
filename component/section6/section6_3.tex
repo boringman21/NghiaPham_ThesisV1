@@ -1,6 +1,268 @@
-\section{Đánh giá tác động khi kết hợp tập viễn thám và quan trắc lên kết quả bổ khuyết chỉ số không khí}
-\label{ex-4}
+\section{Tiền xử lý dữ liệu}
 \subsection{Tổng quan}
-Trong thí nghiệm \ref{ex-4}, tập dữ liệu quan trắc và viễn thám sẽ được gộp lại với nhau để đánh giá tác động qua lại khi bổ khuyết và huấn luyện mô hình dự đoán chất lượng không khí từ nhiều nguồn. Dữ liệu sau khi được gộp sẽ được xoá ngẫu nhiên để đạt tỉ lệ mất dữ liệu lần lượt là 30\%, 40\% và 50\%. Sau đó, các phương pháp bổ khuyết dữ liệu sẽ được sử dụng để cập nhật các giá trị bị mất. Tập dữ liệu sau khi được xử lý sẽ được so sánh với tập dữ liệu ban đầu để đánh giá độ sai lệch. Hình \ref{fig:ex4-experiment} mô tả toàn bộ lược đồ thí nghiệm.
 ...
+% TODO: thêm lược đồ tại đây
+\subsection{Chuyển đổi dữ liệu}
+Quá trình chuyển đổi dữ liệu thô thành định dạng phù hợp cho phân tích và huấn luyện mô hình đóng vai trò then chốt trong tiền xử lý. Dữ liệu thô ban đầu từ hệ thống \texttt{find\_query\_x} cần được tái cấu trúc theo một khuôn mẫu chuẩn hóa nhằm tối ưu hóa cho các bước phân tích tiếp theo. Chúng tôi đã thiết lập và triển khai một quy trình chuyển đổi có hệ thống, được mô tả chi tiết như sau:
 
+\subsubsection{Lọc dữ liệu theo mã thiết bị}
+Bước đầu tiên trong quy trình chuyển đổi là phân tách dữ liệu theo mã định danh thiết bị (\texttt{smsNumber}). Mỗi thiết bị trong hệ thống có một mã định danh riêng biệt. Việc phân tách này mang lại các lợi ích sau:
+
+\begin{itemize}
+    \item Tách biệt dữ liệu từ các vị trí địa lý khác nhau trong mạng lưới
+    \item Đảm bảo tính nhất quán của dữ liệu trong một điểm đo cụ thể
+    \item Cho phép xây dựng các mô hình phù hợp với đặc điểm của từng điểm đo
+    \item Tạo điều kiện thuận lợi cho việc so sánh giữa các điểm đo khác nhau
+\end{itemize}
+
+Quá trình lọc được thực hiện bằng cách truy vấn dữ liệu theo điều kiện mã thiết bị. Kết quả là một tập dữ liệu chỉ chứa thông tin từ một thiết bị cụ thể, sẵn sàng cho các bước xử lý tiếp theo.
+
+% để hình CSV ở  đây
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{image/section6_3/device_filtering.png}
+%     \caption{Minh họa quá trình lọc dữ liệu theo mã thiết bị}
+%     \label{fig:device_filtering}
+% \end{figure}
+
+\subsubsection{Tái cấu trúc dữ liệu theo kênh đo}
+Sau khi hoàn tất việc lọc theo thiết bị, dữ liệu thô vẫn tồn tại ở dạng "dài" (long format), trong đó mỗi kênh đo được biểu diễn bằng nhiều bản ghi riêng biệt theo thời gian. Cấu trúc này, mặc dù hiệu quả cho việc lưu trữ, lại không tối ưu cho các phân tích đa biến và huấn luyện mô hình. Do đó, chúng tôi tiến hành chuyển đổi dữ liệu sang định dạng "rộng" (wide format) thông qua một quy trình có hệ thống:
+
+\begin{enumerate}
+    \item Nhóm dữ liệu theo các mốc thời gian (\texttt{Timestamp}) để tạo ra cấu trúc thời gian chuẩn
+    \item Xác định và trích xuất giá trị từ mỗi kênh đo (\texttt{chNumber}) tại mỗi mốc thời gian
+    \item Chuyển đổi các giá trị này thành các cột riêng biệt, tạo ra một cấu trúc ma trận trong đó mỗi hàng đại diện cho một mốc thời gian và mỗi cột đại diện cho một kênh đo
+    \item Áp dụng các phép biến đổi bổ sung để đảm bảo tính nhất quán và đầy đủ của dữ liệu
+\end{enumerate}
+
+Trong quá trình này, chúng tôi áp dụng một hệ thống ánh xạ chuẩn hóa cho các kênh đo, nhằm tăng tính trực quan và dễ hiểu của dữ liệu:
+
+\begin{itemize}
+    \item Kênh 0 (\texttt{chNumber = 0}): Đại diện cho áp suất đầu vào, được gán nhãn là \texttt{Pressure\_1} trong tập dữ liệu đã chuyển đổi
+    \item Kênh 1 (\texttt{chNumber = 1}): Đại diện cho lưu lượng, được gán nhãn là \texttt{Flow} trong tập dữ liệu đã chuyển đổi
+    \item Kênh 2 (\texttt{chNumber = 2}): Đại diện cho áp suất đầu ra, được gán nhãn là \texttt{Pressure\_2} trong tập dữ liệu đã chuyển đổi
+\end{itemize}
+
+Việc ánh xạ này không chỉ tạo ra một cấu trúc dữ liệu rõ ràng mà còn phản ánh chính xác mối quan hệ vật lý giữa các thông số đo lường, tạo điều kiện thuận lợi cho các phân tích thủy lực và phát hiện bất thường trong hệ thống.
+
+\subsubsection{Chuẩn hóa định dạng thời gian}
+Việc chuẩn hóa thông tin thời gian đóng vai trò then chốt trong xử lý dữ liệu chuỗi thời gian. Chúng tôi áp dụng định dạng ISO 8601 (YYYY-MM-DD HH:MM:SS) cho cột \texttt{Timestamp}, đảm bảo tính nhất quán và chính xác trong các trường hợp:
+
+\begin{itemize}
+    \item Thực hiện các phép tính thời gian phức tạp như xác định khoảng cách giữa các mẫu hoặc phát hiện mẫu bị thiếu
+    \item Sắp xếp dữ liệu theo trình tự thời gian chính xác để phân tích xu hướng
+\end{itemize}
+
+Quá trình chuẩn hóa bao gồm việc chuyển đổi tất cả biểu diễn thời gian sang định dạng datetime chuẩn và sắp xếp dữ liệu theo thứ tự thời gian tăng dần, tạo nền tảng vững chắc cho các phân tích chuỗi thời gian phức tạp trong các bước tiếp theo.
+
+\subsubsection{Xử lý đơn vị đo}
+Để đảm bảo tính nhất quán và khả năng so sánh giữa các điểm đo, chúng tôi thực hiện chuẩn hóa đơn vị đo cho tất cả các giá trị trong tập dữ liệu. Cụ thể, chúng tôi áp dụng các đơn vị chuẩn sau:
+
+\begin{itemize}
+    \item \textbf{Áp suất (\texttt{Pressure\_1} và \texttt{Pressure\_2}):} Đơn vị bar, một đơn vị áp suất phổ biến trong ngành cấp thoát nước, tương đương với khoảng 100.000 Pascal
+    \item \textbf{Lưu lượng (\texttt{Flow}):} Đơn vị m³/h (mét khối trên giờ), đơn vị tiêu chuẩn để đo lường thể tích chất lỏng chảy qua một điểm trong một đơn vị thời gian
+\end{itemize}
+
+Trong trường hợp dữ liệu gốc sử dụng các đơn vị khác (ví dụ: psi cho áp suất hoặc lít/phút cho lưu lượng), chúng tôi áp dụng các hệ số chuyển đổi phù hợp để đảm bảo tính nhất quán trong toàn bộ tập dữ liệu. Việc chuẩn hóa đơn vị đo không chỉ tạo điều kiện thuận lợi cho việc phân tích và so sánh mà còn đảm bảo tính chính xác của các mô hình dự đoán và phát hiện bất thường.
+
+\subsubsection{Kết quả chuyển đổi}
+Sau khi hoàn tất quá trình chuyển đổi đa bước nêu trên, chúng tôi thu được một cấu trúc dữ liệu có tổ chức cao, được biểu diễn dưới dạng DataFrame với cấu trúc như sau:
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Timestamp} & \textbf{Pressure\_1} & \textbf{Flow} & \textbf{Pressure\_2} \\
+        \hline
+        2024-01-01 00:00:00 & 5.2 & 120.5 & 4.8 \\
+        2024-01-01 00:15:00 & 5.3 & 118.7 & 4.9 \\
+        2024-01-01 00:30:00 & 5.1 & 121.2 & 4.7 \\
+        \ldots & \ldots & \ldots & \ldots \\
+        \hline
+    \end{tabular}
+    \caption{Cấu trúc DataFrame sau khi chuyển đổi cho một điểm đo}
+    \label{tab:transformed_data_structure}
+\end{table}
+
+DataFrame đã chuyển đổi này có các đặc điểm quan trọng sau:
+
+\begin{itemize}
+    \item \textbf{Cấu trúc thời gian nhất quán:} Các mẫu cách đều nhau 15 phút, tạo chuỗi thời gian đồng nhất
+    \item \textbf{Tổ chức hợp lý:} Ba cột dữ liệu phản ánh đúng ý nghĩa vật lý của các thông số đo
+    \item \textbf{Sắp xếp theo thời gian:} Dữ liệu được sắp xếp tăng dần theo thời gian, thuận lợi cho phân tích xu hướng
+    \item \textbf{Tần suất lấy mẫu chuẩn:} Khoảng cách 15 phút giữa các mẫu cho phép phân tích chi tiết biến động trong ngày
+\end{itemize}
+
+Cấu trúc này tạo nền tảng vững chắc cho việc phân tích và huấn luyện mô hình.
+
+\subsection{Chọn dữ liệu để huấn luyện mô hình}
+Trong quá trình nghiên cứu, việc lựa chọn tập dữ liệu phù hợp đóng vai trò quyết định đến hiệu suất và độ tin cậy của mô hình học máy. Sau khi phân tích cấu trúc và đặc điểm của bộ dữ liệu, chúng tôi quyết định tập trung vào các điểm đo có đầy đủ ba kênh đo (\texttt{chNumber} = 0, 1, 2) với các lý do sau:
+
+\subsubsection{Tính đầy đủ của thông tin vật lý}
+Các điểm đo có đủ ba kênh cung cấp bức tranh toàn diện về trạng thái thủy lực tại mỗi vị trí. Cụ thể, việc đồng thời có thông tin về áp suất đầu vào, lưu lượng, và áp suất đầu ra cho phép:
+
+\begin{itemize}
+    \item Tính toán chênh lệch áp suất ($\Delta P = P_{in} - P_{out}$) trực tiếp, là chỉ số quan trọng để phát hiện tổn thất áp suất bất thường.
+    \item Thiết lập mối tương quan giữa lưu lượng và chênh lệch áp suất, tuân theo định luật Darcy-Weisbach và các nguyên lý thủy lực cơ bản.
+    \item Xây dựng các đặc trưng phái sinh (derived features) có giá trị cao trong việc phát hiện rò rỉ, như hệ số tổn thất cục bộ, chỉ số biến thiên áp suất theo lưu lượng, v.v.
+\end{itemize}
+
+\subsubsection{Khả năng phát hiện bất thường đa chiều}
+Với ba kênh đo, mô hình có thể phát hiện bất thường theo nhiều chiều và dạng biểu hiện khác nhau:
+
+\begin{itemize}
+    \item \textbf{Bất thường về áp suất đầu vào:} Có thể phản ánh vấn đề từ nguồn cung cấp hoặc đoạn ống phía trước.
+    \item \textbf{Bất thường về lưu lượng:} Phát hiện tiêu thụ bất thường, rò rỉ lớn, hoặc sự cố van.
+    \item \textbf{Bất thường về áp suất đầu ra:} Phản ánh vấn đề ở phía hạ nguồn hoặc tình trạng tắc nghẽn.
+    \item \textbf{Bất thường về mối tương quan:} Quan trọng nhất, có thể phát hiện rò rỉ nhỏ thông qua sự thay đổi trong mối quan hệ giữa ba thông số, ngay cả khi mỗi thông số riêng lẻ vẫn nằm trong ngưỡng bình thường.
+\end{itemize}
+
+\subsubsection{Tính ổn định và độ tin cậy của mô hình}
+Mô hình được huấn luyện trên dữ liệu đầy đủ ba kênh sẽ có độ tin cậy cao hơn vì:
+
+\begin{itemize}
+    \item Giảm thiểu sự phụ thuộc vào một kênh đo duy nhất, từ đó giảm tác động của nhiễu cục bộ hoặc lỗi cảm biến.
+    \item Cho phép áp dụng các kỹ thuật kiểm tra chéo (cross-validation) giữa các kênh để xác nhận tính hợp lệ của dữ liệu.
+    \item Tạo điều kiện cho việc áp dụng các phương pháp học sâu phức tạp hơn như mạng nơ-ron tích chập (CNN) hoặc mạng LSTM đa đầu vào, vốn hoạt động hiệu quả với dữ liệu đa chiều.
+\end{itemize}
+
+\subsubsection{Phương pháp lựa chọn cụ thể}
+Dựa trên các lý do trên, chúng tôi áp dụng quy trình lựa chọn dữ liệu như sau:
+
+\begin{enumerate}
+    \item Quét toàn bộ tập dữ liệu để xác định các điểm đo có đủ ba kênh (\texttt{chNumber} = 0, 1, 2).
+    \item Đối với mỗi điểm đo được chọn, kiểm tra tính đầy đủ của dữ liệu theo thời gian.
+\end{enumerate}
+
+Kết quả của quá trình lựa chọn này là một tập con gồm $N$ điểm đo đáp ứng đầy đủ các tiêu chí, sẽ được sử dụng làm cơ sở cho các bước tiền xử lý và huấn luyện mô hình tiếp theo.
+
+\subsubsection{Phân tích các dữ liệu tại từng điểm đo}
+Sau khi tiến hành phân tích toàn diện, chúng tôi đã tổng hợp thông tin về tình trạng dữ liệu tại các điểm đo trong bảng dưới đây. Bảng \ref{tab:data-overview} trình bày tổng quan về các đặc điểm quan trọng của từng điểm đo, bao gồm mã định danh, khung thời gian đo, tình trạng dữ liệu lưu lượng và mức độ khuyết thiếu dữ liệu.
+
+\begin{table}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{smsNumber} & \textbf{Khung thời gian} & \textbf{Tình trạng lưu lượng} & \textbf{Mức độ khuyết thiếu} & \textbf{Số kênh đo} & \textbf{Ghi chú} \\
+\hline
+841210802047 & 15 phút & Không có dữ liệu & Rất cao (>69\%) & 3 kênh & Thiếu hoàn toàn dữ liệu lưu lượng \\
+\hline
+841210802048 & 15 phút & Không có dữ liệu & Thấp (3.84\%) & 3 kênh & 14 ngày dữ liệu bị mất, thiếu hoàn toàn dữ liệu lưu lượng \\
+\hline
+841210620665 & 15 phút & Không có dữ liệu & Thấp (3.01\%) & 3 kênh & 11 ngày dữ liệu bị mất, thiếu hoàn toàn dữ liệu lưu lượng \\
+\hline
+841210607378 & 15 phút & Không đầy đủ & Thấp (2.74\%) & 2 kênh & 10 ngày dữ liệu bị mất, không có dữ liệu flow \\
+\hline
+840786560116 & 15 phút & Không đầy đủ & Cao (45.21\%) & 3 kênh & Thiếu nhiều dữ liệu flow và áp suất đầu vào/ra \\
+\hline
+84797805118 & 15 phút & Không đầy đủ & Thấp (5.48\%) & 2 kênh & 20 ngày dữ liệu bị mất, không có áp suất trước, dữ liệu flow không đầy đủ \\
+\hline
+841212383325 & 5 phút & Không có dữ liệu & Rất cao (>51\%) & 2 kênh & Không có dữ liệu flow \\
+\hline
+841211914190 & 15 phút & Gần đầy đủ & Cao (32.05\%) & 3 kênh & 117 ngày dữ liệu bị mất \\
+\hline
+8401210607558 & 15 phút & Gần đầy đủ & Thấp (3.01\%) & 3 kênh & 11 ngày dữ liệu bị mất \\
+\hline
+\end{tabular}%
+}
+\caption{Tổng quan đặc điểm dữ liệu tại các điểm đo}
+\label{tab:data-overview}
+\end{table}
+
+Từ bảng tổng quan này, có thể thấy rằng hầu hết các điểm đo đều có vấn đề về tính đầy đủ của dữ liệu, đặc biệt là dữ liệu lưu lượng. Nhiều điểm đo như 840786560116, 841210802048 và 841210620665 hoàn toàn thiếu dữ liệu lưu lượng, trong khi các điểm khác như 840786560116 và 84797805118 có dữ liệu lưu lượng không đầy đủ với tỷ lệ khuyết thiếu cao. Sau khi phân tích kỹ lưỡng, chúng tôi quyết định sử dụng hai điểm đo 841211914190 và 8401210607558 cho các thực nghiệm tiếp theo. Mặc dù điểm 841211914190 có tỷ lệ khuyết thiếu khá cao (32,05\%), nhưng dữ liệu lưu lượng gần đầy đủ và các giá trị khuyết thiếu xuất hiện liên tiếp nhau (117 ngày), thuận lợi cho việc áp dụng các phương pháp bổ khuyết. Tương tự, điểm 8401210607558 có tỷ lệ khuyết thiếu thấp (3,01\%) với dữ liệu lưu lượng gần đầy đủ và các giá trị khuyết thiếu cũng xuất hiện liên tiếp (11 ngày), phù hợp cho việc phân tích và mô hình hóa.
+
+\subsubsection{Phân tích trực quan dữ liệu thiếu}
+
+Để hiểu rõ hơn về đặc điểm và phân bố của dữ liệu thiếu, chúng tôi tiến hành phân tích trực quan đối với các điểm đo đã chọn. Hình \ref{fig:missing_data_visualization_841211914190} và Hình \ref{fig:missing_data_visualization_8401210607558} trình bày tổng quan về dữ liệu và các khoảng thời gian thiếu dữ liệu tại hai điểm đo có dữ liệu lưu lượng gần đầy đủ.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_1/timeseries_combined_841211914190.png}
+    \caption{Phân tích trực quan dữ liệu tại điểm đo 841211914190. Từ trên xuống dưới: Lưu lượng, Áp suất đầu vào, Áp suất đầu ra, Chênh lệch áp suất, và Biểu đồ dữ liệu thiếu theo thời gian.}
+    \label{fig:missing_data_visualization_841211914190}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_1/timeseries_combined_8401210607558.png}
+    \caption{Phân tích trực quan dữ liệu tại điểm đo 8401210607558. Từ trên xuống dưới: Lưu lượng, Áp suất đầu vào, Áp suất đầu ra, Chênh lệch áp suất, và Biểu đồ dữ liệu thiếu theo thời gian.}
+    \label{fig:missing_data_visualization_8401210607558}
+\end{figure}
+
+Ngoài ra, chúng tôi cũng phân tích trực quan các điểm đo không có dữ liệu lưu lượng để hiểu rõ hơn về tình trạng dữ liệu trong toàn bộ hệ thống. Hình \ref{fig:no_flow_data_841210802047} và Hình \ref{fig:no_flow_data_841210620665} minh họa dữ liệu tại hai điểm đo thiếu hoàn toàn dữ liệu lưu lượng.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_1/timeseries_combined_840786560116.png}
+    \caption{Phân tích trực quan dữ liệu tại điểm đo 840786560116. Chỉ có dữ liệu áp suất đầu vào và đầu ra, hoàn toàn thiếu dữ liệu lưu lượng.}
+    \label{fig:no_flow_data_841210802047}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_1/timeseries_combined_841210620665.png}
+    \caption{Phân tích trực quan dữ liệu tại điểm đo 841210620665. Chỉ có dữ liệu áp suất đầu vào và đầu ra, hoàn toàn thiếu dữ liệu lưu lượng.}
+    \label{fig:no_flow_data_841210620665}
+\end{figure}
+
+Từ các biểu đồ trực quan, có thể thấy rõ rằng dữ liệu thiếu tại điểm đo 841211914190 tập trung chủ yếu vào một khoảng thời gian liên tục kéo dài 117 ngày, trong khi tại điểm đo 8401210607558, dữ liệu thiếu xuất hiện trong một khoảng thời gian ngắn hơn (11 ngày). Đối với các điểm đo 841210802047 và 841210620665, mặc dù có dữ liệu áp suất tương đối đầy đủ, nhưng hoàn toàn thiếu dữ liệu lưu lượng, khiến chúng không phù hợp cho các phân tích cần thông tin về lưu lượng nước. Bảng \ref{tab:missing_data_841211914190} và Bảng \ref{tab:missing_data_8401210607558} cung cấp thông tin chi tiết về các ngày thiếu dữ liệu và số lượng điểm dữ liệu bị thiếu tại mỗi điểm đo.
+
+\begin{table}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Khoảng thời gian} & \textbf{Số ngày} & \textbf{Số điểm dữ liệu thiếu/ngày} \\
+\hline
+2024-01-01 đến 2024-04-11 & 102 & 96 (toàn bộ ngày) \\
+\hline
+2024-04-12 & 1 & 53 \\
+\hline
+2024-09-10 đến 2024-09-23 & 14 & 13-75 (thiếu một phần) \\
+\hline
+\end{tabular}%
+}
+\caption{Tóm tắt dữ liệu thiếu tại điểm đo 841211914190}
+\label{tab:missing_data_841211914190}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Ngày} & \textbf{Số lượng điểm dữ liệu thiếu} \\
+\hline
+2024-02-29 & 2 \\
+\hline
+2024-09-10 & 84 \\
+\hline
+2024-09-11 & 28 \\
+\hline
+2024-09-12 & 36 \\
+\hline
+2024-09-13 & 46 \\
+\hline
+2024-09-14 & 30 \\
+\hline
+2024-09-15 & 34 \\
+\hline
+2024-09-16 & 26 \\
+\hline
+2024-09-17 & 40 \\
+\hline
+2024-09-18 & 24 \\
+\hline
+2024-09-19 & 32 \\
+\hline
+\end{tabular}
+\caption{Chi tiết dữ liệu thiếu tại điểm đo 8401210607558}
+\label{tab:missing_data_8401210607558}
+\end{table}
+
+Phân tích trực quan và thống kê chi tiết về dữ liệu thiếu giúp chúng tôi xác định rõ các khoảng thời gian cần được xử lý trong bước tiếp theo của quá trình tiền xử lý dữ liệu. Đặc biệt, việc hiểu rõ đặc điểm của dữ liệu thiếu sẽ giúp lựa chọn phương pháp bổ khuyết phù hợp nhất cho từng trường hợp cụ thể.
+
+\subsection{Xử lý dữ liệu thiếu}
+\subsection{Feature selection}
+\subsection{Tạo chuỗi dữ liệu huấn luyện}
+\subsection{Tạo tập dữ liệu huấn luyện và kiểm tra}

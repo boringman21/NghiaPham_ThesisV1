@@ -1,12 +1,102 @@
-\section{Bổ khuyết các chỉ số chất lượng không khí dựa trên mất mát dữ liệu nhân tạo trên tập viễn thám}\label{ex-3}
-\subsection{Tổng quan}
-Trong thí nghiệm \ref{ex-3}, dữ liệu viễn thám sẽ được xoá ngẫu nhiên để đạt tỉ lệ mất dữ liệu lần lượt là 30\%, 40\% và 50\%. Sau đó, các phương pháp bổ khuyết dữ liệu sẽ được sử dụng để điền khuyết giá trị $PM_{2.5}$ bị mất. Tập dữ liệu sau khi được xử lý sẽ được so sánh với tập dữ liệu ban đầu để đánh giá độ sai lệch. Hình \ref{fig:ex3_ex3} mô tả toàn bộ lược đồ thí nghiệm.
-\begin{figure}[h]
+\section{Mô tả Dữ liệu}
+
+\subsection{Bối cảnh thu thập dữ liệu}
+
+Tập dữ liệu được sử dụng trong nghiên cứu này được thu thập từ một hệ thống giám sát tự động (automatic logger system) triển khai thực tế tại khu vực Bàu Bàng (Bình Dương), một vùng có hạ tầng cấp thoát nước đang được theo dõi và đánh giá thường xuyên. Dữ liệu được thu thập trong khoảng thời gian một năm, từ đầu năm 2024 đến cuối năm 2024, cung cấp bộ dữ liệu toàn diện về hoạt động của hệ thống trong các mùa và điều kiện khác nhau. Hệ thống sử dụng các thiết bị cảm biến điện tử để đo lường các chỉ số kỹ thuật quan trọng tại nhiều điểm đo phân bố trong mạng lưới. Trong phạm vi nghiên cứu này, dữ liệu tập trung vào hai loại chỉ số chính: \textbf{áp suất (Pressure)} và \textbf{lưu lượng (Flow)} — hai thông số nền tảng trong phân tích hiệu suất của hệ thống cấp nước.
+
+Việc thu thập dữ liệu được thực hiện tự động và liên tục, cho phép hình thành các chuỗi thời gian có độ phân giải cao (mỗi 15 phút), từ đó phục vụ các bài toán như phân tích hành vi tiêu thụ, phát hiện rò rỉ, hoặc kiểm soát chất lượng vận hành.
+
+\subsection{Tổ chức và cấu trúc dữ liệu}
+
+Dữ liệu được lưu trữ và cung cấp dưới dạng ba tệp CSV chính: \texttt{find\_query\_1.csv}, \texttt{find\_query\_2.csv}, và \texttt{find\_query\_3.csv}. Mỗi tệp phản ánh thông tin đo được tại các điểm cảm biến trong các khoảng thời gian khác nhau. Các tệp có cấu trúc đồng nhất, trong đó mỗi dòng dữ liệu tương ứng với một phiên ghi dữ liệu tại một kênh cụ thể trong một ngày.
+
+\subsubsection{Các trường dữ liệu chính}
+
+Mỗi bản ghi dữ liệu bao gồm:
+
+\begin{itemize}
+    \item \texttt{smsNumber}: Mã định danh duy nhất của thiết bị ghi dữ liệu (logger).
+    \item \texttt{chNumber}: Số hiệu kênh đo trên thiết bị. Một thiết bị có thể có nhiều kênh đo (ví dụ: kênh đo áp suất, kênh đo lưu lượng, v.v.).
+    \item \texttt{dataType}: Loại dữ liệu được đo (ví dụ: \texttt{Pressure}, \texttt{Flow}).
+    \item \texttt{startDate}, \texttt{endDate}: Mốc thời gian bắt đầu và kết thúc phiên đo dữ liệu.
+    \item \texttt{dataValues.n.dataTime}, \texttt{dataValues.n.dataValue} (với $n = 0,1,\ldots,95$): Cặp giá trị thời gian - giá trị đo, được ghi nhận đều đặn mỗi 15 phút trong vòng 24 giờ, tạo thành chuỗi thời gian có độ phân giải cao.
+    \item \texttt{count}, \texttt{sum}, \texttt{average}, \texttt{min}, \texttt{max}: Các thống kê mô tả của chuỗi giá trị trong ngày.
+    \item \texttt{lastDataUpdateTime}: Thời gian cập nhật cuối cùng, cho biết độ mới và độ tin cậy của dữ liệu.
+\end{itemize}
+
+\noindent
+\textbf{Lưu ý:} Các trường dữ liệu dạng \texttt{dataValues.n.dataTime} và \texttt{dataValues.n.dataValue} được trải rộng dưới dạng các cột riêng biệt (flattened) thay vì mảng lồng nhau như trong JSON.
+
+\vspace{1em}
+Hình~\ref{fig:sample_data_structure} dưới đây minh họa cách tổ chức một dòng dữ liệu trong tệp CSV, thể hiện rõ dạng bảng 96 cặp giá trị tương ứng với từng khung giờ trong ngày.
+
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=\linewidth]{image/section6_2/ex_vientham.drawio.png}
-    \caption{Lược đồ nghiên cứu của thí nghiệm \ref{ex-3}}
-    \label{fig:ex3_ex3}
+    \includegraphics[width=0.95\textwidth]{image/section6_1/sample_data_structure.png}
+    \caption{Cấu trúc dữ liệu một dòng trong tệp \texttt{find\_query\_x.csv}. Mỗi dòng tương ứng với một ngày đo tại một kênh cảm biến.}
+    \label{fig:sample_data_structure}
 \end{figure}
 
-...
+\subsection{Thông tin ánh xạ kênh đo}
 
+Để xác định rõ chức năng và đơn vị đo của từng kênh, tệp \texttt{channel\_data\_type.csv} được sử dụng như bảng ánh xạ hỗ trợ. Mỗi dòng trong tệp này ánh xạ một thiết bị và kênh cụ thể với các thông tin mô tả kèm theo:
+
+\begin{itemize}
+    \item \texttt{Smsnumber}: Trùng với \texttt{smsNumber} trong tệp dữ liệu chính.
+    \item \texttt{SerialNumber}: Mã số sản xuất của thiết bị.
+    \item \texttt{ChannelNumber}: Số kênh đo (ví dụ: 0, 1, 2).
+    \item \texttt{ChannelType}: Loại cảm biến, thường là \texttt{Pressure} hoặc \texttt{Flow}.
+    \item \texttt{ChannelUnits}: Đơn vị đo, ví dụ: \texttt{m}, \texttt{l}, \texttt{m\textsuperscript{3}}, hoặc \texttt{mA3}.
+\end{itemize}
+
+\noindent
+Bảng ánh xạ giúp xác định rõ ý nghĩa dữ liệu từ mỗi kênh đo — ví dụ, kênh số 0 có thể là áp suất tính theo mét cột nước, trong khi kênh số 1 là lưu lượng tính theo lít.
+
+\vspace{0.5em}
+Một ví dụ minh họa được trình bày trong Hình~\ref{fig:channel_mapping_table}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{image/section6_1/channel_mapping_table.png}
+    \caption{Ví dụ bảng ánh xạ từ tệp \texttt{channel\_data\_type.csv}, liên kết giữa thiết bị, kênh đo, và đơn vị.}
+    \label{fig:channel_mapping_table}
+\end{figure}
+
+\subsection{Đặc điểm kỹ thuật của chuỗi dữ liệu}
+
+Mỗi chuỗi dữ liệu trong một ngày bao gồm 96 giá trị đo, được ghi lại với chu kỳ 15 phút (tức 4 giá trị mỗi giờ). Đây là một chuẩn phổ biến trong hệ thống đo lường cấp thoát nước và điện lực, vì nó cân bằng tốt giữa độ chi tiết và dung lượng lưu trữ. Cấu trúc này rất phù hợp cho các mô hình học máy thời gian thực, mô hình hồi quy chuỗi thời gian (time series regression), hoặc phát hiện bất thường (anomaly detection).
+
+Các thống kê mô tả đi kèm (min, max, trung bình) cho phép kiểm tra sơ bộ chất lượng dữ liệu hoặc phục vụ tiền xử lý như kiểm tra ngưỡng bất thường hoặc các khoảng thời gian bị thiếu dữ liệu.
+
+\subsection{Ý nghĩa cấu trúc kênh đo tại mỗi điểm}
+
+Tùy theo số lượng và loại kênh đo (\texttt{chNumber}) được cấu hình trên từng thiết bị, ta có thể suy ra cấu hình vật lý và chức năng quan trắc tại mỗi điểm đo. Dưới đây là hai mô hình phổ biến:
+
+\begin{itemize}
+    \item \textbf{Trường hợp đầy đủ (3 kênh):} Nếu một điểm đo có đủ ba kênh với \texttt{chNumber} = 0, 1, 2 thì có nghĩa:
+    \begin{itemize}
+        \item Kênh \texttt{chNumber} = 0: Đo áp suất đầu vào (áp suất trước điểm đo).
+        \item Kênh \texttt{chNumber} = 1: Đo lưu lượng qua điểm đo.
+        \item Kênh \texttt{chNumber} = 2: Đo áp suất đầu ra (áp suất sau điểm đo).
+    \end{itemize}
+    Cấu hình này thường được áp dụng tại các điểm giao nhận nước, các trạm bơm, hoặc đoạn đường ống quan trọng, nơi cần theo dõi áp suất trước/sau để phát hiện rò rỉ hoặc đánh giá tổn thất áp suất cục bộ.
+    
+    \item \textbf{Trường hợp tối giản (2 kênh):} Nếu điểm đo chỉ có \texttt{chNumber} = 0 và 1, ta hiểu rằng:
+    \begin{itemize}
+        \item Kênh 0 vẫn là áp suất (không phân biệt đầu vào/ra).
+        \item Kênh 1 là lưu lượng.
+    \end{itemize}
+    Trường hợp này phổ biến hơn ở các điểm tiêu thụ đơn lẻ (ví dụ: đồng hồ nước hộ gia đình hoặc điểm nhánh nhỏ trong mạng lưới).
+\end{itemize}
+
+Nhờ quy ước này, ta có thể phân loại logic cấu trúc điểm đo và mở rộng sang các bài toán đánh giá mạng lưới như phân tích tổn thất áp suất, suy luận chiều dòng chảy, hay xác định vị trí bất thường dựa trên tương quan giữa áp suất và lưu lượng.
+
+% \vspace{0.5em}
+% Hình~\ref{fig:channel_logic_structure} dưới đây minh họa trực quan hai cấu hình điển hình này:
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.85\textwidth]{images/channel_logic_structure.png}
+%     \caption{Cấu hình logic các kênh đo tại điểm: (a) đo đầy đủ đầu vào - lưu lượng - đầu ra; (b) đo áp suất và lưu lượng tổng quát.}
+%     \label{fig:channel_logic_structure}
+% \end{figure}

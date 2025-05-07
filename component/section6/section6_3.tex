@@ -580,3 +580,69 @@ Quá trình huấn luyện được hỗ trợ bởi các cơ chế giám sát h
 Chiến lược kép này không chỉ cho phép đánh giá hiệu suất của các kiến trúc mô hình khác nhau mà còn cung cấp cái nhìn sâu sắc về tính hiệu quả của việc huấn luyện mô hình chuyên biệt so với mô hình tổng quát trong bối cảnh dự báo lưu lượng nước và phát hiện bất thường. Kết quả của quá trình huấn luyện và đánh giá hiệu suất sẽ được trình bày chi tiết trong phần tiếp theo.
 
 \subsection{Đánh giá mô hình}
+
+Dựa trên kết quả huấn luyện từ hai chiến lược khác nhau, chúng tôi tiến hành phân tích chi tiết hiệu suất của các mô hình LSTM và GRU trong việc dự báo lưu lượng nước. Kết quả được đánh giá thông qua hai chỉ số chính: RMSE (Root Mean Square Error) và MAE (Mean Absolute Error), phản ánh độ chính xác của các dự báo.
+
+\subsubsection{Đánh giá theo từng điểm đo}
+
+Bảng \ref{tab:model_performance_by_location} trình bày kết quả đánh giá hiệu suất của các mô hình tại từng điểm đo riêng biệt.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Hiệu suất của các mô hình theo từng điểm đo}
+    \label{tab:model_performance_by_location}
+    \begin{tabular}{|l|l|c|c|c|c|}
+        \hline
+        \textbf{Điểm đo} & \textbf{Dữ liệu đầu vào} & \multicolumn{2}{c|}{\textbf{LSTM}} & \multicolumn{2}{c|}{\textbf{GRU}} \\
+        \cline{3-6}
+        & & \textbf{RMSE} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAE} \\
+        \hline
+        \multirow{2}{*}{841211914190} & Chỉ lưu lượng & 31.0548 & 17.6299 & 31.4756 & 17.7724 \\
+        \cline{2-6}
+        & Lưu lượng + áp suất & 30.0085 & 18.0322 & 30.0749 & 17.4541 \\
+        \hline
+        \multirow{2}{*}{8401210607558} & Chỉ lưu lượng & 45.5464 & 31.3453 & 45.4384 & 31.3374 \\
+        \cline{2-6}
+        & Lưu lượng + áp suất & 45.7258 & 31.7983 & 48.1915 & 33.1949 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Từ bảng kết quả, có thể thấy tại điểm đo 841211914190, việc bổ sung thêm dữ liệu áp suất đã cải thiện nhẹ hiệu suất của cả hai mô hình (giảm RMSE từ 31.0548 xuống 30.0085 đối với LSTM). Điều này phù hợp với lý thuyết về mối quan hệ thủy lực giữa áp suất và lưu lượng trong hệ thống cấp nước.
+
+Tuy nhiên, tại điểm đo 8401210607558, việc bổ sung thêm dữ liệu áp suất không mang lại cải thiện đáng kể cho hiệu suất mô hình. Thực tế, mô hình GRU còn cho thấy sự suy giảm hiệu suất khi sử dụng thêm dữ liệu áp suất (RMSE tăng từ 45.4384 lên 48.1915).
+
+\subsubsection{Đánh giá mô hình tổng hợp}
+
+Bảng \ref{tab:combined_model_performance} trình bày kết quả đánh giá hiệu suất của các mô hình khi được huấn luyện trên tập dữ liệu kết hợp từ cả hai điểm đo.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Hiệu suất của các mô hình tổng hợp}
+    \label{tab:combined_model_performance}
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Dữ liệu đầu vào} & \multicolumn{2}{c|}{\textbf{LSTM}} & \multicolumn{2}{c|}{\textbf{GRU}} \\
+        \cline{2-5}
+        & \textbf{RMSE} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAE} \\
+        \hline
+        Chỉ lưu lượng & 42.7537 & 28.5852 & 42.7337 & 28.5339 \\
+        \hline
+        Lưu lượng + áp suất & 43.5561 & 28.7302 & 45.0266 & 29.7936 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsubsection{Phân tích và thảo luận}
+
+Từ kết quả trên, có thể rút ra một số nhận xét quan trọng:
+
+\begin{enumerate}
+    \item \textbf{Hiệu suất tương đối giữa LSTM và GRU:} Cả hai kiến trúc mạng đều thể hiện hiệu suất tương đương trong hầu hết các trường hợp, với sự khác biệt không đáng kể về RMSE và MAE. Điều này phù hợp với các nghiên cứu trước đây về khả năng xử lý chuỗi thời gian của hai kiến trúc này.
+    
+    \item \textbf{Tác động của việc bổ sung dữ liệu áp suất:} Việc bổ sung thêm dữ liệu áp suất không phải lúc nào cũng mang lại cải thiện hiệu suất. Tại điểm đo 841211914190, việc bổ sung dữ liệu áp suất có tác động tích cực, trong khi tại điểm đo 8401210607558, tác động này không rõ ràng và thậm chí có thể gây suy giảm hiệu suất.
+    
+    \item \textbf{Chiến lược huấn luyện:} Mô hình được huấn luyện riêng cho từng điểm đo thường cho hiệu suất tốt hơn so với mô hình tổng hợp, đặc biệt là tại điểm đo 841211914190. Điều này cho thấy việc nắm bắt đặc thù riêng của từng điểm đo có thể quan trọng hơn việc học các mẫu chung từ toàn bộ hệ thống.
+\end{enumerate}
+
+Bảng \ref{tab:model_performance_by_location} và \ref{tab:combined_model_performance} cung cấp cái nhìn tổng quan rõ ràng về hiệu suất của các mô hình, giúp dễ dàng so sánh và đánh giá các chiến lược huấn luyện khác nhau. Kết quả này cung cấp cơ sở cho việc lựa chọn chiến lược huấn luyện và kiến trúc mô hình phù hợp cho bài toán dự báo lưu lượng nước trong hệ thống cấp nước. Việc cân nhắc giữa độ phức tạp của mô hình và hiệu suất dự báo là yếu tố quan trọng trong quá trình triển khai thực tế.

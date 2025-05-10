@@ -1,92 +1,62 @@
-flowchart LR
+flowchart TB
     classDef dataPrep fill:#d4f1f9,stroke:#05445E,stroke-width:2px,color:#05445E,font-weight:bold
     classDef modelDev fill:#d8f3dc,stroke:#1B4332,stroke-width:2px,color:#1B4332,font-weight:bold
     classDef anomalyAnalysis fill:#fff1e6,stroke:#9E2A2B,stroke-width:2px,color:#9E2A2B,font-weight:bold
     classDef evaluation fill:#e9ecef,stroke:#343a40,stroke-width:2px,color:#343a40,font-weight:bold
-    classDef phaseTitle font-weight:bold,font-size:14px
+    classDef phaseTitle font-weight:bold,font-size:12px
     
     subgraph Process ["Quy trình phát hiện bất thường"]
         direction TB
         
         subgraph DataPrep ["GIAI ĐOẠN 1: CHUẨN BỊ DỮ LIỆU"]
-            direction LR
-            A["1.Thu thập dữ liệu<br>từ các điểm đo"] --> 
-            B["2.Lọc điểm đo<br>đủ 3 kênh dữ liệu"] --> 
-            C["3.Tiền xử lý"]
-            
-            subgraph Preprocessing
-                direction TB
-                C1["3.1 Chuyển đổi dữ liệu<br>theo kênh đo"]
-                C2["3.2 Xử lý dữ liệu thiếu<br>bằng Listwise Deletion"]
-                C3["3.3 Lựa chọn đặc trưng<br>và tạo dữ liệu huấn luyện"]
-                
-                C1 --> C2 --> C3
-            end
-            
-            C --- Preprocessing
+            direction TB
+            A["1.Thu thập dữ liệu"] --> 
+            B["2.Lọc điểm đo đủ 3 kênh"] --> 
+            C["3.Tiền xử lý dữ liệu"]
         end
         
         subgraph ModelDev ["GIAI ĐOẠN 2: PHÁT TRIỂN MÔ HÌNH"]
-            direction LR
-            D["4.Phân chia<br>dữ liệu 80/20"] -->
-            E["5.Huấn luyện<br>mô hình dự báo"]
+            direction TB
+            D["4.Phân chia dữ liệu 80/20"] -->
+            E["5.Huấn luyện mô hình"] -->
+            F["6.Đánh giá hiệu quả"]
             
-            subgraph Training
-                direction TB
-                E1["5.1 Huấn luyện<br>mô hình đơn biến"]
-                E2["5.2 Huấn luyện<br>mô hình đa biến"]
-                
-                E1 --- E2
+            subgraph Training [" "]
+                direction LR
+                E1["5.1 Mô hình đơn biến"] --- E2["5.2 Mô hình đa biến"]
             end
             
-            E --- Training -->
-            F["6.Đánh giá<br>hiệu quả mô hình"]
+            E --- Training
         end
         
         subgraph AnomalyDetection ["GIAI ĐOẠN 3: PHÁT HIỆN BẤT THƯỜNG"]
-            direction LR
-            G["7.Phương pháp<br>phát hiện bằng sai số"]
+            direction TB
+            G["7.Phát hiện bằng sai số"]
+            H["8.Học không giám sát"]
             
-            H["8. Phương pháp<br>học không giám sát"]
-            
-            subgraph Methods
-                direction TB
-                H1["8.1 Isolation<br>Forest"]
-                H2["8.2 Local<br>Outlier Factor"]
-                H3["8.3 One-Class<br>SVM"]
-                
-                H1 --- H2 --- H3
+            subgraph Methods [" "]
+                direction LR
+                H1["8.1 Isolation Forest"] --- H2["8.2 LOF"] --- H3["8.3 One-Class SVM"]
             end
             
-            G & H --- Methods
+            H --- Methods
         end
         
         subgraph ResultAnalysis ["GIAI ĐOẠN 4: PHÂN TÍCH KẾT QUẢ"]
-            I["9 So sánh và đánh giá<br>các phương pháp<br>phát hiện bất thường"]
+            I["9.So sánh và đánh giá các phương pháp"]
         end
     end
     
     DataPrep --> ModelDev --> AnomalyDetection --> ResultAnalysis
     
-    subgraph Details ["THÔNG TIN BỔ SUNG"]
-        direction TB
-        N1["Kênh dữ liệu<br>Lưu lượng (chNumber = 1)<br>Áp suất đầu vào (chNumber = 0)<br>Áp suất đầu ra (chNumber = 2)"]
-        N2["Chuỗi huấn luyện<br>Input: 6 giờ dữ liệu liên tục<br>Output: giá trị sau 15 phút"]
-        N3["Mô hình sử dụng<br>LSTM và GRU"]
-        N4["Ngưỡng phát hiện<br>error > 3 x std(error)"]
-    end
-    
     A:::dataPrep
     B:::dataPrep
     C:::dataPrep
-    C1:::dataPrep
-    C2:::dataPrep
-    C3:::dataPrep
     D:::modelDev
     E:::modelDev
     E1:::modelDev
     E2:::modelDev
-    F:::evaluation
+    F:::modelDev
     G:::anomalyAnalysis
     H:::anomalyAnalysis
     H1:::anomalyAnalysis
@@ -98,4 +68,3 @@ flowchart LR
     ModelDev:::phaseTitle
     AnomalyDetection:::phaseTitle
     ResultAnalysis:::phaseTitle
-    Details:::phaseTitle

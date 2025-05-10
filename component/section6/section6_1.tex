@@ -1,12 +1,19 @@
 \chapter{Phân tích, huấn luyên và đánh giá hiệu quả trên dữ liệu thực tế}
 \section{Tổng quan}\label{ex-1}
-...
 
-\begin{figure}[h]
+Trong chương này, chúng tôi trình bày quy trình phát hiện bất thường trên dữ liệu thực tế từ hệ thống cấp nước. Quy trình được chia thành bốn giai đoạn chính như minh họa trong Hình \ref{fig:section6_1-experiment}:
+
+Giai đoạn 1 tập trung vào chuẩn bị dữ liệu, bao gồm thu thập dữ liệu từ các điểm đo, lọc các điểm đo có đủ ba kênh dữ liệu (lưu lượng, áp suất đầu vào và áp suất đầu ra), và tiền xử lý dữ liệu.
+
+Giai đoạn 2 liên quan đến phát triển mô hình, với việc phân chia dữ liệu theo tỷ lệ 80/20 cho huấn luyện và kiểm tra, huấn luyện các mô hình dự báo đơn biến và đa biến, và đánh giá hiệu quả của các mô hình.
+
+Giai đoạn 3 tập trung vào phát hiện bất thường, sử dụng phương pháp phát hiện bằng sai số và các phương pháp học không giám sát như Isolation Forest, Local Outlier Factor và One-Class SVM.
+
+Giai đoạn 4 là phân tích kết quả, so sánh và đánh giá các phương pháp phát hiện bất thường đã triển khai.
+
+\begin{figure}[h!]
     \centering
-    \includegraphics[width=\linewidth]{image/section6_1/experiment.drawio.png}
-    \caption{Lược đồ nghiên cứu của thí nghiệm \ref{ex-1}}
+    \includegraphics[width=\linewidth]{image/section6_1/luoc_do_nghien_cuu_real_dataset.png}
+    \caption{Lược đồ quy trình phát hiện bất thường}
     \label{fig:section6_1-experiment}
 \end{figure}
-Trong thí nghiệm \ref{ex-1}, dữ liệu chỉ số không khí sẽ được xoá ngẫu nhiên để đạt tỉ lệ mất dữ liệu lần lượt là 15\%, 20\% và 30\%. Sau đó, các phương pháp bổ khuyết dữ liệu sẽ được sử dụng để cập nhật các giá trị bị mất. Tập dữ liệu sau khi được xử lý sẽ được so sánh với tập dữ liệu ban đầu để đánh giá độ sai lệch. Kế tiếp, 4 tập dữ liệu được bổ khuyết tốt nhất của mỗi chỉ số trong trường hợp khuyết 20\% dữ liệu sẽ được đem đi huấn luyện các mô hình dự đoán để xem xét mức độ tác động lên chất lượng của các mô hình dự đoán. Hình \ref{fig:section6_1-experiment} mô tả toàn bộ lược đồ thí nghiệm.
-...

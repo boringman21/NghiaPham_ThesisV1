@@ -1,9 +1,365 @@
-% \section{Phát hiện bất thường}
-% \subsection{Tổng quan}
-% % TODO: tạo lược đồ tại đây
-% \subsection{Phát hiện bằng sai số}
-% \subsection{Phát hiện bằng các phương pháp học không giám sát}
-% \subsubsection{Isolation Forest}
-% \subsubsection{LOF}
-% \subsubsection{One-class SVM}
-% \subsection{Phân tích kết quả}
+\section{Phát hiện bất thường}
+\subsection{Tổng quan}
+% TODO: tạo lược đồ tại đây
+
+\subsection{Phát hiện bằng sai số}
+Trong phần này, chúng tôi trình bày phương pháp phát hiện bất thường dựa trên sai số dự đoán của các mô hình đã được huấn luyện. Phương pháp này dựa trên nguyên tắc cơ bản về thống kê mà theo đó, trong điều kiện bình thường, sai số dự đoán của mô hình thường tuân theo phân phối xác suất nhất định, và các giá trị nằm ngoài khoảng tin cậy có thể được xem là bất thường.
+
+\subsubsection{Cơ sở lý thuyết}
+Như đã trình bày trong Phần 3.2, dữ liệu bất thường (anomalies hoặc outliers) là các quan sát khác biệt đáng kể so với mẫu hành vi thông thường của chuỗi thời gian. Một giá trị \( y_t \) được coi là bất thường nếu:
+
+\begin{equation}
+    |y_t - \hat{y}_t| > \delta,
+\end{equation}
+
+trong đó \(\hat{y}_t\) là giá trị dự đoán từ mô hình, và \(\delta\) là ngưỡng xác định dựa trên phân phối của dữ liệu.
+
+Trong nghiên cứu này, chúng tôi chọn ngưỡng \(\delta\) bằng ba lần độ lệch chuẩn của sai số dự đoán:
+
+\begin{equation}
+\delta = 3 \times \sigma_e
+\end{equation}
+
+trong đó \(\sigma_e\) là độ lệch chuẩn của sai số dự đoán trong tập huấn luyện, được tính bằng:
+
+\begin{equation}
+\sigma_e = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2}
+\end{equation}
+
+Việc sử dụng ngưỡng ba lần độ lệch chuẩn dựa trên quy tắc 3-sigma, một nguyên lý thống kê được áp dụng rộng rãi trong phát hiện bất thường \cite{malhotra2016lstm, hundman2018detecting}. Theo quy tắc này, đối với dữ liệu tuân theo phân phối chuẩn, khoảng 99.7\% các quan sát sẽ nằm trong phạm vi ±3 độ lệch chuẩn từ giá trị trung bình. Do đó, bất kỳ quan sát nào vượt ra ngoài khoảng này có xác suất rất thấp (khoảng 0.3\%) để xảy ra trong điều kiện bình thường, và có thể được xem là bất thường.
+
+\subsubsection{Quy trình thực hiện}
+Quy trình phát hiện bất thường bằng phương pháp sai số được thực hiện theo các bước sau:
+
+\begin{enumerate}
+    \item Sử dụng các mô hình đã huấn luyện (LSTM và GRU với các chiến lược khác nhau) để dự đoán lưu lượng nước trên tập dữ liệu kiểm tra.
+    \item Tính toán sai số giữa giá trị dự đoán và giá trị thực tế: \(e_t = y_t - \hat{y}_t\).
+    \item Tính độ lệch chuẩn của sai số trên tập huấn luyện: \(\sigma_e\).
+    \item Xác định ngưỡng phát hiện bất thường: \(\delta = 3 \times \sigma_e\).
+    \item Đánh dấu các điểm dữ liệu là bất thường nếu \(|e_t| > \delta\).
+\end{enumerate}
+
+Quy trình này được áp dụng cho tất cả mười hai mô hình đã được huấn luyện trong phần trước: bao gồm các mô hình LSTM và GRU cho từng điểm đo riêng biệt và mô hình tổng hợp, với hai loại dữ liệu đầu vào khác nhau (chỉ lưu lượng và kết hợp lưu lượng với áp suất). Việc sử dụng nhiều mô hình khác nhau giúp đánh giá độ tin cậy và tính nhất quán của phương pháp này trong việc phát hiện bất thường.
+
+\subsubsection{Kết quả phát hiện bất thường}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_841211914190_lstm_flow.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình LSTM với dữ liệu lưu lượng tại điểm đo 841211914190. Đường màu xanh thể hiện giá trị thực tế, đường màu cam thể hiện giá trị dự đoán, và các điểm màu đỏ biểu thị các điểm dữ liệu được xác định là bất thường.}
+    \label{fig:anomaly_lstm_841211914190_flow}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_841211914190_lstm_allmetric.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình LSTM với dữ liệu kết hợp lưu lượng và áp suất tại điểm đo 841211914190.}
+    \label{fig:anomaly_lstm_841211914190_all}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_841211914190_gru_flow.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình GRU với dữ liệu lưu lượng tại điểm đo 841211914190.}
+    \label{fig:anomaly_gru_841211914190_flow}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_841211914190_gru_allmetric.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình GRU với dữ liệu kết hợp lưu lượng và áp suất tại điểm đo 841211914190.}
+    \label{fig:anomaly_gru_841211914190_all}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_8401210607558_lstm_flow.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình LSTM với dữ liệu lưu lượng tại điểm đo 8401210607558.}
+    \label{fig:anomaly_lstm_8401210607558_flow}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_8401210607558_lstm_all_metric.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình LSTM với dữ liệu kết hợp lưu lượng và áp suất tại điểm đo 8401210607558.}
+    \label{fig:anomaly_lstm_8401210607558_all}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_8401210607558_gru_flow.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình GRU với dữ liệu lưu lượng tại điểm đo 8401210607558.}
+    \label{fig:anomaly_gru_8401210607558_flow}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_8401210607558_gru_allmetric.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình GRU với dữ liệu kết hợp lưu lượng và áp suất tại điểm đo 8401210607558.}
+    \label{fig:anomaly_gru_8401210607558_all}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_combined_lstm_flow.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình LSTM tổng hợp với dữ liệu lưu lượng.}
+    \label{fig:anomaly_combined_lstm_flow}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_combined_lstm_allmetric.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình LSTM tổng hợp với dữ liệu kết hợp lưu lượng và áp suất.}
+    \label{fig:anomaly_combined_lstm_all}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_combined_gru_flow.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình GRU tổng hợp với dữ liệu lưu lượng.}
+    \label{fig:anomaly_combined_gru_flow}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_combined_gru_allmetric.png}
+    \caption{Kết quả phát hiện bất thường bằng mô hình GRU tổng hợp với dữ liệu kết hợp lưu lượng và áp suất.}
+    \label{fig:anomaly_combined_gru_all}
+\end{figure}
+
+\subsubsection{Phân tích kết quả phát hiện bất thường}
+
+Từ kết quả phát hiện bất thường trên các hình từ \ref{fig:anomaly_lstm_841211914190_flow} đến \ref{fig:anomaly_combined_gru_all}, chúng tôi rút ra một số nhận xét quan trọng:
+
+\begin{enumerate}
+    \item \textbf{Đặc điểm của các điểm bất thường:} Các điểm bất thường thường xuất hiện trong các khoảng thời gian có biến động lớn về lưu lượng, đặc biệt là các đỉnh tiêu thụ cao hoặc các thời điểm chuyển tiếp giữa tiêu thụ thấp và cao. Điều này phù hợp với đặc điểm dữ liệu chuỗi thời gian đã được mô tả trong Phần 3.2, trong đó các bất thường thường nổi bật hơn khi so sánh với mẫu hành vi điển hình.
+    
+    \item \textbf{Phân bố thời gian của các bất thường:} Các điểm bất thường không phân bố đều trong thời gian mà thường xuất hiện theo cụm, đặc biệt vào các thời điểm có sự thay đổi đột ngột trong lưu lượng nước. Điều này phản ánh khả năng có các sự kiện hoặc hiện tượng đặc biệt xảy ra trong những khoảng thời gian đó, có thể liên quan đến rò rỉ, sự cố van, hoặc tiêu thụ bất thường.
+    
+    \item \textbf{So sánh giữa các mô hình:} Mô hình LSTM và GRU cho kết quả phát hiện bất thường tương đối giống nhau, nhưng có một số điểm khác biệt, đặc biệt trong các khoảng thời gian có biến động phức tạp. Điều này cho thấy mỗi kiến trúc mạng có những điểm mạnh riêng trong việc nắm bắt các mẫu hành vi khác nhau trong dữ liệu.
+    
+    \item \textbf{Độ nhạy của mô hình:} Mô hình được huấn luyện riêng cho từng điểm đo thường nhạy hơn trong việc phát hiện các bất thường cục bộ, trong khi mô hình tổng hợp có xu hướng phát hiện các bất thường chung hơn. Điều này phù hợp với kết quả đánh giá hiệu suất mô hình đã được trình bày trong phần trước.
+    
+    \item \textbf{Tương quan với các hiện tượng ban đêm:} Đáng chú ý, một số điểm bất thường được phát hiện trong khoảng thời gian ban đêm (từ 00:00 đến 05:00), khi lưu lượng nước thường ổn định và thấp hơn. Điều này phù hợp với nhận định trong Phần 3.2 về việc biến động dữ liệu vào ban đêm và khả năng phát hiện bất thường rõ ràng hơn trong khoảng thời gian này. Các bất thường này có thể là dấu hiệu của rò rỉ, vì rò rỉ thường nổi bật hơn khi tiêu thụ bình thường thấp.
+\end{enumerate}
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|l|l|c|c|c|}
+        \hline
+        \textbf{Mô hình} & \textbf{Dữ liệu} & \textbf{Số bất} & \textbf{Tổng} & \textbf{\%} \\
+        & & \textbf{thường} & \textbf{điểm} & \\
+        \hline
+        \multirow{2}{*}{LSTM - 841211914190} & Chỉ lưu lượng & 167 & 4.733 & 3,53 \\
+        \cline{2-5}
+        & Lưu lượng + áp suất & 164 & 4.733 & 3,47 \\
+        \hline
+        \multirow{2}{*}{GRU - 841211914190} & Chỉ lưu lượng & 168 & 4.733 & 3,55 \\
+        \cline{2-5}
+        & Lưu lượng + áp suất & 149 & 4.733 & 3,15 \\
+        \hline
+        \multirow{2}{*}{LSTM - 8401210607558} & Chỉ lưu lượng & 236 & 6.745 & 3,50 \\
+        \cline{2-5}
+        & Lưu lượng + áp suất & 238 & 6.745 & 3,53 \\
+        \hline
+        \multirow{2}{*}{GRU - 8401210607558} & Chỉ lưu lượng & 240 & 6.745 & 3,56 \\
+        \cline{2-5}
+        & Lưu lượng + áp suất & 222 & 6.745 & 3,29 \\
+        \hline
+        \multirow{2}{*}{LSTM chung} & Chỉ lưu lượng & 184 & 4.733 & 3,89 \\
+        \cline{2-5}
+        (841211914190) & Lưu lượng + áp suất & 168 & 4.733 & 3,55 \\
+        \hline
+        \multirow{2}{*}{GRU chung} & Chỉ lưu lượng & 176 & 4.733 & 3,72 \\
+        \cline{2-5}
+        (841211914190) & Lưu lượng + áp suất & 165 & 4.733 & 3,49 \\
+        \hline
+        \multirow{2}{*}{LSTM chung} & Chỉ lưu lượng & 235 & 6.745 & 3,48 \\
+        \cline{2-5}
+        (8401210607558) & Lưu lượng + áp suất & 215 & 6.745 & 3,19 \\
+        \hline
+        \multirow{2}{*}{GRU chung} & Chỉ lưu lượng & 237 & 6.745 & 3,51 \\
+        \cline{2-5}
+        (8401210607558) & Lưu lượng + áp suất & 214 & 6.745 & 3,17 \\
+        \hline
+    \end{tabular}
+    \caption{Tổng hợp số lượng điểm bất thường được phát hiện bởi các mô hình}
+    \label{tab:anomaly_detection_summary}
+\end{table}
+
+Tỷ lệ điểm bất thường được phát hiện nằm trong khoảng từ 3,15\% đến 3,89\%, cao hơn đáng kể so với kỳ vọng lý thuyết 0,3\% dựa trên quy tắc 3-sigma. Điều này có thể được giải thích bởi một số yếu tố:
+
+\begin{itemize}
+    \item Phân phối sai số dự đoán có thể không hoàn toàn tuân theo phân phối chuẩn, mà có thể có đuôi dày hơn (heavy-tailed)
+    \item Sự hiện diện của các hiện tượng bất thường thực sự trong dữ liệu thực tế, bao gồm rò rỉ, sự cố thiết bị, hoặc các thay đổi đột ngột trong mẫu tiêu thụ
+    \item Khả năng của mô hình trong việc nắm bắt các mẫu hành vi phức tạp và phi tuyến trong dữ liệu thủy lực
+\end{itemize}
+
+Từ bảng \ref{tab:anomaly_detection_summary}, có thể thấy một số xu hướng đáng chú ý:
+
+\begin{itemize}
+    \item Tại điểm đo 841211914190, mô hình chung có xu hướng phát hiện nhiều bất thường hơn so với mô hình riêng (3,89\% so với 3,53\% đối với LSTM với dữ liệu chỉ lưu lượng). Điều này gợi ý rằng mô hình chung có thể nhạy hơn với các bất thường tại điểm đo này.
+    
+    \item Việc bổ sung dữ liệu áp suất thường làm giảm số lượng bất thường được phát hiện, đặc biệt là đối với mô hình GRU. Điều này cho thấy áp suất có thể cung cấp thông tin bổ sung giúp mô hình giải thích tốt hơn một số biến động trong lưu lượng mà ban đầu có thể bị coi là bất thường.
+    
+    \item Không có sự khác biệt lớn về tỷ lệ bất thường giữa hai điểm đo, mặc dù điểm đo 841211914190 có xu hướng biến động nhiều hơn khi sử dụng các mô hình và dữ liệu đầu vào khác nhau.
+\end{itemize}
+
+Phân tích chi tiết về phân bố thời gian của các điểm bất thường cho thấy chúng thường xuất hiện trong các khoảng thời gian cụ thể, điều này gợi ý rằng chúng không phải là các phát hiện ngẫu nhiên mà có thể liên quan đến các sự kiện hoặc hiện tượng thực tế.
+
+\subsubsection{Kết luận về phương pháp phát hiện bất thường dựa trên sai số}
+
+Phương pháp phát hiện bất thường dựa trên ngưỡng 3 lần độ lệch chuẩn đã chứng minh được hiệu quả trong việc xác định các điểm dữ liệu có hành vi khác thường trong chuỗi thời gian lưu lượng nước. Phương pháp này có một số ưu điểm đáng chú ý:
+
+\begin{itemize}
+    \item \textbf{Tính đơn giản và hiệu quả:} Phương pháp này dễ dàng triển khai và không đòi hỏi quá trình huấn luyện bổ sung sau khi đã có mô hình dự báo cơ sở.
+    
+    \item \textbf{Cơ sở thống kê vững chắc:} Dựa trên nguyên lý thống kê được chấp nhận rộng rãi (quy tắc 3-sigma), phương pháp này cung cấp một cách tiếp cận khách quan để xác định các điểm dữ liệu bất thường.
+    
+    \item \textbf{Kết quả trực quan:} Các điểm bất thường được xác định rõ ràng trên biểu đồ chuỗi thời gian, giúp dễ dàng theo dõi và phân tích.
+    
+    \item \textbf{Khả năng tùy chỉnh:} Ngưỡng phát hiện có thể được điều chỉnh (ví dụ: 2σ, 2,5σ, hoặc 3,5σ) tùy theo mức độ nhạy cảm mong muốn và đặc điểm cụ thể của dữ liệu.
+\end{itemize}
+
+Tuy nhiên, phương pháp này cũng có một số hạn chế cần lưu ý:
+
+\begin{itemize}
+    \item \textbf{Giả định về phân phối:} Phương pháp này đạt hiệu quả tối ưu khi sai số dự đoán tuân theo phân phối chuẩn, điều này không phải lúc nào cũng đúng trong thực tế.
+    
+    \item \textbf{Nhạy cảm với chất lượng mô hình:} Hiệu quả phát hiện bất thường phụ thuộc vào chất lượng của mô hình dự báo cơ sở. Một mô hình dự báo kém có thể tạo ra nhiều sai số lớn, dẫn đến tỷ lệ báo động giả cao.
+    
+    \item \textbf{Khó khăn trong việc phát hiện bất thường dần dần:} Các bất thường phát triển chậm (như rò rỉ nhỏ phát triển dần) có thể không tạo ra sai số đủ lớn để vượt qua ngưỡng 3σ trong giai đoạn đầu.
+\end{itemize}
+
+Trong các phần tiếp theo, chúng tôi sẽ khám phá các phương pháp học không giám sát khác để phát hiện bất thường, và so sánh hiệu quả của chúng với phương pháp dựa trên sai số đã trình bày.
+
+\subsection{Phát hiện bằng các phương pháp học không giám sát}
+
+Ngoài phương pháp dựa trên sai số dự đoán từ mô hình học sâu, chúng tôi tiếp tục khám phá khả năng phát hiện bất thường thông qua các phương pháp học không giám sát. Ưu điểm chính của các phương pháp này là khả năng hoạt động mà không cần dữ liệu được gán nhãn trước, cho phép phát hiện các dạng bất thường chưa biết trước. Các thuật toán không giám sát này có thể trực tiếp học từ cấu trúc dữ liệu để xác định các mẫu khác biệt so với phần lớn dữ liệu.
+
+\subsubsection{Isolation Forest}
+
+Isolation Forest (IF) là thuật toán phát hiện bất thường dựa trên nguyên lý rằng các điểm dữ liệu bất thường thường dễ dàng bị "cô lập" hơn so với các điểm dữ liệu bình thường. Thuật toán xây dựng các cây quyết định ngẫu nhiên và đánh giá độ bất thường dựa trên số lượng phân chia cần thiết để cô lập một điểm dữ liệu.
+
+\paragraph{Nguyên lý hoạt động}
+Isolation Forest hoạt động thông qua các bước sau:
+\begin{enumerate}
+    \item Xây dựng một tập hợp các cây quyết định (Isolation Trees).
+    \item Tại mỗi nút của cây, thuật toán chọn ngẫu nhiên một thuộc tính và một ngưỡng phân chia.
+    \item Quá trình phân chia tiếp tục cho đến khi mỗi điểm dữ liệu được cô lập hoàn toàn.
+    \item Điểm bất thường được xác định dựa trên độ sâu trung bình cần thiết để cô lập điểm đó - các điểm cần ít sự phân chia hơn (độ sâu cây thấp hơn) được coi là bất thường.
+\end{enumerate}
+
+Đối với bộ dữ liệu chuỗi thời gian của chúng tôi, Isolation Forest được áp dụng trên ma trận đặc trưng bao gồm ba thông số: lưu lượng, áp suất đầu vào và áp suất đầu ra. Mỗi điểm dữ liệu trong không gian ba chiều này được đánh giá mức độ bất thường dựa trên khả năng bị cô lập.
+
+\paragraph{Triển khai và kết quả}
+Chúng tôi triển khai Isolation Forest với các tham số sau:
+\begin{itemize}
+    \item Số lượng cây (n\_estimators): 100
+    \item Tỷ lệ mẫu con (contamination): được ước tính là 0.05 dựa trên phân tích sơ bộ
+    \item Số lượng mẫu tối đa cho mỗi cây (max\_samples): "auto" (tối đa 256 mẫu)
+\end{itemize}
+
+Sau khi áp dụng Isolation Forest trên toàn bộ tập dữ liệu, thuật toán đã phát hiện được 1.682 điểm bất thường, chiếm 4,94\% tổng số điểm dữ liệu. Hình \ref{fig:isolation_forest_results} minh họa kết quả phát hiện bất thường của Isolation Forest trên chuỗi thời gian.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\textwidth]{image/section6_3/isolation_forest_results.png}
+%     \caption{Kết quả phát hiện bất thường bằng Isolation Forest. Các điểm màu đỏ biểu thị các điểm được xác định là bất thường.}
+%     \label{fig:isolation_forest_results}
+% \end{figure}
+
+Như có thể thấy từ hình trên, Isolation Forest đặc biệt nhạy với các điểm dữ liệu có sự biến động mạnh, đặc biệt là các đỉnh và đáy cực trị trong chuỗi lưu lượng. Đây là đặc tính phổ biến của thuật toán này, phù hợp với việc phát hiện các bất thường dạng điểm (point anomalies) và các biến động đột ngột, điều này đặc biệt hữu ích trong việc phát hiện sự cố rò rỉ đột ngột hoặc sự thay đổi lớn trong mẫu tiêu thụ nước.
+
+\subsubsection{Local Outlier Factor (LOF)}
+
+Phương pháp Local Outlier Factor (LOF) dựa trên khái niệm mật độ cục bộ để phát hiện bất thường. Thay vì xem xét toàn bộ không gian dữ liệu, LOF tập trung vào mật độ tương đối của một điểm dữ liệu so với các điểm lân cận của nó.
+
+\paragraph{Nguyên lý hoạt động}
+LOF hoạt động thông qua các bước chính sau:
+\begin{enumerate}
+    \item Xác định k điểm lân cận gần nhất cho mỗi điểm dữ liệu.
+    \item Tính toán mật độ cục bộ cho mỗi điểm dựa trên khoảng cách đến các điểm lân cận.
+    \item Tính toán hệ số LOF bằng cách so sánh mật độ cục bộ của điểm đó với mật độ cục bộ của các điểm lân cận.
+    \item Điểm có hệ số LOF cao (mật độ thấp hơn đáng kể so với các lân cận) được coi là bất thường.
+\end{enumerate}
+
+Ưu điểm của LOF là khả năng phát hiện bất thường cục bộ - các điểm dữ liệu có thể không phải là bất thường trong toàn bộ tập dữ liệu nhưng bất thường so với vùng lân cận của chúng. Đặc điểm này đặc biệt hữu ích cho dữ liệu có cấu trúc phức tạp hoặc nhiều nhóm với mật độ khác nhau.
+
+\paragraph{Triển khai và kết quả}
+Chúng tôi áp dụng LOF với các tham số:
+\begin{itemize}
+    \item Số lượng láng giềng (n\_neighbors): 20
+    \item Thuật toán tìm kiếm láng giềng: "auto" (tự động chọn thuật toán tối ưu)
+    \item Tỷ lệ mẫu bất thường (contamination): 0.05
+\end{itemize}
+
+Sau khi áp dụng LOF trên toàn bộ tập dữ liệu, thuật toán đã phát hiện 273 điểm bất thường, chiếm 0,80\% tổng số điểm dữ liệu. Con số này thấp hơn đáng kể so với Isolation Forest, phản ánh tính chọn lọc cao hơn của LOF trong việc xác định các bất thường thực sự dựa trên cấu trúc mật độ cục bộ.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\textwidth]{image/section6_3/lof_results.png}
+%     \caption{Kết quả phát hiện bất thường bằng Local Outlier Factor. Các điểm màu đỏ biểu thị các điểm được xác định là bất thường.}
+%     \label{fig:lof_results}
+% \end{figure}
+
+Như minh họa trong Hình \ref{fig:lof_results}, LOF phát hiện các điểm bất thường tập trung chủ yếu vào các vị trí có sự thay đổi đột ngột về mật độ dữ liệu, đặc biệt là các điểm có giá trị cao bất thường so với các điểm xung quanh. Điều đáng chú ý là LOF phát hiện ít bất thường hơn nhiều so với Isolation Forest, phản ánh sự khác biệt cơ bản trong định nghĩa "bất thường" giữa hai thuật toán. LOF tập trung vào các điểm thực sự khác biệt so với các điểm lân cận, trong khi Isolation Forest có xu hướng xác định nhiều điểm hơn do cách tiếp cận phân vùng ngẫu nhiên.
+
+\subsubsection{One-class SVM}
+
+One-class Support Vector Machine (OCSVM) là một biến thể của thuật toán SVM truyền thống, được thiết kế đặc biệt cho bài toán phát hiện bất thường. Thay vì phân loại dữ liệu thành các lớp khác nhau, OCSVM tìm cách xác định ranh giới bao quanh phần lớn dữ liệu bình thường và xác định các điểm nằm ngoài ranh giới này là bất thường.
+
+\paragraph{Nguyên lý hoạt động}
+One-class SVM hoạt động dựa trên các nguyên tắc sau:
+\begin{enumerate}
+    \item Ánh xạ dữ liệu vào không gian đặc trưng có chiều cao hơn thông qua hàm kernel.
+    \item Tìm một siêu phẳng tối ưu trong không gian mới này sao cho nó tách biệt phần lớn dữ liệu với gốc tọa độ và tối đa hóa khoảng cách từ siêu phẳng đến gốc tọa độ.
+    \item Sử dụng một tham số $\nu$ để kiểm soát tỷ lệ điểm dữ liệu có thể nằm ngoài siêu phẳng (tức là tỷ lệ bất thường).
+    \item Các điểm nằm ngoài ranh giới được xác định bởi siêu phẳng được coi là bất thường.
+\end{enumerate}
+
+One-class SVM đặc biệt hiệu quả khi dữ liệu bình thường có thể được mô tả bằng một ranh giới đơn lẻ trong không gian đặc trưng, và có khả năng phát hiện các bất thường phức tạp nhờ khả năng ánh xạ phi tuyến tính của các hàm kernel.
+
+\paragraph{Triển khai và kết quả}
+Chúng tôi triển khai One-class SVM với các tham số:
+\begin{itemize}
+    \item Kernel: RBF (Radial Basis Function)
+    \item Nu ($\nu$): 0.05
+    \item Gamma: "scale" (1 / (n\_features * X.var()))
+\end{itemize}
+
+Sau khi áp dụng One-class SVM, thuật toán đã phát hiện 1.624 điểm bất thường, chiếm 4,77\% tổng số điểm dữ liệu. Kết quả này khá tương đồng với Isolation Forest về số lượng bất thường được phát hiện, mặc dù có sự khác biệt về vị trí cụ thể của các điểm bất thường.
+
+Như thể hiện trong Hình \ref{fig:ocsvm_results}, One-class SVM phát hiện các bất thường tập trung chủ yếu vào các vùng có giá trị cực trị và các điểm có sự biến động lớn so với xu hướng chung của dữ liệu. Đặc biệt, thuật toán này nhạy với các điểm có giá trị cao bất thường trong chuỗi lưu lượng, điều này gợi ý khả năng phát hiện các sự cố tiêu thụ đột biến hoặc rò rỉ lớn.
+
+\subsubsection{Trực quan hóa kết quả phát hiện bất thường}
+
+Để đánh giá hiệu quả của các phương pháp học không giám sát trong phát hiện bất thường, chúng tôi đã tiến hành trực quan hóa kết quả phát hiện trên chuỗi thời gian cho cả hai điểm đo 841211914190 và 8401210607558. Mỗi biểu đồ trực quan hóa thể hiện dữ liệu chuỗi thời gian gốc cùng với các điểm được phát hiện là bất thường bởi từng thuật toán.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_1/anomalies_subplots_841211914190.png}
+    \caption{Kết quả phát hiện bất thường tại điểm đo 841211914190 bằng ba phương pháp học không giám sát. Từ trên xuống dưới: Isolation Forest, Local Outlier Factor và One-class SVM. Các điểm màu đỏ biểu thị các điểm được xác định là bất thường.}
+    \label{fig:anomaly_subplots_841211914190}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_1/anomalies_subplots_8401210607558.png}
+    \caption{Kết quả phát hiện bất thường tại điểm đo 8401210607558 bằng ba phương pháp học không giám sát. Từ trên xuống dưới: Isolation Forest, Local Outlier Factor và One-class SVM. Các điểm màu đỏ biểu thị các điểm được xác định là bất thường.}
+    \label{fig:anomaly_subplots_8401210607558}
+\end{figure}
+
+Từ các hình \ref{fig:anomaly_subplots_841211914190} và \ref{fig:anomaly_subplots_8401210607558}, có thể quan sát thấy sự khác biệt đáng kể trong cách các thuật toán xác định bất thường. Cụ thể:
+
+\begin{itemize}
+    \item \textbf{Isolation Forest} phát hiện 1.682 điểm bất thường, chiếm 4,94\% tổng số điểm dữ liệu. Thuật toán này thể hiện độ nhạy cao với các giá trị cực trị và các biến động đột ngột trong chuỗi thời gian. Các điểm bất thường thường tập trung tại các đỉnh tiêu thụ và các điểm chuyển tiếp giữa các mức tiêu thụ khác nhau.
+    
+    \item \textbf{Local Outlier Factor} chỉ phát hiện 273 điểm bất thường, chiếm 0,80\% tổng số điểm dữ liệu. Đây là thuật toán chọn lọc nhất trong ba phương pháp, tập trung chủ yếu vào các điểm thực sự khác biệt về mật độ so với vùng lân cận của chúng. Các điểm bất thường được phát hiện thường là các giá trị đột biến riêng lẻ hơn là các cụm điểm liên tiếp.
+    
+    \item \textbf{One-class SVM} phát hiện 1.624 điểm bất thường, chiếm 4,77\% tổng số điểm dữ liệu. Mẫu phát hiện của One-class SVM tương đối tương đồng với Isolation Forest, nhưng có một số khác biệt tinh tế trong việc xác định ranh giới giữa dữ liệu bình thường và bất thường, đặc biệt ở các khu vực chuyển tiếp.
+\end{itemize}
+
+Đáng chú ý, cả ba thuật toán đều thể hiện tính nhất quán trong việc phát hiện bất thường giữa hai điểm đo, với cùng tỷ lệ phát hiện cho mỗi phương pháp. Điều này gợi ý rằng các thuật toán học không giám sát có thể khái quát hóa tốt trên các bộ dữ liệu khác nhau trong cùng hệ thống cấp nước.
+
+Sự đa dạng trong kết quả phát hiện từ các thuật toán khác nhau nhấn mạnh tầm quan trọng của việc lựa chọn phương pháp phù hợp với đặc điểm cụ thể của dữ liệu và mục tiêu phát hiện bất thường. Trong khi Isolation Forest và One-class SVM có độ nhạy cao hơn và phù hợp cho việc phát hiện nhiều loại bất thường, Local Outlier Factor lại cung cấp độ chính xác cao hơn trong việc phát hiện các bất thường thực sự nổi bật so với các điểm xung quanh.

@@ -1,0 +1,77 @@
+flowchart TB
+    classDef methodClass fill:#d4f1f9,stroke:#05445E,stroke-width:2px,color:#05445E,font-weight:bold
+    classDef supervisedClass fill:#d8f3dc,stroke:#1B4332,stroke-width:2px,color:#1B4332,font-weight:bold
+    classDef unsupervisedClass fill:#fff1e6,stroke:#9E2A2B,stroke-width:2px,color:#9E2A2B,font-weight:bold
+    classDef modelClass fill:#e9ecef,stroke:#343a40,stroke-width:2px,color:#343a40,font-weight:bold
+    classDef titleClass font-weight:bold,font-size:14px
+    
+    Title["PHÁT HIỆN BẤT THƯỜNG TRONG DỮ LIỆU LƯU LƯỢNG NƯỚC"]:::titleClass
+    
+    Title --> Method1["1.Phát hiện bằng sai số"]
+    Title --> Method2["2.Phát hiện bằng học không giám sát"]
+    
+    subgraph SupervisedMethod ["Phương pháp dựa trên sai số"]
+        direction TB
+        M1Process["Quy trình thực hiện"]
+        
+        subgraph Models ["Mô hình dự đoán"]
+            direction LR
+            LSTM["LSTM"] --- GRU["GRU"]
+            SingleModel["Mô hình riêng"] --- CombinedModel["Mô hình tổng hợp"]
+            FlowOnly["Chỉ lưu lượng"] --- FlowPressure["Lưu lượng + áp suất"]
+        end
+        
+        subgraph M1Steps ["Các bước thực hiện"]
+            direction TB
+            Step1["1.Dự đoán từ mô hình"] --> 
+            Step2["2.Tính sai số dự đoán"] -->
+            Step3["3.Tính độ lệch chuẩn σe"] -->
+            Step4["4.Xác định ngưỡng δ = 3×σe"] -->
+            Step5["5.Phát hiện |et| > δ"]
+        end
+        
+        M1Process --- M1Steps
+    end
+    
+    subgraph UnsupervisedMethod ["Phương pháp học không giám sát"]
+        direction TB
+        
+        subgraph Algorithms ["Thuật toán"]
+            direction LR
+            IF["Isolation Forest"] --- LOF["Local Outlier Factor"] --- OCSVM["One-class SVM"]
+        end
+        
+        subgraph Principles ["Nguyên lý"]
+            IFP["Cô lập các điểm dễ dàng hơn"] 
+            LOFP["Mật độ cục bộ khác biệt"]
+            OCSVMP["Ranh giới bao quanh dữ liệu"]
+        end
+        
+        Algorithms --> Principles
+        IF -.-> IFP
+        LOF -.-> LOFP
+        OCSVM -.-> OCSVMP
+    end
+    
+    Method1 --> SupervisedMethod
+    Method2 --> UnsupervisedMethod
+    
+    %% Styling
+    Method1:::methodClass
+    Method2:::methodClass
+    M1Process:::supervisedClass
+    Models:::supervisedClass
+    LSTM:::modelClass
+    GRU:::modelClass
+    SingleModel:::modelClass
+    CombinedModel:::modelClass
+    FlowOnly:::modelClass
+    FlowPressure:::modelClass
+    
+    Algorithms:::unsupervisedClass
+    IF:::unsupervisedClass
+    LOF:::unsupervisedClass
+    OCSVM:::unsupervisedClass
+    IFP:::unsupervisedClass
+    LOFP:::unsupervisedClass
+    OCSVMP:::unsupervisedClass                

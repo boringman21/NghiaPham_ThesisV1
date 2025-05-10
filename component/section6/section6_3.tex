@@ -3,7 +3,7 @@
 
 Quá trình tiền xử lý dữ liệu được thực hiện theo một quy trình có hệ thống, bao gồm năm giai đoạn chính như được minh họa trong Hình \ref{fig:data_preprocessing_flow}. Quy trình này đảm bảo dữ liệu thô từ hệ thống SCADA được chuyển đổi thành định dạng phù hợp cho việc huấn luyện mô hình và phát hiện bất thường.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_1/luoc_do_tien_xu_ly_du_lieu.png}
     \caption{Lược đồ quy trình tiền xử lý dữ liệu}
@@ -29,7 +29,7 @@ Bước đầu tiên trong quy trình chuyển đổi là phân tách dữ liệ
 Quá trình lọc được thực hiện bằng cách truy vấn dữ liệu theo điều kiện mã thiết bị. Kết quả là một tập dữ liệu chỉ chứa thông tin từ một thiết bị cụ thể, sẵn sàng cho các bước xử lý tiếp theo.
 
 % để hình CSV ở  đây
-% \begin{figure}[h]
+% \begin{figure}[H]
 %     \centering
 %     \includegraphics[width=0.8\textwidth]{image/section6_3/device_filtering.png}
 %     \caption{Minh họa quá trình lọc dữ liệu theo mã thiết bị}
@@ -186,14 +186,14 @@ Từ bảng tổng quan này, có thể thấy rằng hầu hết các điểm �
 
 Để hiểu rõ hơn về đặc điểm và phân bố của dữ liệu thiếu, chúng tôi tiến hành phân tích trực quan đối với các điểm đo đã chọn. Hình \ref{fig:missing_data_visualization_841211914190} và Hình \ref{fig:missing_data_visualization_8401210607558} trình bày tổng quan về dữ liệu và các khoảng thời gian thiếu dữ liệu tại hai điểm đo có dữ liệu lưu lượng gần đầy đủ.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_1/timeseries_combined_841211914190.png}
     \caption{Phân tích trực quan dữ liệu tại điểm đo 841211914190. Từ trên xuống dưới: Lưu lượng, Áp suất đầu vào, Áp suất đầu ra, Chênh lệch áp suất, và Biểu đồ dữ liệu thiếu theo thời gian.}
     \label{fig:missing_data_visualization_841211914190}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_1/timeseries_combined_8401210607558.png}
     \caption{Phân tích trực quan dữ liệu tại điểm đo 8401210607558. Từ trên xuống dưới: Lưu lượng, Áp suất đầu vào, Áp suất đầu ra, Chênh lệch áp suất, và Biểu đồ dữ liệu thiếu theo thời gian.}
@@ -202,14 +202,14 @@ Từ bảng tổng quan này, có thể thấy rằng hầu hết các điểm �
 
 Ngoài ra, chúng tôi cũng phân tích trực quan các điểm đo không có dữ liệu lưu lượng để hiểu rõ hơn về tình trạng dữ liệu trong toàn bộ hệ thống. Hình \ref{fig:no_flow_data_841210802047} và Hình \ref{fig:no_flow_data_841210620665} minh họa dữ liệu tại hai điểm đo thiếu hoàn toàn dữ liệu lưu lượng.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_1/timeseries_combined_840786560116.png}
     \caption{Phân tích trực quan dữ liệu tại điểm đo 840786560116. Chỉ có dữ liệu áp suất đầu vào và đầu ra, hoàn toàn thiếu dữ liệu lưu lượng.}
     \label{fig:no_flow_data_841210802047}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_1/timeseries_combined_841210620665.png}
     \caption{Phân tích trực quan dữ liệu tại điểm đo 841210620665. Chỉ có dữ liệu áp suất đầu vào và đầu ra, hoàn toàn thiếu dữ liệu lưu lượng.}
@@ -313,7 +313,7 @@ Việc áp dụng phương pháp loại bỏ ngày có dữ liệu thiếu đã 
 
 Mặc dù phương pháp này dẫn đến việc giảm số lượng dữ liệu huấn luyện, đặc biệt đối với điểm đo 841211914190, nhưng lợi ích từ việc đảm bảo tính nhất quán và độ tin cậy của dữ liệu vượt trội hơn hạn chế về khối lượng dữ liệu. Hơn nữa, với đặc điểm tính mùa vụ rõ rệt trong dữ liệu chuỗi thời gian hệ thống cấp nước, các mẫu dữ liệu còn lại vẫn đủ đại diện cho các mẫu hành vi điển hình của hệ thống.
 
-% \begin{figure}[htbp]
+% \begin{figure}[H]
 %     \centering
 %     \includegraphics[width=\textwidth]{image/section6_3/time_series_after_cleaning.png}
 %     \caption{Biểu đồ minh họa chuỗi thời gian sau khi áp dụng phương pháp xóa ngày có dữ liệu thiếu tại điểm đo 841211914190}

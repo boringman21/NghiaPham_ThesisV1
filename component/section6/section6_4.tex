@@ -1,6 +1,20 @@
 \section{Huấn luyện mô hình}
 \subsection{Tổng quan}
-% TODO: tạo lược đồ tại đây
+Quá trình huấn luyện mô hình dự báo lưu lượng nước được thực hiện theo các bước chính sau:
+\begin{itemize}
+    \item \textbf{Chuẩn bị dữ liệu:} Dữ liệu chuỗi thời gian được tiền xử lý, chuẩn hóa và chia thành tập huấn luyện, kiểm tra và xác thực.
+    \item \textbf{Xây dựng mô hình:} Triển khai hai kiến trúc mạng nơ-ron hồi quy là LSTM và GRU với cấu trúc nhiều lớp.
+    \item \textbf{Chiến lược huấn luyện:} Áp dụng hai phương pháp - huấn luyện mô hình riêng cho từng điểm đo và mô hình chung cho tất cả điểm đo.
+    \item \textbf{Đánh giá hiệu suất:} Sử dụng các chỉ số MAE, MSE và RMSE để đánh giá khả năng dự báo của mô hình.
+    \item \textbf{Tối ưu hóa:} Điều chỉnh siêu tham số và áp dụng các kỹ thuật như Early Stopping để nâng cao hiệu quả mô hình.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_1/luoc_do_tong_quan_huan_luyen_mo_hinh.png}
+    \caption{Tổng quan quy trình huấn luyện mô hình}
+    \label{fig:luoc_do_tong_quan_huan_luyen_mo_hinh}
+\end{figure}
 \subsection{Huấn luyện mô hình}
 
 Từ dữ liệu chuỗi thời gian đã được tiền xử lý ở các phần trước, chúng tôi tiến hành huấn luyện các mô hình học sâu cho bài toán dự báo lưu lượng nước. Trong quá trình này, hai chiến lược huấn luyện khác nhau được triển khai nhằm khám phá phương pháp tối ưu cho hệ thống dự báo và phát hiện bất thường.

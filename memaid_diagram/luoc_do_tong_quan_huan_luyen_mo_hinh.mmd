@@ -1,0 +1,98 @@
+flowchart TB
+    classDef strategy fill:#d4f1f9,stroke:#05445E,stroke-width:2px,color:#05445E,font-weight:bold
+    classDef architecture fill:#d8f3dc,stroke:#1B4332,stroke-width:2px,color:#1B4332,font-weight:bold
+    classDef training fill:#fff1e6,stroke:#9E2A2B,stroke-width:2px,color:#9E2A2B,font-weight:bold
+    classDef evaluation fill:#e9ecef,stroke:#343a40,stroke-width:2px,color:#343a40,font-weight:bold
+    classDef phaseTitle font-weight:bold,font-size:12px
+    
+    subgraph TrainingOverview ["Tổng quan quá trình huấn luyện mô hình"]
+        direction TB
+        
+        subgraph Strategies ["CHIẾN LƯỢC HUẤN LUYỆN"]
+            direction TB
+            S1["Chiến lược 1: Mô hình riêng cho từng điểm đo"] --> 
+            S1A["Huấn luyện mô hình cho điểm đo 841211914190"]
+            S1 -->
+            S1B["Huấn luyện mô hình cho điểm đo 8401210607558"]
+            
+            S2["Chiến lược 2: Mô hình chung cho tất cả điểm đo"] -->
+            S2A["Huấn luyện mô hình trên dữ liệu kết hợp"]
+        end
+        
+        subgraph Architectures ["KIẾN TRÚC MÔ HÌNH"]
+            direction TB
+            A1["Mô hình LSTM"] --> 
+            A1A["2 lớp LSTM (50, 25 đơn vị)"]
+            A1 --> 
+            A1B["Dropout (20%) và lớp đầu ra"]
+            
+            A2["Mô hình GRU"] --> 
+            A2A["2 lớp GRU (50, 25 đơn vị)"]
+            A2 --> 
+            A2B["Dropout (20%) và lớp đầu ra"]
+        end
+        
+        subgraph TrainingProcess ["QUÁ TRÌNH HUẤN LUYỆN"]
+            direction TB
+            T1["Chuẩn bị dữ liệu (chia 80/20)"] -->
+            T2["Huấn luyện với tham số:"]
+            
+            subgraph Parameters [" "]
+                direction LR
+                P1["Epochs: 100"] --- P2["Batch size: 32"] --- P3["Early stopping"] --- P4["Model checkpoint"]
+            end
+            
+            T2 --- Parameters
+            
+            T3["Biến thể dữ liệu đầu vào:"]
+            
+            subgraph InputData [" "]
+                direction LR
+                I1["Chỉ lưu lượng"] --- I2["Lưu lượng + áp suất"]
+            end
+            
+            T3 --- InputData
+        end
+        
+        subgraph ModelEvaluation ["ĐÁNH GIÁ MÔ HÌNH"]
+            direction TB
+            E1["Đánh giá hiệu suất"] --> 
+            E2["So sánh RMSE và MAE"]
+            E1 -->
+            E3["Phân tích ảnh hưởng của dữ liệu đầu vào"]
+            E1 -->
+            E4["So sánh hai chiến lược huấn luyện"]
+        end
+    end
+    
+    Strategies --> Architectures --> TrainingProcess --> ModelEvaluation
+    
+    S1:::strategy
+    S1A:::strategy
+    S1B:::strategy
+    S2:::strategy
+    S2A:::strategy
+    A1:::architecture
+    A1A:::architecture
+    A1B:::architecture
+    A2:::architecture
+    A2A:::architecture
+    A2B:::architecture
+    T1:::training
+    T2:::training
+    T3:::training
+    P1:::training
+    P2:::training
+    P3:::training
+    P4:::training
+    I1:::training
+    I2:::training
+    E1:::evaluation
+    E2:::evaluation
+    E3:::evaluation
+    E4:::evaluation
+    
+    Strategies:::phaseTitle
+    Architectures:::phaseTitle
+    TrainingProcess:::phaseTitle
+    ModelEvaluation:::phaseTitle 

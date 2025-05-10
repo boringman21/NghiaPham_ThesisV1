@@ -1,6 +1,32 @@
 \section{Phát hiện bất thường}
 \subsection{Tổng quan}
-% TODO: tạo lược đồ tại đây
+Phát hiện bất thường trong dữ liệu lưu lượng nước là một nhiệm vụ quan trọng để đảm bảo hoạt động hiệu quả và an toàn của hệ thống phân phối nước. Trong nghiên cứu này, chúng tôi tiếp cận vấn đề thông qua hai phương pháp chính:
+
+\begin{itemize}
+    \item \textbf{Phát hiện bằng sai số:} Phương pháp này dựa trên việc phân tích sai số dự đoán từ các mô hình học sâu, bao gồm:
+    \begin{itemize}
+        \item Sử dụng các mô hình dự đoán như LSTM và GRU
+        \item Kết hợp nhiều chiến lược: mô hình riêng cho từng điểm đo và mô hình tổng hợp
+        \item Thử nghiệm với hai loại dữ liệu đầu vào: chỉ lưu lượng và kết hợp lưu lượng với áp suất
+        \item Áp dụng quy trình 5 bước từ dự đoán đến xác định ngưỡng 3-sigma để phát hiện bất thường
+    \end{itemize}
+    
+    \item \textbf{Phát hiện bằng học không giám sát:} Phương pháp này không cần dữ liệu gán nhãn trước và dựa trên các thuật toán:
+    \begin{itemize}
+        \item \textit{Isolation Forest:} Phát hiện bất thường dựa trên nguyên lý các điểm bất thường dễ bị cô lập hơn
+        \item \textit{Local Outlier Factor:} Xác định bất thường theo mật độ cục bộ khác biệt so với các điểm lân cận
+        \item \textit{One-class SVM:} Xây dựng ranh giới bao quanh dữ liệu bình thường và phát hiện các điểm ngoài ranh giới
+    \end{itemize}
+\end{itemize}
+
+Kết hợp hai phương pháp này giúp xác định đa dạng các loại bất thường trong dữ liệu lưu lượng nước, từ những biến động đột ngột đến các mẫu hành vi khác thường. Việc phát hiện chính xác và kịp thời các bất thường đóng vai trò quan trọng trong việc giảm thiểu thất thoát nước, phát hiện sớm sự cố và tối ưu hóa vận hành hệ thống.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{image/section6_1/luoc_do_phat_hien_bat_thuong.png}
+    \caption{Tổng quan về các phương pháp phát hiện bất thường trong dữ liệu lưu lượng nước}
+    \label{fig:overview_anomaly_detection}
+\end{figure}
 
 \subsection{Phát hiện bằng sai số}
 Trong phần này, chúng tôi trình bày phương pháp phát hiện bất thường dựa trên sai số dự đoán của các mô hình đã được huấn luyện. Phương pháp này dựa trên nguyên tắc cơ bản về thống kê mà theo đó, trong điều kiện bình thường, sai số dự đoán của mô hình thường tuân theo phân phối xác suất nhất định, và các giá trị nằm ngoài khoảng tin cậy có thể được xem là bất thường.
@@ -43,84 +69,84 @@ Quy trình này được áp dụng cho tất cả mười hai mô hình đã đ
 
 \subsubsection{Kết quả phát hiện bất thường}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_841211914190_lstm_flow.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình LSTM với dữ liệu lưu lượng tại điểm đo 841211914190. Đường màu xanh thể hiện giá trị thực tế, đường màu cam thể hiện giá trị dự đoán, và các điểm màu đỏ biểu thị các điểm dữ liệu được xác định là bất thường.}
     \label{fig:anomaly_lstm_841211914190_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_841211914190_lstm_allmetric.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình LSTM với dữ liệu kết hợp lưu lượng và áp suất tại điểm đo 841211914190.}
     \label{fig:anomaly_lstm_841211914190_all}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_841211914190_gru_flow.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình GRU với dữ liệu lưu lượng tại điểm đo 841211914190.}
     \label{fig:anomaly_gru_841211914190_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_841211914190_gru_allmetric.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình GRU với dữ liệu kết hợp lưu lượng và áp suất tại điểm đo 841211914190.}
     \label{fig:anomaly_gru_841211914190_all}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_8401210607558_lstm_flow.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình LSTM với dữ liệu lưu lượng tại điểm đo 8401210607558.}
     \label{fig:anomaly_lstm_8401210607558_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_8401210607558_lstm_all_metric.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình LSTM với dữ liệu kết hợp lưu lượng và áp suất tại điểm đo 8401210607558.}
     \label{fig:anomaly_lstm_8401210607558_all}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_8401210607558_gru_flow.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình GRU với dữ liệu lưu lượng tại điểm đo 8401210607558.}
     \label{fig:anomaly_gru_8401210607558_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_8401210607558_gru_allmetric.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình GRU với dữ liệu kết hợp lưu lượng và áp suất tại điểm đo 8401210607558.}
     \label{fig:anomaly_gru_8401210607558_all}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_combined_lstm_flow.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình LSTM tổng hợp với dữ liệu lưu lượng.}
     \label{fig:anomaly_combined_lstm_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_combined_lstm_allmetric.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình LSTM tổng hợp với dữ liệu kết hợp lưu lượng và áp suất.}
     \label{fig:anomaly_combined_lstm_all}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_combined_gru_flow.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình GRU tổng hợp với dữ liệu lưu lượng.}
     \label{fig:anomaly_combined_gru_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_3/anomaly_detection_combined_gru_allmetric.png}
     \caption{Kết quả phát hiện bất thường bằng mô hình GRU tổng hợp với dữ liệu kết hợp lưu lượng và áp suất.}
@@ -209,7 +235,7 @@ Phân tích chi tiết về phân bố thời gian của các điểm bất thư
 
 \subsubsection{Kết luận về phương pháp phát hiện bất thường dựa trên sai số}
 
-Phương pháp phát hiện bất thường dựa trên ngưỡng 3 lần độ lệch chuẩn đã chứng minh được hiệu quả trong việc xác định các điểm dữ liệu có hành vi khác thường trong chuỗi thời gian lưu lượng nước. Phương pháp này có một số ưu điểm đáng chú ý:
+Phương pháp phát hiện bất thường dựa trên ngưỡng 3-sigma đã chứng minh được hiệu quả trong việc xác định các điểm dữ liệu có hành vi khác thường trong chuỗi thời gian lưu lượng nước. Phương pháp này có một số ưu điểm đáng chú ý:
 
 \begin{itemize}
     \item \textbf{Tính đơn giản và hiệu quả:} Phương pháp này dễ dàng triển khai và không đòi hỏi quá trình huấn luyện bổ sung sau khi đã có mô hình dự báo cơ sở.
@@ -230,6 +256,18 @@ Tuy nhiên, phương pháp này cũng có một số hạn chế cần lưu ý:
     
     \item \textbf{Khó khăn trong việc phát hiện bất thường dần dần:} Các bất thường phát triển chậm (như rò rỉ nhỏ phát triển dần) có thể không tạo ra sai số đủ lớn để vượt qua ngưỡng 3σ trong giai đoạn đầu.
 \end{itemize}
+
+Dựa trên kết quả phân tích giữa các mô hình chung và mô hình riêng cho từng điểm đo, chúng tôi nhận thấy rằng sử dụng mô hình chung mang lại một số ưu điểm đáng lưu ý:
+
+\begin{itemize}
+    \item \textbf{Tối ưu hóa tài nguyên:} Việc duy trì và huấn luyện một mô hình chung thay vì nhiều mô hình riêng biệt giúp giảm đáng kể chi phí tính toán và lưu trữ, đặc biệt khi hệ thống phân phối nước có nhiều điểm đo.
+    
+    \item \textbf{Độ nhạy phát hiện tốt:} Kết quả cho thấy mô hình chung có xu hướng phát hiện được nhiều bất thường hơn (ví dụ: 3,89\% so với 3,53\% đối với LSTM với dữ liệu chỉ lưu lượng tại điểm đo 841211914190), cho thấy khả năng nhạy cao trong việc phát hiện các biến động bất thường.
+    
+    \item \textbf{Khả năng mở rộng:} Mô hình chung có thể dễ dàng áp dụng cho các điểm đo mới mà không cần huấn luyện lại từ đầu, tạo điều kiện thuận lợi cho việc mở rộng hệ thống giám sát.
+\end{itemize}
+
+Tuy nhiên, trong một số trường hợp cụ thể, việc kết hợp mô hình chung với điều chỉnh riêng cho các điểm đo có đặc tính đặc biệt có thể mang lại hiệu quả tối ưu, cân bằng giữa khả năng khái quát hóa và độ chính xác cục bộ.
 
 Trong các phần tiếp theo, chúng tôi sẽ khám phá các phương pháp học không giám sát khác để phát hiện bất thường, và so sánh hiệu quả của chúng với phương pháp dựa trên sai số đã trình bày.
 
@@ -260,16 +298,9 @@ Chúng tôi triển khai Isolation Forest với các tham số sau:
     \item Số lượng mẫu tối đa cho mỗi cây (max\_samples): "auto" (tối đa 256 mẫu)
 \end{itemize}
 
-Sau khi áp dụng Isolation Forest trên toàn bộ tập dữ liệu, thuật toán đã phát hiện được 1.682 điểm bất thường, chiếm 4,94\% tổng số điểm dữ liệu. Hình \ref{fig:isolation_forest_results} minh họa kết quả phát hiện bất thường của Isolation Forest trên chuỗi thời gian.
+Sau khi áp dụng Isolation Forest trên toàn bộ tập dữ liệu, thuật toán đã phát hiện được 1.682 điểm bất thường, chiếm 4,94\% tổng số điểm dữ liệu.
 
-% \begin{figure}[htbp]
-%     \centering
-%     \includegraphics[width=\textwidth]{image/section6_3/isolation_forest_results.png}
-%     \caption{Kết quả phát hiện bất thường bằng Isolation Forest. Các điểm màu đỏ biểu thị các điểm được xác định là bất thường.}
-%     \label{fig:isolation_forest_results}
-% \end{figure}
-
-Như có thể thấy từ hình trên, Isolation Forest đặc biệt nhạy với các điểm dữ liệu có sự biến động mạnh, đặc biệt là các đỉnh và đáy cực trị trong chuỗi lưu lượng. Đây là đặc tính phổ biến của thuật toán này, phù hợp với việc phát hiện các bất thường dạng điểm (point anomalies) và các biến động đột ngột, điều này đặc biệt hữu ích trong việc phát hiện sự cố rò rỉ đột ngột hoặc sự thay đổi lớn trong mẫu tiêu thụ nước.
+Isolation Forest đặc biệt nhạy với các điểm dữ liệu có sự biến động mạnh, đặc biệt là các đỉnh và đáy cực trị trong chuỗi lưu lượng. Đây là đặc tính phổ biến của thuật toán này, phù hợp với việc phát hiện các bất thường dạng điểm (point anomalies) và các biến động đột ngột, điều này đặc biệt hữu ích trong việc phát hiện sự cố rò rỉ đột ngột hoặc sự thay đổi lớn trong mẫu tiêu thụ nước.
 
 \subsubsection{Local Outlier Factor (LOF)}
 
@@ -296,14 +327,7 @@ Chúng tôi áp dụng LOF với các tham số:
 
 Sau khi áp dụng LOF trên toàn bộ tập dữ liệu, thuật toán đã phát hiện 273 điểm bất thường, chiếm 0,80\% tổng số điểm dữ liệu. Con số này thấp hơn đáng kể so với Isolation Forest, phản ánh tính chọn lọc cao hơn của LOF trong việc xác định các bất thường thực sự dựa trên cấu trúc mật độ cục bộ.
 
-% \begin{figure}[htbp]
-%     \centering
-%     \includegraphics[width=\textwidth]{image/section6_3/lof_results.png}
-%     \caption{Kết quả phát hiện bất thường bằng Local Outlier Factor. Các điểm màu đỏ biểu thị các điểm được xác định là bất thường.}
-%     \label{fig:lof_results}
-% \end{figure}
-
-Như minh họa trong Hình \ref{fig:lof_results}, LOF phát hiện các điểm bất thường tập trung chủ yếu vào các vị trí có sự thay đổi đột ngột về mật độ dữ liệu, đặc biệt là các điểm có giá trị cao bất thường so với các điểm xung quanh. Điều đáng chú ý là LOF phát hiện ít bất thường hơn nhiều so với Isolation Forest, phản ánh sự khác biệt cơ bản trong định nghĩa "bất thường" giữa hai thuật toán. LOF tập trung vào các điểm thực sự khác biệt so với các điểm lân cận, trong khi Isolation Forest có xu hướng xác định nhiều điểm hơn do cách tiếp cận phân vùng ngẫu nhiên.
+LOF phát hiện các điểm bất thường tập trung chủ yếu vào các vị trí có sự thay đổi đột ngột về mật độ dữ liệu, đặc biệt là các điểm có giá trị cao bất thường so với các điểm xung quanh. Điều đáng chú ý là LOF phát hiện ít bất thường hơn nhiều so với Isolation Forest, phản ánh sự khác biệt cơ bản trong định nghĩa "bất thường" giữa hai thuật toán. LOF tập trung vào các điểm thực sự khác biệt so với các điểm lân cận, trong khi Isolation Forest có xu hướng xác định nhiều điểm hơn do cách tiếp cận phân vùng ngẫu nhiên.
 
 \subsubsection{One-class SVM}
 
@@ -330,20 +354,20 @@ Chúng tôi triển khai One-class SVM với các tham số:
 
 Sau khi áp dụng One-class SVM, thuật toán đã phát hiện 1.624 điểm bất thường, chiếm 4,77\% tổng số điểm dữ liệu. Kết quả này khá tương đồng với Isolation Forest về số lượng bất thường được phát hiện, mặc dù có sự khác biệt về vị trí cụ thể của các điểm bất thường.
 
-Như thể hiện trong Hình \ref{fig:ocsvm_results}, One-class SVM phát hiện các bất thường tập trung chủ yếu vào các vùng có giá trị cực trị và các điểm có sự biến động lớn so với xu hướng chung của dữ liệu. Đặc biệt, thuật toán này nhạy với các điểm có giá trị cao bất thường trong chuỗi lưu lượng, điều này gợi ý khả năng phát hiện các sự cố tiêu thụ đột biến hoặc rò rỉ lớn.
+One-class SVM phát hiện các bất thường tập trung chủ yếu vào các vùng có giá trị cực trị và các điểm có sự biến động lớn so với xu hướng chung của dữ liệu. Đặc biệt, thuật toán này nhạy với các điểm có giá trị cao bất thường trong chuỗi lưu lượng, điều này gợi ý khả năng phát hiện các sự cố tiêu thụ đột biến hoặc rò rỉ lớn.
 
 \subsubsection{Trực quan hóa kết quả phát hiện bất thường}
 
 Để đánh giá hiệu quả của các phương pháp học không giám sát trong phát hiện bất thường, chúng tôi đã tiến hành trực quan hóa kết quả phát hiện trên chuỗi thời gian cho cả hai điểm đo 841211914190 và 8401210607558. Mỗi biểu đồ trực quan hóa thể hiện dữ liệu chuỗi thời gian gốc cùng với các điểm được phát hiện là bất thường bởi từng thuật toán.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_1/anomalies_subplots_841211914190.png}
     \caption{Kết quả phát hiện bất thường tại điểm đo 841211914190 bằng ba phương pháp học không giám sát. Từ trên xuống dưới: Isolation Forest, Local Outlier Factor và One-class SVM. Các điểm màu đỏ biểu thị các điểm được xác định là bất thường.}
     \label{fig:anomaly_subplots_841211914190}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/section6_1/anomalies_subplots_8401210607558.png}
     \caption{Kết quả phát hiện bất thường tại điểm đo 8401210607558 bằng ba phương pháp học không giám sát. Từ trên xuống dưới: Isolation Forest, Local Outlier Factor và One-class SVM. Các điểm màu đỏ biểu thị các điểm được xác định là bất thường.}
@@ -363,3 +387,50 @@ Từ các hình \ref{fig:anomaly_subplots_841211914190} và \ref{fig:anomaly_sub
 Đáng chú ý, cả ba thuật toán đều thể hiện tính nhất quán trong việc phát hiện bất thường giữa hai điểm đo, với cùng tỷ lệ phát hiện cho mỗi phương pháp. Điều này gợi ý rằng các thuật toán học không giám sát có thể khái quát hóa tốt trên các bộ dữ liệu khác nhau trong cùng hệ thống cấp nước.
 
 Sự đa dạng trong kết quả phát hiện từ các thuật toán khác nhau nhấn mạnh tầm quan trọng của việc lựa chọn phương pháp phù hợp với đặc điểm cụ thể của dữ liệu và mục tiêu phát hiện bất thường. Trong khi Isolation Forest và One-class SVM có độ nhạy cao hơn và phù hợp cho việc phát hiện nhiều loại bất thường, Local Outlier Factor lại cung cấp độ chính xác cao hơn trong việc phát hiện các bất thường thực sự nổi bật so với các điểm xung quanh.
+
+\subsubsection{Kết luận về phương pháp học không giám sát trong phát hiện bất thường}
+
+Sau khi triển khai và phân tích ba phương pháp học không giám sát (Isolation Forest, Local Outlier Factor và One-class SVM) trong bài toán phát hiện bất thường trên dữ liệu lưu lượng nước, chúng tôi rút ra một số kết luận quan trọng:
+
+\begin{itemize}
+    \item \textbf{Tính linh hoạt và hiệu quả:} Các phương pháp học không giám sát đã chứng minh khả năng phát hiện bất thường mà không cần dữ liệu được gán nhãn trước, một ưu điểm đáng kể trong các ứng dụng thực tế khi việc xác định bất thường trước đó thường khó khăn hoặc không khả thi.
+    
+    \item \textbf{Đa dạng trong định nghĩa bất thường:} Mỗi thuật toán đưa ra một định nghĩa khác nhau về bất thường, từ đó cung cấp các góc nhìn bổ sung cho nhau. Isolation Forest tập trung vào các điểm dễ bị cô lập, LOF nhấn mạnh vào các điểm có mật độ khác biệt, và One-class SVM xác định các điểm nằm ngoài ranh giới thông thường.
+    
+    \item \textbf{Cân bằng giữa độ nhạy và độ chính xác:} LOF thể hiện độ chọn lọc cao nhất (0,80\% điểm bất thường), trong khi Isolation Forest và One-class SVM có độ nhạy cao hơn (khoảng 4,77-4,94\% điểm bất thường). Sự cân bằng này cho phép lựa chọn thuật toán phù hợp tùy theo yêu cầu cụ thể của ứng dụng - ưu tiên phát hiện nhiều bất thường tiềm ẩn hoặc tập trung vào các bất thường rõ ràng nhất.
+    
+    \item \textbf{Khả năng tổng quát hóa:} Cả ba thuật toán đều thể hiện tính nhất quán trong việc phát hiện bất thường giữa các điểm đo khác nhau, chứng tỏ khả năng áp dụng rộng rãi trong hệ thống phân phối nước.
+    
+    \item \textbf{Tiềm năng kết hợp:} Với đặc điểm bổ sung cho nhau, việc kết hợp nhiều thuật toán có thể mang lại kết quả toàn diện hơn, ví dụ như sử dụng Isolation Forest để tạo danh sách các bất thường tiềm năng, sau đó áp dụng LOF để lọc ra các bất thường có ý nghĩa nhất.
+\end{itemize}
+
+So với phương pháp dựa trên sai số được trình bày trước đó, các phương pháp học không giám sát có một số ưu điểm nổi bật:
+
+\begin{itemize}
+    \item Không phụ thuộc vào chất lượng của mô hình dự báo cơ sở.
+    \item Có khả năng phát hiện các dạng bất thường đa dạng hơn, không chỉ giới hạn ở các điểm có sai số dự đoán lớn.
+    \item Không yêu cầu giả định về phân phối của dữ liệu.
+\end{itemize}
+
+Tuy nhiên, các phương pháp này cũng có những hạn chế cần lưu ý:
+
+\begin{itemize}
+    \item Khó xác định ngưỡng hoặc tham số tối ưu cho mỗi thuật toán.
+    \item Thiếu giải thích rõ ràng về lý do tại sao một điểm được coi là bất thường, đặc biệt đối với các thuật toán phức tạp như One-class SVM.
+    \item Có thể nhạy cảm với nhiễu và cần tiền xử lý dữ liệu cẩn thận.
+\end{itemize}
+
+Tổng quan, các phương pháp học không giám sát đã thể hiện tiềm năng lớn trong phát hiện bất thường trên dữ liệu lưu lượng nước. Việc lựa chọn thuật toán phù hợp hoặc kết hợp nhiều thuật toán có thể cung cấp một công cụ hiệu quả để phát hiện sớm các sự cố tiềm ẩn trong hệ thống cấp nước, từ đó nâng cao hiệu quả quản lý và giảm thiểu tổn thất trong hệ thống phân phối nước.
+
+\subsection{Kết luận chung}
+
+Trong phần này, chúng tôi đã giới thiệu và phân tích hai nhóm phương pháp phát hiện bất thường trong dữ liệu lưu lượng nước: phương pháp dựa trên sai số dự đoán từ các mô hình học sâu và phương pháp học không giám sát.
+
+Phương pháp dựa trên sai số với ngưỡng 3-sigma đã chứng minh được hiệu quả với ưu điểm về tính đơn giản, nền tảng thống kê vững chắc và khả năng trực quan hóa rõ ràng. Tỷ lệ phát hiện bất thường nằm trong khoảng 3,15\% đến 3,89\%, cao hơn đáng kể so với kỳ vọng lý thuyết, phản ánh đặc điểm thực tế của dữ liệu thủy lực. Phân tích cũng cho thấy mô hình chung có tiềm năng tốt trong việc phát hiện bất thường tại nhiều điểm đo, tối ưu hóa tài nguyên và khả năng mở rộng.
+
+Các phương pháp học không giám sát cung cấp góc nhìn đa dạng về bất thường trong dữ liệu. Isolation Forest và One-class SVM phát hiện khoảng 4,8\% điểm bất thường với độ nhạy cao, trong khi Local Outlier Factor lại có độ chính xác cao hơn trong việc phát hiện các bất thường thực sự nổi bật so với các điểm xung quanh.
+
+Kết hợp hai nhóm phương pháp mang lại cách tiếp cận toàn diện trong phát hiện bất thường. Phương pháp dựa trên sai số cung cấp nền tảng giải thích rõ ràng dựa trên mô hình dự báo, trong khi các phương pháp không giám sát có thể phát hiện các mẫu bất thường phức tạp mà không cần dữ liệu được gán nhãn trước.
+
+Kết quả nghiên cứu cho thấy tiềm năng ứng dụng thực tế của các phương pháp này trong hệ thống giám sát mạng lưới cấp nước, giúp phát hiện sớm các sự cố tiềm ẩn trong hệ thống cấp nước, từ đó góp phần cải thiện hiệu quả quản lý và giảm thiểu tổn thất trong hệ thống phân phối nước.
+

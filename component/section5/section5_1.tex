@@ -1,12 +1,43 @@
 \chapter{Phân tích đặc trưng rò rỉ trong LeakDB}
 \section{Lược đồ nghiên cứu}
 
-% Luận văn này sẽ được tiến hành dựa trên hai lược đồ nghiên cứu:
-% \begin{itemize}
-%     \item Nghiên cứu bổ khuyết và đánh giá hiệu quả trên các mô hình dự đoán chất lượng không khí từ nhiều nguồn dựa trên mất mát nhân tạo
-%     \item Nghiên cứu bổ khuyết và đánh giá hiệu quả trên các mô hình dự đoán chất lượng không khí từ nhiều nguồn dựa trên mất mát thực tế
-% \end{itemize}
+Nghiên cứu này đề xuất quy trình phân tích đặc trưng rò rỉ trong LeakDB với bốn giai đoạn chính. Toàn bộ quy trình được thể hiện trong Hình \ref{fig:luocdo_phantich_leakdb}.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{image/section5_1/luoc_do_phan_tich_leakdb.png}
+    \caption{Lược đồ quy trình phân tích đặc trưng rò rỉ trong LeakDB}
+    \label{fig:luocdo_phantich_leakdb}
+\end{figure}
 
-...
+Quy trình phân tích được thực hiện theo các giai đoạn sau:
+
+\begin{itemize}
+    \item \textbf{Giai đoạn 1: Tìm hiểu dữ liệu}
+    \begin{itemize}
+        \item Nghiên cứu cấu trúc cơ sở dữ liệu LeakDB 
+        \item Phân tích các mạng lưới liên quan trong dữ liệu
+        \item Xây dựng mô hình hóa các rò rỉ dữ liệu
+    \end{itemize}
+    
+    \item \textbf{Giai đoạn 2: Phân tích kịch bản}
+    \begin{itemize}
+        \item Phân loại các kịch bản rò rỉ dữ liệu
+        \item Xây dựng cấu trúc mô phỏng phù hợp
+        \item Lựa chọn kịch bản để phân tích chi tiết
+    \end{itemize}
+    
+    \item \textbf{Giai đoạn 3: Phân tích đặc trưng}
+    \begin{itemize}
+        \item Phân tích dữ liệu theo chuỗi thời gian
+        \item Xác định các tương quan giữa các yếu tố
+        \item So sánh các đặc trưng khác nhau của rò rỉ
+    \end{itemize}
+    
+    \item \textbf{Giai đoạn 4: Kết luận}
+    \begin{itemize}
+        \item Xác định các đặc trưng quan trọng nhất
+        \item Đề xuất các ứng dụng thực tiễn từ kết quả nghiên cứu
+    \end{itemize}
+\end{itemize}
 

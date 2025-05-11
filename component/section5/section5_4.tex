@@ -1,7 +1,117 @@
 \section{Phân tích đặc trưng theo thời gian trong các kịch bản rò rỉ}
-\subsection{Phân tích yếu tố mùa vụ}
-\subsection{Phân tích dữ liệu vận hành về đêm}
 
-\subsection{Huấn luyện mô hình dự đoán rò rỉ}
+\subsection{Đặc điểm tín hiệu thời gian trong phát hiện rò rỉ}
 
-\subsection{Đánh giá mô hình dự đoán rò rỉ}
+Phân tích chuỗi thời gian của các tham số hệ thống như áp suất, lưu lượng trước và sau điểm rò rỉ cung cấp những thông tin quan trọng để nhận diện sự kiện rò rỉ trong mạng lưới cấp nước. Khi xảy ra rò rỉ, các thông số này thường biểu hiện những mẫu biến đổi đặc trưng, có thể được sử dụng làm cơ sở để phát triển các thuật toán phát hiện bất thường.
+
+Trong quá trình phân tích, chúng tôi đặc biệt chú ý đến các hiện tượng sau:
+\begin{itemize}
+    \item Sự sụt giảm áp suất tại các nút gần điểm rò rỉ
+    \item Sự chênh lệch lưu lượng giữa đầu vào và đầu ra của các đoạn ống
+    \item Các biến động bất thường trong mẫu tiêu thụ nước theo thời gian
+    \item Mối tương quan giữa nhãn rò rỉ (label) và các tham số vận hành của hệ thống
+\end{itemize}
+
+\subsection{Phân tích kịch bản rò rỉ tại nút 28}
+
+\subsubsection{Đặc trưng chuỗi thời gian}
+
+Hình \ref{fig:scenario28_timeseries} minh họa các chuỗi thời gian của kịch bản rò rỉ tại nút 28, bao gồm nhãn rò rỉ (Label), áp suất tại nút (Pressure\_Node\_28), lưu lượng trước điểm rò rỉ (Flow\_Link\_29) và lưu lượng sau điểm rò rỉ (Flow\_Link\_30). Quan sát dữ liệu cho thấy:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{image/section5_1/scenario28_timeseries.png}
+    \caption{Chuỗi thời gian của các tham số trong kịch bản rò rỉ tại nút 28}
+    \label{fig:scenario28_timeseries}
+\end{figure}
+
+\begin{itemize}
+    \item Nhãn rò rỉ (biểu đồ thứ nhất) chỉ ra rằng sự cố rò rỉ xuất hiện trong khoảng thời gian từ tháng 3 đến tháng 7 năm 2017.
+    \item Áp suất tại nút 28 (biểu đồ thứ hai) biểu hiện sự sụt giảm đáng kể trong giai đoạn rò rỉ, đặc biệt là trong khoảng tháng 5 đến tháng 7, khi áp suất giảm từ mức cao nhất khoảng 68 xuống còn khoảng 52-53.
+    \item Lưu lượng tại Flow\_Link\_29 (biểu đồ thứ ba) thể hiện đột biến tăng cao trong giai đoạn đầu rò rỉ (tháng 3), với giá trị đạt đỉnh trên 500, sau đó duy trì ở mức dao động cao hơn bình thường trong suốt giai đoạn rò rỉ.
+    \item Flow\_Link\_30 (biểu đồ thứ tư) cũng biểu hiện những dao động bất thường trong giai đoạn rò rỉ, bao gồm cả một đợt sụt giảm đáng kể vào khoảng tháng 3.
+\end{itemize}
+
+\subsubsection{Phân tích tương quan}
+
+Ma trận tương quan (Hình \ref{fig:scenario28_corr}) cho thấy mối quan hệ giữa các tham số trong kịch bản rò rỉ tại nút 28:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/section5_1/scenario_28_corr.png}
+    \caption{Ma trận tương quan giữa các tham số trong kịch bản rò rỉ tại nút 28}
+    \label{fig:scenario28_corr}
+\end{figure}
+
+\begin{itemize}
+    \item Có tương quan nghịch mạnh giữa áp suất (Pressure\_Node\_28) và lưu lượng tại Flow\_Link\_29 (hệ số -0.89), cho thấy khi áp suất giảm do rò rỉ, lưu lượng tại liên kết này tăng lên.
+    \item Tương quan nghịch vừa phải giữa áp suất và Flow\_Link\_30 (hệ số -0.67), phản ánh ảnh hưởng của rò rỉ đối với lưu lượng sau điểm rò rỉ.
+    \item Nhãn rò rỉ (Label) có tương quan thuận yếu với Flow\_Link\_29 (0.28) và tương quan nghịch yếu với áp suất (-0.13) và Flow\_Link\_30 (-0.19).
+\end{itemize}
+
+\subsection{Phân tích kịch bản rò rỉ tại nút 26}
+
+\subsubsection{Đặc trưng chuỗi thời gian}
+
+Hình \ref{fig:scenario316_timeseries} thể hiện các chuỗi thời gian của kịch bản rò rỉ tại nút 26, bao gồm nhãn rò rỉ, áp suất và lưu lượng tại các liên kết liên quan:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{image/section5_1/scenario316_timeseries.png}
+    \caption{Chuỗi thời gian của các tham số trong kịch bản rò rỉ tại nút 26}
+    \label{fig:scenario316_timeseries}
+\end{figure}
+
+\begin{itemize}
+    \item Nhãn rò rỉ (biểu đồ thứ nhất) cho thấy rò rỉ xảy ra đột ngột vào cuối năm 2017, thể hiện bằng một xung nhọn trong biểu đồ.
+    \item Áp suất tại nút 26 (biểu đồ thứ hai) biểu hiện mẫu sụt giảm tương tự như tại nút 28, với áp suất giảm mạnh trong giai đoạn giữa năm 2017, đặc biệt từ tháng 5 đến tháng 9.
+    \item Flow\_Link\_26 (biểu đồ thứ ba) có giá trị âm, thể hiện hướng dòng chảy, và biểu hiện sự thay đổi đáng kể trong cường độ dòng chảy (tăng cường độ âm) trong giai đoạn rò rỉ.
+    \item Flow\_Link\_27 (biểu đồ thứ tư) biểu hiện một đột biến cực lớn vào cuối năm 2017, trùng với thời điểm nhãn rò rỉ xuất hiện, cho thấy sự thay đổi đột ngột trong lưu lượng khi xảy ra rò rỉ.
+\end{itemize}
+
+\subsubsection{Phân tích tương quan}
+
+Ma trận tương quan (Hình \ref{fig:scenario316_corr}) cho thấy mối quan hệ giữa các tham số trong kịch bản rò rỉ tại nút 26:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/section5_1/scenario316_corr.png}
+    \caption{Ma trận tương quan giữa các tham số trong kịch bản rò rỉ tại nút 26}
+    \label{fig:scenario316_corr}
+\end{figure}
+
+\begin{itemize}
+    \item Nhãn rò rỉ (Label) có tương quan thuận mạnh với Flow\_Link\_27 (0.83), chứng tỏ sự xuất hiện rò rỉ có liên hệ chặt chẽ với đột biến trong lưu lượng tại liên kết này.
+    \item Tương quan nghịch mạnh giữa nhãn rò rỉ và Flow\_Link\_26 (-0.69), phản ánh hiện tượng giảm lưu lượng (tăng giá trị âm) tại liên kết này khi rò rỉ xảy ra.
+    \item Tương quan thuận mạnh giữa Pressure\_Node\_26 và Flow\_Link\_26 (0.82), cho thấy sự liên hệ nhất quán giữa áp suất và lưu lượng.
+\end{itemize}
+
+\subsection{So sánh đặc trưng rò rỉ giữa các kịch bản}
+
+Từ việc phân tích hai kịch bản rò rỉ trên, chúng tôi nhận thấy một số đặc điểm chung và khác biệt quan trọng:
+
+\subsubsection{Đặc điểm chung}
+\begin{itemize}
+    \item Cả hai kịch bản đều thể hiện sự sụt giảm áp suất tại nút rò rỉ trong giai đoạn xảy ra sự cố.
+    \item Lưu lượng tại các liên kết trước và sau điểm rò rỉ đều biểu hiện những thay đổi đáng kể, phản ánh sự mất cân bằng trong hệ thống.
+    \item Các ma trận tương quan đều cho thấy mối liên hệ mạnh giữa áp suất và lưu lượng, tuy nhiên hướng tương quan có thể khác nhau tùy thuộc vào vị trí và cấu trúc mạng lưới.
+\end{itemize}
+
+\subsubsection{Khác biệt}
+\begin{itemize}
+    \item Kịch bản tại nút 28 thể hiện rò rỉ kéo dài (từ tháng 3 đến tháng 7), trong khi kịch bản tại nút 26 biểu hiện sự cố rò rỉ đột ngột vào cuối năm.
+    \item Mức độ tương quan giữa nhãn rò rỉ và các tham số khác có sự khác biệt: tại nút 26, nhãn rò rỉ có tương quan mạnh với Flow\_Link\_27 (0.83), trong khi tại nút 28, tương quan giữa nhãn và các tham số hệ thống yếu hơn.
+    \item Đặc trưng biến động của lưu lượng khác nhau: Flow\_Link\_29 (kịch bản nút 28) thể hiện đột biến tăng cao vào đầu giai đoạn rò rỉ, trong khi Flow\_Link\_27 (kịch bản nút 26) biểu hiện đột biến vào cuối giai đoạn.
+\end{itemize}
+
+\subsection{Ứng dụng đặc trưng rò rỉ theo thời gian trong phát hiện sớm}
+
+Dựa trên phân tích đặc trưng rò rỉ, chúng tôi xác định một số đặc điểm quan trọng có thể được sử dụng trong các thuật toán phát hiện sớm:
+
+\begin{itemize}
+    \item Sự thay đổi đột ngột về áp suất tại nút và chênh lệch lưu lượng giữa các liên kết liền kề là những chỉ báo mạnh về khả năng xảy ra rò rỉ.
+    \item Mối tương quan giữa áp suất và lưu lượng có thể được theo dõi liên tục, và bất kỳ thay đổi đáng kể nào trong mối tương quan này cũng có thể là dấu hiệu sớm của sự cố.
+    \item Các mẫu biến động thời gian, đặc biệt là sự xuất hiện của các đỉnh (peaks) hoặc đáy (troughs) bất thường trong chuỗi thời gian, cần được phân tích kỹ để phát hiện những dấu hiệu sớm của rò rỉ.
+\end{itemize}
+
+Những đặc trưng này sẽ được sử dụng làm cơ sở để thiết kế và huấn luyện các mô hình học máy trong các phần tiếp theo của nghiên cứu.

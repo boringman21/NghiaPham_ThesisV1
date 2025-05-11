@@ -1,1 +1,19 @@
-\section{Phân tích yếu tố lưu lượng ban đêm}
+\section{Kết luận}
+
+Chương này đã trình bày chi tiết về bộ dữ liệu \textbf{LeakDB} và các phân tích đặc trưng rò rỉ trong mạng lưới cấp nước. Qua quá trình nghiên cứu, chúng tôi đã thu được những kết quả quan trọng sau:
+
+\begin{itemize}
+    \item Bộ dữ liệu \textbf{LeakDB} cung cấp một nền tảng mô phỏng toàn diện với 500 kịch bản khác nhau, bao gồm cả trường hợp có và không có rò rỉ, tạo điều kiện thuận lợi cho việc phát triển và đánh giá các thuật toán phát hiện rò rỉ.
+    
+    \item Qua phân tích mô hình mạng lưới Hanoi với 360 kịch bản rò rỉ và 120 kịch bản không rò rỉ, chúng tôi đã nhận diện được cấu trúc dữ liệu chặt chẽ bao gồm thông tin về áp suất, lưu lượng, và nhãn rò rỉ theo thời gian.
+    
+    \item Phân tích đặc trưng theo thời gian cho thấy các mẫu biến đổi đặc trưng khi xảy ra rò rỉ, cụ thể là sự sụt giảm áp suất tại các nút gần điểm rò rỉ và sự chênh lệch lưu lượng giữa các liên kết liền kề.
+    
+    \item Ma trận tương quan giữa các tham số hệ thống đã xác định mối liên hệ mạnh giữa áp suất và lưu lượng, với các mẫu tương quan khác nhau tùy thuộc vào vị trí và loại rò rỉ (đột ngột hoặc kéo dài).
+    
+    \item So sánh giữa các kịch bản rò rỉ (tại nút 26 và nút 28) cho thấy sự khác biệt trong đặc điểm biến động của lưu lượng và áp suất, phản ánh tính đa dạng của các trường hợp rò rỉ trong thực tế.
+    
+    \item Từ việc nghiên cứu dữ liệu \textbf{LeakDB}, chúng tôi nhận thấy lưu lượng (Flow) là đặc trưng đặc biệt quan trọng trong việc phát hiện rò rỉ, thể hiện qua các đột biến rõ rệt và tương quan mạnh với nhãn rò rỉ trong nhiều kịch bản, đặc biệt là tại các liên kết gần điểm rò rỉ.
+\end{itemize}
+
+Những kết quả này tạo nền tảng vững chắc cho việc phát triển các thuật toán phát hiện rò rỉ sớm trong mạng lưới cấp nước. Đặc biệt, những đặc trưng đã được xác định có thể được sử dụng để huấn luyện các mô hình học máy với độ chính xác cao, đồng thời giúp thiết kế các hệ thống giám sát thời gian thực hiệu quả. Trong các chương tiếp theo, chúng tôi sẽ ứng dụng những hiểu biết này để xây dựng và đánh giá các mô hình phát hiện rò rỉ dựa trên học máy, đồng thời áp dụng nền tảng kiến thức từ dữ liệu mô phỏng \textbf{LeakDB} vào việc phân tích và xử lý dữ liệu thực tế từ các hệ thống cấp nước đang vận hành.

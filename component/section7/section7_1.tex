@@ -1,19 +1,95 @@
 \chapter{Kết luận}
-\section{Ưu điểm của đề tài}
-Đề tài đã nghiên cứu và thử nghiệm các phương pháp bổ khuyết giúp nâng cao chất lượng các mô hình dự đoán chất lượng không khí bao gồm:
-\begin{itemize}
-    \item Phương pháp cổ điển
-    \begin{itemize}
-        \item Phương pháp cổ điển trên đơn thuộc tính
-        \item Phương pháp cổ điển kết hợp nhiều thuộc tính
-    \end{itemize}
-    \item Phương pháp học sâu
-    \begin{itemize}
-        \item Phương pháp học sâu trên đơn thuộc tính
-        \item Phương pháp học sâu kết hợp nhiều thuộc tính
-    \end{itemize}
-\end{itemize}
 
-Đồng thời, đối với phương pháp MICE, tác giả cũng đề xuất các phương pháp khác nhau khi khởi tạo giá trị ban đầu cho MICE giúp nâng cao chất lượng xử lý dữ liệu của phương pháp này. Bên cạnh đó, đề tài còn thử nghiệm trong các trường hợp tỉ lệ mất mát dữ liệu khác nhau, số lượng dữ liệu bị mất tại cùng một thời điểm khác nhau, và đánh giá kết quả khi áp dụng các phương pháp bổ khuyết lên huấn luyện các mô hình dự đoán chất lượng không khí.
+\section{Tổng kết các kết quả nghiên cứu}
 
-...
+Luận văn đã tập trung nghiên cứu và phát triển các phương pháp phát hiện rò rỉ nước trong hệ thống cấp nước đô thị bằng cách ứng dụng các kỹ thuật học máy tiên tiến. Xuất phát từ thực trạng nghiêm trọng của vấn đề thất thoát nước với tỷ lệ dao động từ 15\% đến 30\% tại Việt Nam và lên tới 40\% tại các nước đang phát triển, nghiên cứu này mang tính cấp thiết trong bối cảnh gia tăng nhu cầu sử dụng nước sạch và biến đổi khí hậu toàn cầu.
+
+Qua quá trình nghiên cứu, luận văn đã đạt được các kết quả chính sau:
+
+\begin{enumerate}
+    \item Xây dựng được tổng quan toàn diện về các phương pháp phát hiện rò rỉ nước, từ phương pháp truyền thống dựa trên mô hình thủy lực và phân tích tín hiệu âm thanh đến các phương pháp hiện đại sử dụng học máy và mạng nơ-ron đồ thị (GNN).
+    
+    \item Phân tích và xử lý hiệu quả dữ liệu chuỗi thời gian với các đặc trưng phức tạp như tính mùa vụ, biến động theo thời gian trong ngày và sự hiện diện của các bất thường. Đặc biệt, luận văn đã đề xuất phương pháp xử lý dữ liệu bị thiếu phù hợp với bài toán phát hiện rò rỉ nước.
+    
+    \item Phân tích chi tiết bộ dữ liệu LeakDB để tìm hiểu đặc trưng rò rỉ trong hệ thống cấp nước. Thông qua phân tích này, luận văn đã xác định các đặc điểm quan trọng như sự sụt giảm áp suất tại các nút gần điểm rò rỉ, sự chênh lệch lưu lượng giữa các liên kết liền kề, và mối tương quan mạnh giữa áp suất và lưu lượng khi xảy ra rò rỉ.
+    
+    \item Nghiên cứu và triển khai các mô hình học máy từ cơ bản đến nâng cao, bao gồm Linear Regression, Support Vector Machines, K-Nearest Neighbors, Decision Trees, và các mô hình học sâu như Multilayer Perceptron (MLP), mạng Long Short-Term Memory (LSTM) và Gated Recurrent Unit (GRU).
+    
+    \item Triển khai thành công các phương pháp phát hiện bất thường trên dữ liệu thực tế từ hệ thống giám sát tự động tại khu vực Bàu Bàng (Bình Dương), bao gồm phương pháp phát hiện bằng sai số dựa trên quy tắc 3-sigma và phương pháp học không giám sát với các thuật toán Isolation Forest, Local Outlier Factor và One-class SVM.
+    
+    \item Đề xuất hai chiến lược huấn luyện khác nhau cho mô hình dự báo lưu lượng nước: mô hình riêng cho từng điểm đo và mô hình chung cho tất cả điểm đo. Kết quả cho thấy mô hình chung có hiệu suất tốt hơn đáng kể đối với một số điểm đo, trong khi hiệu suất tương đương cho các điểm đo khác.
+    
+    \item Đề xuất các phương pháp đánh giá hiệu suất mô hình toàn diện, bao gồm các chỉ số cơ bản như Accuracy, Precision, Recall, F1-score và các chỉ số nâng cao như AUC, RMSE, MAE cùng với kỹ thuật Cross-validation để đảm bảo tính tổng quát của mô hình.
+\end{enumerate}
+
+\section{Những đóng góp chính của luận văn}
+
+Luận văn đã có những đóng góp quan trọng vào lĩnh vực phát hiện rò rỉ nước qua việc ứng dụng học máy:
+
+\begin{enumerate}
+    \item \textbf{Đóng góp lý thuyết:} Luận văn đã hệ thống hóa và phân tích sâu sắc các phương pháp học máy trong phát hiện rò rỉ nước, từ đó xây dựng khung lý thuyết vững chắc cho việc phát triển và triển khai các giải pháp thực tế.
+    
+    \item \textbf{Đóng góp phương pháp:} 
+    \begin{itemize}
+        \item Phát triển các phương pháp xử lý dữ liệu chuỗi thời gian bị thiếu, đặc biệt quan trọng trong môi trường thực tế khi dữ liệu từ cảm biến thường bị mất hoặc không đồng bộ.
+        \item Đề xuất quy trình tiền xử lý dữ liệu thực tế gồm năm giai đoạn: chuyển đổi dữ liệu, chọn dữ liệu, xử lý dữ liệu thiếu, lựa chọn đặc trưng và tạo dữ liệu huấn luyện, tạo nền tảng vững chắc cho việc phân tích dữ liệu cảm biến thực tế.
+        \item Kết hợp nhiều phương pháp phát hiện bất thường để có cái nhìn toàn diện hơn về các hiện tượng bất thường trong hệ thống cấp nước.
+    \end{itemize}
+    
+    \item \textbf{Đóng góp thực nghiệm:}
+    \begin{itemize}
+        \item Phân tích chi tiết đặc trưng rò rỉ trong bộ dữ liệu LeakDB, cung cấp hiểu biết sâu sắc về tính chất và biểu hiện của các sự cố rò rỉ trong hệ thống cấp nước.
+        \item So sánh hiệu suất của các mô hình học máy khác nhau (LSTM, GRU) với các chiến lược huấn luyện và loại dữ liệu đầu vào khác nhau, cung cấp cơ sở cho việc lựa chọn mô hình phù hợp trong các tình huống thực tế.
+        \item Đánh giá các phương pháp phát hiện bất thường trên dữ liệu thực tế, xác định ưu nhược điểm của từng phương pháp và các kịch bản áp dụng phù hợp.
+    \end{itemize}
+    
+    \item \textbf{Đóng góp ứng dụng:} Các mô hình và phương pháp được đề xuất trong luận văn có tính ứng dụng cao, có thể được triển khai trong các hệ thống quản lý nước đô thị, góp phần giảm thiểu thất thoát nước, tối ưu hóa chi phí vận hành và bảo vệ nguồn tài nguyên nước quý giá.
+\end{enumerate}
+
+\section{Hạn chế và hướng phát triển}
+
+\subsection{Hạn chế của nghiên cứu}
+
+Mặc dù đạt được nhiều kết quả quan trọng, nghiên cứu vẫn còn một số hạn chế cần được ghi nhận:
+
+\begin{enumerate}
+    \item Yêu cầu tài nguyên tính toán lớn đối với các mô hình học sâu và mạng nơ-ron đồ thị, đặc biệt khi áp dụng cho các mạng lưới cấp nước có quy mô lớn với hàng nghìn nút và cảm biến.
+    
+    \item Vấn đề dữ liệu thiếu trong thực tế vẫn là thách thức lớn. Nhiều điểm đo trong nghiên cứu thực tế tại khu vực Bàu Bàng gặp phải tình trạng thiếu dữ liệu nghiêm trọng, đặc biệt là dữ liệu lưu lượng, gây khó khăn cho việc huấn luyện và đánh giá mô hình.
+    
+    \item Tính đặc thù của từng điểm đo làm hạn chế khả năng tổng quát hóa của các mô hình. Kết quả nghiên cứu cho thấy mô hình chung có hiệu suất tốt hơn đáng kể đối với một số điểm đo, nhưng lại tương đương hoặc kém hơn cho các điểm đo khác.
+    
+    \item Khả năng thích ứng của mô hình khi chuyển từ môi trường mô phỏng (dữ liệu LeakDB) sang điều kiện thực tế còn cần được kiểm chứng thêm, đặc biệt trong các điều kiện môi trường khác nhau.
+    
+    \item Mức độ tích hợp giữa các mô hình học máy và kiến thức chuyên ngành về thủy lực học vẫn còn hạn chế, ảnh hưởng đến tính giải thích của mô hình và khả năng áp dụng trong thực tế.
+\end{enumerate}
+
+\subsection{Hướng phát triển trong tương lai}
+
+Dựa trên các kết quả đạt được và hạn chế ghi nhận, nghiên cứu đề xuất một số hướng phát triển trong tương lai:
+
+\begin{enumerate}
+    \item \textbf{Tích hợp đa nguồn dữ liệu:} Kết hợp dữ liệu từ cảm biến áp suất và lưu lượng với dữ liệu GIS, dữ liệu thời tiết, và thông tin về tuổi thọ đường ống để nâng cao độ chính xác của mô hình.
+    
+    \item \textbf{Phát triển các phương pháp xử lý dữ liệu thiếu hiệu quả hơn:} Nghiên cứu và triển khai các phương pháp xử lý dữ liệu thiếu tiên tiến, phù hợp với đặc điểm của dữ liệu chuỗi thời gian trong hệ thống cấp nước, nhằm tối đa hóa khả năng sử dụng dữ liệu thực tế không hoàn chỉnh.
+    
+    \item \textbf{Phát triển mô hình học liên tục:} Xây dựng các mô hình có khả năng học và cập nhật liên tục từ dữ liệu thời gian thực, giúp thích ứng với các thay đổi trong hệ thống cấp nước theo thời gian.
+    
+    \item \textbf{Kết hợp nhiều mô hình phát hiện bất thường:} Phát triển các hệ thống kết hợp nhiều mô hình phát hiện bất thường khác nhau, nhằm tận dụng thế mạnh của từng phương pháp và nâng cao độ tin cậy trong việc phát hiện rò rỉ.
+    
+    \item \textbf{Ứng dụng học tăng cường:} Tích hợp học tăng cường (Reinforcement Learning) để tối ưu hóa quá trình phát hiện và xử lý rò rỉ, bao gồm cả việc điều phối các đội sửa chữa và quản lý nguồn lực.
+    
+    \item \textbf{Phát triển hệ thống hỗ trợ quyết định:} Xây dựng các hệ thống hỗ trợ quyết định tích hợp (Decision Support Systems) dựa trên kết quả từ các mô hình học máy, giúp các nhà quản lý nước đưa ra các quyết định kịp thời và hiệu quả.
+    
+    \item \textbf{Mở rộng phạm vi ứng dụng:} Áp dụng các phương pháp và mô hình đã phát triển trong các lĩnh vực liên quan như phát hiện ô nhiễm nước, dự báo nhu cầu sử dụng nước, và quản lý chất lượng nước.
+\end{enumerate}
+
+\section{Kết luận chung}
+
+Nghiên cứu này đã chứng minh tiềm năng to lớn của việc ứng dụng học máy trong phát hiện và ngăn chặn rò rỉ nước trong hệ thống cấp nước đô thị. Với sự kết hợp giữa các phương pháp xử lý dữ liệu tiên tiến và các mô hình học máy hiện đại, luận văn đã đề xuất các giải pháp khả thi giúp nâng cao hiệu quả quản lý hệ thống cấp nước, góp phần giảm thiểu thất thoát nước, tiết kiệm chi phí và bảo vệ nguồn tài nguyên nước quý giá.
+
+Thông qua việc phân tích chi tiết bộ dữ liệu LeakDB và dữ liệu thực tế từ khu vực Bàu Bàng, nghiên cứu đã làm rõ các đặc trưng của hiện tượng rò rỉ trong hệ thống cấp nước và đề xuất các phương pháp phát hiện bất thường hiệu quả. Đặc biệt, đóng góp quan trọng của luận văn là việc kết hợp nhiều phương pháp phát hiện bất thường, từ phương pháp dựa trên sai số dự đoán đến các thuật toán học không giám sát, để có cái nhìn toàn diện về các hiện tượng bất thường trong hệ thống cấp nước.
+
+Trong bối cảnh biến đổi khí hậu và khan hiếm nước ngày càng trở nên nghiêm trọng, những kết quả từ nghiên cứu này không chỉ mang ý nghĩa khoa học mà còn có giá trị thực tiễn cao, đóng góp vào mục tiêu phát triển bền vững và nâng cao chất lượng cuộc sống tại các đô thị.
+
+Với tầm nhìn hướng tới một tương lai nơi công nghệ và khoa học dữ liệu được ứng dụng rộng rãi trong quản lý tài nguyên thiên nhiên, nghiên cứu này đặt nền móng cho sự phát triển của các hệ thống cấp nước thông minh, hiệu quả và bền vững.

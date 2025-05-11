@@ -1,0 +1,46 @@
+flowchart TB
+    classDef dataPrep fill:#d4f1f9,stroke:#05445E,stroke-width:1px,color:#05445E
+    classDef dataAnalysis fill:#d8f3dc,stroke:#1B4332,stroke-width:1px,color:#1B4332
+    classDef featureExtraction fill:#fff1e6,stroke:#9E2A2B,stroke-width:1px,color:#9E2A2B
+    classDef evaluation fill:#e9ecef,stroke:#343a40,stroke-width:1px,color:#343a40
+    
+    subgraph Process ["Quy trình phân tích đặc trưng rò rỉ trong LeakDB"]
+        direction TB
+        
+        subgraph DataPrep ["GIAI ĐOẠN 1: TÌM HIỂU DỮ LIỆU"]
+            A["1.Tìm hiểu cấu trúc LeakDB"] --> 
+            B["2.Phân tích mạng lưới"] --> 
+            C["3.Mô hình hóa rò rỉ"]
+        end
+        
+        subgraph DataAnalysis ["GIAI ĐOẠN 2: PHÂN TÍCH KỊCH BẢN"]
+            D["4.Phân loại kịch bản"] -->
+            E["5.Cấu trúc mô phỏng"] -->
+            F["6.Chọn kịch bản phân tích"]
+        end
+        
+        subgraph FeatureExtraction ["GIAI ĐOẠN 3: PHÂN TÍCH ĐẶC TRƯNG"]
+            G["7.Phân tích chuỗi thời gian"] -->
+            H["8.Phân tích tương quan"] -->
+            I["9.So sánh đặc trưng"]
+        end
+        
+        subgraph Conclusion ["GIAI ĐOẠN 4: KẾT LUẬN"]
+            J["10.Xác định đặc trưng quan trọng"] -->
+            K["11.Đề xuất ứng dụng"]
+        end
+    end
+    
+    DataPrep --> DataAnalysis --> FeatureExtraction --> Conclusion
+    
+    A:::dataPrep
+    B:::dataPrep
+    C:::dataPrep
+    D:::dataAnalysis
+    E:::dataAnalysis
+    F:::dataAnalysis
+    G:::featureExtraction
+    H:::featureExtraction
+    I:::featureExtraction
+    J:::evaluation
+    K:::evaluation

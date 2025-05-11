@@ -153,6 +153,8 @@ Quy trình này được áp dụng cho tất cả mười hai mô hình đã đ
     \label{fig:anomaly_combined_gru_all}
 \end{figure}
 
+Nhìn vào các hình từ \ref{fig:anomaly_lstm_841211914190_flow} đến \ref{fig:anomaly_combined_gru_all}, có thể thấy hầu hết các mô hình đều nhận biết các điểm bất thường tốt dựa vào biểu đồ chuỗi thời gian (timeseries plot) và biểu đồ phân tán (scatter plot). Các điểm bất thường được đánh dấu rõ ràng và phù hợp với những biến động bất thường trong dữ liệu lưu lượng nước.
+
 \subsubsection{Phân tích kết quả phát hiện bất thường}
 
 Từ kết quả phát hiện bất thường trên các hình từ \ref{fig:anomaly_lstm_841211914190_flow} đến \ref{fig:anomaly_combined_gru_all}, chúng tôi rút ra một số nhận xét quan trọng:
@@ -162,11 +164,17 @@ Từ kết quả phát hiện bất thường trên các hình từ \ref{fig:ano
     
     \item \textbf{Phân bố thời gian của các bất thường:} Các điểm bất thường không phân bố đều trong thời gian mà thường xuất hiện theo cụm, đặc biệt vào các thời điểm có sự thay đổi đột ngột trong lưu lượng nước. Điều này phản ánh khả năng có các sự kiện hoặc hiện tượng đặc biệt xảy ra trong những khoảng thời gian đó, có thể liên quan đến rò rỉ, sự cố van, hoặc tiêu thụ bất thường.
     
-    \item \textbf{So sánh giữa các mô hình:} Mô hình LSTM và GRU cho kết quả phát hiện bất thường tương đối giống nhau, nhưng có một số điểm khác biệt, đặc biệt trong các khoảng thời gian có biến động phức tạp. Điều này cho thấy mỗi kiến trúc mạng có những điểm mạnh riêng trong việc nắm bắt các mẫu hành vi khác nhau trong dữ liệu.
+    \item \textbf{So sánh giữa các mô hình LSTM và GRU:} 
+    \begin{itemize}
+        \item \textbf{LSTM:} Mô hình LSTM thể hiện khả năng nắm bắt tốt hơn các phụ thuộc dài hạn trong dữ liệu, đặc biệt trong các khoảng thời gian có xu hướng biến đổi chậm. Điểm mạnh của LSTM là khả năng ghi nhớ thông tin trong thời gian dài nhờ cơ chế cổng phức tạp hơn, giúp phát hiện các bất thường liên quan đến sự thay đổi từ từ như rò rỉ phát triển dần. Tuy nhiên, LSTM có nhiều tham số hơn, dẫn đến thời gian huấn luyện lâu hơn và đôi khi có thể quá nhạy với nhiễu.
+        
+        \item \textbf{GRU:} Mô hình GRU cho thấy phản ứng nhanh hơn với các thay đổi đột ngột trong dữ liệu, phát hiện tốt các bất thường tức thời như đỉnh tiêu thụ bất ngờ. Với cấu trúc đơn giản hơn (ít cổng hơn), GRU có ít tham số hơn, huấn luyện nhanh hơn và ít có khả năng bị quá khớp trên tập dữ liệu nhỏ. Tuy nhiên, GRU có thể kém hiệu quả hơn trong việc nắm bắt các mẫu phụ thuộc rất dài hạn.
+        
+        \item Về tỷ lệ phát hiện bất thường, GRU có xu hướng phát hiện nhiều điểm bất thường hơn khi chỉ sử dụng dữ liệu lưu lượng (168 so với 167 tại điểm 841211914190), nhưng lại phát hiện ít hơn khi kết hợp với dữ liệu áp suất (149 so với 164). Điều này cho thấy GRU có thể nhạy cảm hơn với dữ liệu đơn biến, trong khi LSTM xử lý tốt hơn với dữ liệu đa biến.
+    \end{itemize}
     
     \item \textbf{Độ nhạy của mô hình:} Mô hình được huấn luyện riêng cho từng điểm đo thường nhạy hơn trong việc phát hiện các bất thường cục bộ, trong khi mô hình tổng hợp có xu hướng phát hiện các bất thường chung hơn. Điều này phù hợp với kết quả đánh giá hiệu suất mô hình đã được trình bày trong phần trước.
     
-    \item \textbf{Tương quan với các hiện tượng ban đêm:} Đáng chú ý, một số điểm bất thường được phát hiện trong khoảng thời gian ban đêm (từ 00:00 đến 05:00), khi lưu lượng nước thường ổn định và thấp hơn. Điều này phù hợp với nhận định trong Phần 3.2 về việc biến động dữ liệu vào ban đêm và khả năng phát hiện bất thường rõ ràng hơn trong khoảng thời gian này. Các bất thường này có thể là dấu hiệu của rò rỉ, vì rò rỉ thường nổi bật hơn khi tiêu thụ bình thường thấp.
 \end{enumerate}
 
 \begin{table}[htbp]

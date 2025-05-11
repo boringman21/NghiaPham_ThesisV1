@@ -132,11 +132,29 @@ Sau khi huấn luyện các mô hình theo hai chiến lược khác nhau, chún
 \end{table}
 
 Từ kết quả trên, chúng tôi có thể đưa ra một số nhận xét quan trọng:
+\begin{enumerate}
+    \item Đối với điểm đo \texttt{841211914190}:
+    \begin{itemize}
+        \item Mô hình chung có hiệu suất tốt hơn đáng kể so với mô hình riêng (RMSE giảm từ 31.0548 xuống 24.5274 đối với LSTM chỉ với dữ liệu lưu lượng).
+        \item Việc bổ sung dữ liệu áp suất cải thiện hiệu suất ở cả hai chiến lược huấn luyện.
+    \end{itemize}
+    \item Đối với điểm đo \texttt{8401210607558}:
+    \begin{itemize}
+        \item Hiệu suất của mô hình chung và mô hình riêng tương đương nhau.
+        \item Việc bổ sung dữ liệu áp suất không mang lại cải thiện đáng kể, thậm chí còn làm giảm hiệu suất của mô hình GRU.
+    \end{itemize}
+\end{enumerate}
 
-1. Đối với điểm đo 841211914190:
-   - Mô hình chung có hiệu suất tốt hơn đáng kể so với mô hình riêng (RMSE giảm từ 31.0548 xuống 24.5274 đối với LSTM với dữ liệu chỉ lưu lượng).
-   - Việc bổ sung dữ liệu áp suất cải thiện hiệu suất ở cả hai chiến lược huấn luyện.
+\subsubsection{Kết luận về chiến lược huấn luyện}
 
-2. Đối với điểm đo 8401210607558:
-   - Hiệu suất của mô hình chung và mô hình riêng tương đương nhau.
-   - Việc bổ sung dữ liệu áp suất không mang lại cải thiện đáng kể, thậm chí còn làm giảm hiệu suất của mô hình GRU.
+Dựa trên kết quả đánh giá hiệu suất của hai chiến lược huấn luyện, chúng tôi có thể đưa ra một số kết luận quan trọng:
+
+\begin{itemize}
+    \item \textbf{Hiệu quả của mô hình chung:} Kết quả thực nghiệm cho thấy mô hình chung có hiệu suất dự báo vượt trội đối với điểm đo \texttt{841211914190}, trong khi vẫn duy trì hiệu suất tương đương với mô hình riêng đối với điểm đo \texttt{8401210607558}. Điều này chứng tỏ khả năng tổng quát hóa tốt của mô hình chung.
+    
+    \item \textbf{Tối ưu hóa tài nguyên:} Việc sử dụng một mô hình chung thay vì nhiều mô hình riêng biệt giúp giảm đáng kể chi phí tính toán, lưu trữ và bảo trì hệ thống.
+    
+    \item \textbf{Khả năng mở rộng:} Chiến lược mô hình chung có tiềm năng lớn trong việc mở rộng cho nhiều điểm đo khác trong hệ thống cấp nước mà không cần phải huấn luyện lại từng mô hình riêng biệt.
+\end{itemize}
+
+Từ những phân tích trên, chúng tôi khuyến nghị sử dụng chiến lược mô hình chung cho hệ thống dự báo lưu lượng nước. Tuy nhiên, cần lưu ý rằng hiệu quả của mô hình chung có thể phụ thuộc vào mức độ tương đồng giữa các điểm đo trong hệ thống. Trong trường hợp có điểm đo với đặc tính rất khác biệt, có thể cần xem xét kết hợp hai chiến lược để đạt được hiệu quả tối ưu.

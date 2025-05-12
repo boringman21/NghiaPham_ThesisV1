@@ -18,5 +18,6 @@
                 "xelatex"
             ]
         }
-    ]
+    ],
+    "editor.wordWrap": "on"
 }
